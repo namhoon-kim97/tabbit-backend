@@ -1,7 +1,7 @@
-package com.jungle.example_code.global.exception;
+package com.jungle.Tabbit.global.exception;
 
 
-import com.jungle.example_code.global.model.ResponseStatus;
+import com.jungle.Tabbit.global.model.ResponseStatus;
 
 /**
  * 인증된 사용자가 권한이 없는 리소스에 접근하려 할 때 사용하는 예외

@@ -1,8 +1,8 @@
-package com.jungle.example_code.global.handler;
+package com.jungle.Tabbit.global.handler;
 
 
-import com.jungle.example_code.global.exception.BusinessLogicException;
-import com.jungle.example_code.global.model.CommonResponse;
+import com.jungle.Tabbit.global.exception.BusinessLogicException;
+import com.jungle.Tabbit.global.model.CommonResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

@@ -1,8 +1,7 @@
-package com.jungle.example_code.global.handler;
+package com.jungle.Tabbit.global.handler;
 
-
-import com.jungle.example_code.global.model.ResponseErrorFormat;
-import com.jungle.example_code.global.model.ResponseStatus;
+import com.jungle.Tabbit.global.model.ResponseErrorFormat;
+import com.jungle.Tabbit.global.model.ResponseStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
