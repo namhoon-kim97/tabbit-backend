@@ -41,7 +41,6 @@ jobs:
           gcloud config set compute/zone ${{ secrets.TABBIT_INSTANCE_ZONE }}
           gcloud compute scp build/libs/tabbit.jar ${{ secrets.TABBIT_INSTANCE }}:/home/py980627/tabbit --zone ${{ secrets.TABBIT_INSTANCE_ZONE }}
           gcloud compute ssh ${{ secrets.TABBIT_INSTANCE }} --zone ${{ secrets.TABBIT_INSTANCE_ZONE }} --command "
-          sudo mv /home/py980627/tabbit/tabbit.jar /home/py980627/tabbit/tabbit.jar &&
           sudo systemctl restart tabbit.service
           "
-
+      
