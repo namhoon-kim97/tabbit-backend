@@ -39,8 +39,8 @@ jobs:
     - name: Deploy to GCE
       run: |
         gcloud config set compute/zone ${{ secrets.TABBIT_INSTANCE_ZONE }}
-        gcloud compute scp build/libs/*.jar ${TABBIT_INSTANCE}:/home/YOUR_USER --zone ${{ secrets.TABBIT_INSTANCE_ZONE }}
+        gcloud compute scp build/libs/*.jar ${TABBIT_INSTANCE}:/home/py980627/tabbit --zone ${{ secrets.TABBIT_INSTANCE_ZONE }}
         gcloud compute ssh ${TABBIT_INSTANCE} --zone ${{ secrets.TABBIT_INSTANCE_ZONE }} --command "
-        sudo mv /home/YOUR_USER/*.jar /home/YOUR_USER/app.jar &&
-        sudo systemctl restart my-app.service
+        sudo mv /home/py980627/tabbit/*.jar /home/py980627/tabbit/tabbit.jar &&
+        sudo systemctl restart tabbit.service
         "
