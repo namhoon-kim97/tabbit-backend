@@ -7,6 +7,12 @@ plugins {
 group = 'com.jungle'
 version = '0.0.1-SNAPSHOT'
 
+bootJar{
+	archivesBaseName = 'tabbit'
+	archiveFileName = 'tabbit.jar'
+	archiveVersion = "0.0.1"
+}
+
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(17)
