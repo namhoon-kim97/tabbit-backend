@@ -1,8 +1,8 @@
 package com.jungle.Tabbit.domain.restaurant.controller;
 
 import com.jungle.Tabbit.domain.restaurant.service.RestaurantService;
-import com.jungle.example_code.global.model.CommonResponse;
-import com.jungle.example_code.global.model.ResponseStatus;
+import com.jungle.Tabbit.global.model.CommonResponse;
+import com.jungle.Tabbit.global.model.ResponseStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
