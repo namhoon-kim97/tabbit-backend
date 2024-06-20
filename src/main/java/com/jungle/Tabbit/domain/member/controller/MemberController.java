@@ -35,7 +35,7 @@ public class MemberController {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", token);
 
-        CommonResponse<Object> resp = CommonResponse.success(ResponseStatus.SUCCESS_CREATE);
+        CommonResponse<Object> resp = CommonResponse.success(ResponseStatus.SUCCESS_LOGIN);
 
         return new ResponseEntity<>(resp, headers, HttpStatus.OK);
     }
