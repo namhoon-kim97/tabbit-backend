@@ -51,7 +51,10 @@ public enum ResponseStatus {
     // Token Failed Status
     FAIL_TOKEN_NOT_FOUND("클라이언트가 요청한 토큰 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
-    FAIL_REFRESHTOKEN_NOT_FOUND("클라이언트가 요청한 RefreshToken을 찾을 수 없습니다.(만료)", HttpStatus.NOT_FOUND);
+    FAIL_REFRESHTOKEN_NOT_FOUND("클라이언트가 요청한 RefreshToken을 찾을 수 없습니다.(만료)", HttpStatus.NOT_FOUND),
+
+    // Nfc
+    FAIL_NFC_NOT_FOUND("NFC가 등록되어 있지 않습니다.", HttpStatus.NOT_FOUND);
 
     private String message;
 
