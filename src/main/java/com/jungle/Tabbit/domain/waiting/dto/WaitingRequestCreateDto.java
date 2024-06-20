@@ -7,5 +7,4 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class WaitingRequestCreateDto {
     private int peopleNumber;
-    private int waitingNumber;
 }

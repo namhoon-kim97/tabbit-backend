@@ -1,6 +1,7 @@
 package com.jungle.Tabbit.domain.waiting.controller;
 
 import com.jungle.Tabbit.domain.waiting.dto.WaitingRequestCreateDto;
+import com.jungle.Tabbit.domain.waiting.dto.WaitingResponseDto;
 import com.jungle.Tabbit.domain.waiting.service.WaitingService;
 import com.jungle.Tabbit.global.model.CommonResponse;
 import com.jungle.Tabbit.global.model.ResponseStatus;
@@ -15,7 +16,7 @@ public class WaitingController {
 
     @PostMapping("/{nfcId}")
     public CommonResponse<?> registerWaiting(@RequestBody WaitingRequestCreateDto requestDto, @PathVariable("nfcId") String nfcId) {
-        return CommonResponse.success(ResponseStatus.SUCCESS_CREATE
-                , waitingService.registerWaiting(requestDto, nfcId));
+        WaitingResponseDto responseDto = waitingService.registerWaiting(requestDto, nfcId);
+        return CommonResponse.success(ResponseStatus.SUCCESS_CREATE, responseDto);
     }
 }

@@ -1,17 +1,22 @@
 package com.jungle.Tabbit.domain.waiting.service;
 
+import com.jungle.Tabbit.domain.member.entity.Member;
+import com.jungle.Tabbit.domain.nfc.entity.Nfc;
+import com.jungle.Tabbit.domain.nfc.repository.NfcRepository;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
-import com.jungle.Tabbit.domain.restaurant.repository.RestaurantRepository;
 import com.jungle.Tabbit.domain.waiting.dto.WaitingRequestCreateDto;
 import com.jungle.Tabbit.domain.waiting.dto.WaitingResponseDto;
 import com.jungle.Tabbit.domain.waiting.entity.Waiting;
 import com.jungle.Tabbit.domain.waiting.entity.WaitingStatus;
 import com.jungle.Tabbit.domain.waiting.repository.WaitingRepository;
+import com.jungle.Tabbit.global.exception.NotFoundException;
+import com.jungle.Tabbit.global.model.ResponseStatus;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -19,23 +24,48 @@ import java.util.concurrent.atomic.AtomicLong;
 @RequiredArgsConstructor
 public class WaitingService {
     private final WaitingRepository waitingRepository;
-    private final RestaurantRepository restaurantRepository;
+    private final NfcRepository nfcRepository;
+    private final MemberRepository memberRepository;
     private static final ConcurrentHashMap<Long, AtomicLong> storeQueueNumbers = new ConcurrentHashMap<>();  // 가게별 전역 대기번호 변수
 
     @Transactional
     public WaitingResponseDto registerWaiting(WaitingRequestCreateDto requestDto, String nfcId) {
-        Restaurant restaurant = restaurantRepository.findByNfcId(nfcId);
-        Long queueNumber = getNextQueueNumber(restaurant.getId());
+        String memberName = SecurityUtil.getCurrentMembername();
+        Member member = memberRepository.findByMembername(memberName)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
+        Nfc nfc = nfcRepository.findByNfcId(nfcId)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_NFC_NOT_FOUND));
 
-        Waiting waiting = new Waiting(requestDto.getPeopleNumber(), queueNumber.intValue(), restaurant.getId(), WaitingStatus.STATUS_WAITING);
+        Restaurant restaurant = nfc.getRestaurant();
+        Long queueNumber = getNextQueueNumber(restaurant.getRestaurantId());
+
+        Waiting waiting = new Waiting(requestDto.getPeopleNumber(), queueNumber.intValue(), restaurant, WaitingStatus.STATUS_WAITING, member);
         waitingRepository.save(waiting);
 
-        return WaitingResponseDto.of(waiting);
+        int currentWaitingPosition = getCurrentWaitingPosition(waiting);
+        int estimatedWaitTime = calculateEstimatedWaitTime(currentWaitingPosition);
+
+        return WaitingResponseDto.of(waiting, estimatedWaitTime, currentWaitingPosition);
     }
 
     private Long getNextQueueNumber(Long storeId) {
         storeQueueNumbers.putIfAbsent(storeId, new AtomicLong(0));
         return storeQueueNumbers.get(storeId).incrementAndGet();
+    }
+
+    public int getCurrentWaitingPosition(Waiting waiting) {
+        List<Waiting> waitingList = waitingRepository.findByRestaurantAndStatusOrderByQueueNumberAsc(waiting.getRestaurant(), WaitingStatus.STATUS_WAITING);
+        for (int i = 0; i < waitingList.size(); i++) {
+            if (waitingList.get(i).getWaitingId().equals(waiting.getWaitingId())) {
+                return i + 1;
+            }
+        }
+        return -1; // should not happen
+    }
+
+    public int calculateEstimatedWaitTime(int position) {
+        int averageWaitTimePerPerson = 10; // 가게의 평균 처리 시간 (분 단위) -> 이건 점주한테 입력받음 수정해야함.
+        return position * averageWaitTimePerPerson;
     }
 
     @Scheduled(cron = "0 0 0 * * ?")
