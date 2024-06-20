@@ -1,6 +1,5 @@
 package com.jungle.Tabbit.domain.member.entity;
 
-import com.jungle.example_code.global.common.Role;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -13,29 +12,29 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, name = "member_id")
-    private Long id;
+    private Long memberId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "nickname")
     private String nickname;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "password")
     private String password;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "username")
     private String username;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "member_role")
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private MemberRole memberRole;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "badge_id")
     private Long BadgeId;
 
-    public Member(String nickname, String password, String username, Role role, Long badgeId) {
+    public Member(String nickname, String password, String username, MemberRole memberRole, Long badgeId) {
         this.nickname = nickname;
         this.password = password;
         this.username = username;
-        this.role = role;
+        this.memberRole = memberRole;
         BadgeId = badgeId;
     }
 }
