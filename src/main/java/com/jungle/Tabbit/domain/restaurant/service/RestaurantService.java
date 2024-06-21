@@ -4,6 +4,7 @@ import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.entity.MemberRole;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
 import com.jungle.Tabbit.domain.restaurant.dto.RestaurantCreateRequestDto;
+import com.jungle.Tabbit.domain.restaurant.dto.RestaurantListResponseDto;
 import com.jungle.Tabbit.domain.restaurant.dto.RestaurantResponseDto;
 import com.jungle.Tabbit.domain.restaurant.entity.Address;
 import com.jungle.Tabbit.domain.restaurant.entity.Category;
@@ -34,14 +35,16 @@ public class RestaurantService {
     private final CategoryRepository categoryRepository;
     private final StampRepository stampRepository;
 
-    public List<RestaurantResponseDto> getAllRestaurant(String username) {
+    public RestaurantListResponseDto getAllRestaurant(String username) {
         Member member = memberRepository.findMemberByUsername(username)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
-        List<Restaurant> restaurants = restaurantRepository.findAll();
 
-        return restaurants.stream()
+        List<Restaurant> restaurantList = restaurantRepository.findAll();
+        List<RestaurantResponseDto> restaurantResponseList = restaurantList.stream()
                 .map(restaurant -> RestaurantResponseDto.of(restaurant, stampRepository.findByMemberAndRestaurant(member, restaurant).isPresent()))
                 .collect(Collectors.toList());
+
+        return RestaurantListResponseDto.builder().restaurantResponseList(restaurantResponseList).build();
     }
 
     public void createRestaurant(RestaurantCreateRequestDto requestDto, String username) {
