@@ -79,10 +79,10 @@ public class WaitingService {
     }
 
     public WaitingResponseDto getWaitingOverview(Long restaurantId, String username) {
-        Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId);
+        Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
         Member member = memberRepository.findMemberByUsername(username)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
-
         Waiting userWaiting = waitingRepository.findByRestaurantAndMemberAndWaitingStatus(restaurant, member, WaitingStatus.STATUS_WAITING)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_GET_CURRENT_WAIT_POSITION));
 

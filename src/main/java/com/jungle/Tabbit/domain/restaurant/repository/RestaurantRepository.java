@@ -4,11 +4,12 @@ import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
 import org.springframework.data.repository.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface RestaurantRepository extends Repository<Restaurant, Long> {
     List<Restaurant> findAll();
 
-    Restaurant save(Restaurant restaurant);
+    void save(Restaurant restaurant);
 
-    Restaurant findByRestaurantId(Long id);
+    Optional<Restaurant> findByRestaurantId(Long id);
 }
