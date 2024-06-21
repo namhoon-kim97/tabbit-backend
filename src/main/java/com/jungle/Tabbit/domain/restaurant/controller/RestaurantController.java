@@ -30,7 +30,7 @@ public class RestaurantController {
     }
 
     @GetMapping("/{restaurantId}")
-    public CommonResponse<?> getRestaurantSummaryById(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId) {
+    public CommonResponse<?> getRestaurantSummary(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId) {
         return CommonResponse.success(ResponseStatus.SUCCESS_OK, restaurantService.getRestaurantSummaryInfo(restaurantId, userDetails.getUsername()));
     }
 }
