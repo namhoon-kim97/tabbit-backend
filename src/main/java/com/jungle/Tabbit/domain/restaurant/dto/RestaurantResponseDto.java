@@ -20,7 +20,7 @@ public class RestaurantResponseDto {
     @JsonProperty("isEarnedStamp")
     private boolean isEarnedStamp; // 스탬프 획득 유무
 
-    public static RestaurantResponseDto of(Restaurant restaurant, boolean is_earned_stamp) {
+    public static RestaurantResponseDto of(Restaurant restaurant, boolean isEarnedStamp) {
         return RestaurantResponseDto.builder()
                 .restaurantId(restaurant.getRestaurantId())
                 .name(restaurant.getName())
@@ -28,7 +28,7 @@ public class RestaurantResponseDto {
                 .summaryAddress(restaurant.getAddress().getSido() + " " + restaurant.getAddress().getSigungu() + " " + restaurant.getAddress().getEupmyeondong())
                 .latitude(restaurant.getLatitude())
                 .longitude(restaurant.getLongitude())
-                .isEarnedStamp(is_earned_stamp)
+                .isEarnedStamp(isEarnedStamp)
                 .build();
     }
 }
