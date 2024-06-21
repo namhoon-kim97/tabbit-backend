@@ -93,8 +93,8 @@ public class RestaurantService {
         Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
 
-        boolean is_earned_stamp = stampRepository.findByMemberAndRestaurant(member, restaurant).isPresent();
+        boolean isEarnedStamp = stampRepository.findByMemberAndRestaurant(member, restaurant).isPresent();
 
-        return RestaurantResponseDto.of(restaurant, is_earned_stamp);
+        return RestaurantResponseDto.of(restaurant, isEarnedStamp);
     }
 }
