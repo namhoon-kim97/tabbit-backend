@@ -1,5 +1,6 @@
 package com.jungle.Tabbit.domain.waiting.controller;
 
+import com.jungle.Tabbit.domain.waiting.dto.WaitingListResponseDtoList;
 import com.jungle.Tabbit.domain.waiting.dto.WaitingRequestCreateDto;
 import com.jungle.Tabbit.domain.waiting.dto.WaitingResponseDto;
 import com.jungle.Tabbit.domain.waiting.service.WaitingService;
@@ -9,8 +10,6 @@ import com.jungle.Tabbit.global.model.ResponseStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/waitings")
@@ -32,7 +31,7 @@ public class WaitingController {
 
     @GetMapping("/list")
     public CommonResponse<?> getUserWaitingList(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        List<WaitingResponseDto> waitingList = waitingService.getUserWaitingList(userDetails.getUsername());
-        return CommonResponse.success(ResponseStatus.SUCCESS_OK, waitingList);
+        WaitingListResponseDtoList responseDto = waitingService.getUserWaitingList(userDetails.getUsername());
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK, responseDto);
     }
 }
