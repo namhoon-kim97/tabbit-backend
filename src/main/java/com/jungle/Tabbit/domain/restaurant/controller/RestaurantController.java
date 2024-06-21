@@ -22,8 +22,8 @@ public class RestaurantController {
     }
 
     @PostMapping
-    public CommonResponse<?> createRestaurant(@RequestBody RestaurantCreateRequestDto restaurantCreateRequestDto) {
-        restaurantService.createRestaurant(restaurantCreateRequestDto);
+    public CommonResponse<?> createRestaurant(@RequestBody RestaurantCreateRequestDto requestDto) {
+        restaurantService.createRestaurant(requestDto);
         return CommonResponse.success(ResponseStatus.SUCCESS_CREATE);
     }
 }
