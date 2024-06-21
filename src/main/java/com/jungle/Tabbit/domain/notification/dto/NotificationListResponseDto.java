@@ -1,10 +1,6 @@
 package com.jungle.Tabbit.domain.notification.dto;
 
-import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.notification.entity.Notification;
-import com.jungle.example_code.domain.board.dto.BoardResponseDto;
-import com.jungle.example_code.domain.board.entity.Board;
-import com.jungle.example_code.domain.reply.dto.ReplyResponseDto;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -16,7 +12,8 @@ import java.util.stream.Collectors;
 public class NotificationListResponseDto {
 
     private Long memberId;
-    private List<NotificationResponseDto> notificationList; ;
+    private List<NotificationResponseDto> notificationList;
+    ;
 
     public static NotificationListResponseDto of(Long memberId, List<Notification> notificationList) {
         List<NotificationResponseDto> notifications = notificationList.stream()

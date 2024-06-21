@@ -14,7 +14,6 @@ import com.jungle.Tabbit.global.exception.BusinessLogicException;
 import com.jungle.Tabbit.global.exception.DuplicatedException;
 import com.jungle.Tabbit.global.exception.NotFoundException;
 import com.jungle.Tabbit.global.model.ResponseStatus;
-import com.jungle.Tabbit.global.util.SecurityUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -33,8 +32,7 @@ public class WaitingService {
     private static final ConcurrentHashMap<Long, AtomicLong> storeQueueNumbers = new ConcurrentHashMap<>();  // 가게별 전역 대기번호 변수
 
     @Transactional
-    public WaitingResponseDto registerWaiting(WaitingRequestCreateDto requestDto) {
-        String username = SecurityUtil.getCurrentUsername();
+    public WaitingResponseDto registerWaiting(WaitingRequestCreateDto requestDto, String username) {
         Member member = memberRepository.findMemberByUsername(username)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
         Nfc nfc = nfcRepository.findByNfcId(requestDto.getNfcId())

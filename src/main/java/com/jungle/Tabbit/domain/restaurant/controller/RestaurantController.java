@@ -2,10 +2,12 @@ package com.jungle.Tabbit.domain.restaurant.controller;
 
 import com.jungle.Tabbit.domain.restaurant.dto.RestaurantCreateRequestDto;
 import com.jungle.Tabbit.domain.restaurant.service.RestaurantService;
+import com.jungle.Tabbit.global.config.security.CustomUserDetails;
 import com.jungle.Tabbit.global.model.CommonResponse;
 import com.jungle.Tabbit.global.model.ResponseStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -22,8 +24,8 @@ public class RestaurantController {
     }
 
     @PostMapping
-    public CommonResponse<?> createRestaurant(@RequestBody RestaurantCreateRequestDto requestDto) {
-        restaurantService.createRestaurant(requestDto);
+    public CommonResponse<?> createRestaurant(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody RestaurantCreateRequestDto requestDto) {
+        restaurantService.createRestaurant(requestDto, userDetails.getUsername());
         return CommonResponse.success(ResponseStatus.SUCCESS_CREATE);
     }
 }
