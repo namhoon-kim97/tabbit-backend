@@ -15,7 +15,7 @@ public class WaitingResponseDto {
     private int peopleNumber; // 식사 인원
     private int waitingNumber; // 대기 번호
     private WaitingStatus status; // 상태
-    private int estimatedWaitTime; // 예상 대기 시간
+    private Long estimatedWaitTime; // 예상 대기 시간
     private int currentWaitingPosition; // 현재 나의 순서
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -24,7 +24,7 @@ public class WaitingResponseDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
 
-    public static WaitingResponseDto of(Waiting waiting, int estimatedWaitTime, int currentWaitingPosition) {
+    public static WaitingResponseDto of(Waiting waiting, Long estimatedWaitTime, int currentWaitingPosition) {
         return WaitingResponseDto.builder()
                 .waitingId(waiting.getWaitingId())
                 .peopleNumber(waiting.getPeopleNumber())

@@ -53,7 +53,7 @@ public class WaitingService {
         waitingRepository.save(waiting);
 
         int currentWaitingPosition = getCurrentWaitingPosition(waiting);
-        int estimatedWaitTime = calculateEstimatedWaitTime(currentWaitingPosition);
+        Long estimatedWaitTime = calculateEstimatedWaitTime(currentWaitingPosition, restaurant.getEstimatedTimePerTeam());
 
         return WaitingResponseDto.of(waiting, estimatedWaitTime, currentWaitingPosition);
     }
@@ -73,9 +73,8 @@ public class WaitingService {
         return -1; // 실패
     }
 
-    public int calculateEstimatedWaitTime(int position) {
-        int averageWaitTimePerPerson = 10; // 가게의 평균 처리 시간 (분 단위) -> 이건 점주한테 입력받음 수정해야함.
-        return position * averageWaitTimePerPerson;
+    public Long calculateEstimatedWaitTime(int position, Long estimatedTimePerTeam) {
+        return position * estimatedTimePerTeam;
     }
 
     @Scheduled(cron = "0 0 0 * * ?")
