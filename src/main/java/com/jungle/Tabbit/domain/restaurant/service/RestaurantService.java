@@ -11,6 +11,7 @@ import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
 import com.jungle.Tabbit.domain.restaurant.entity.RestaurantDetail;
 import com.jungle.Tabbit.domain.restaurant.repository.CategoryRepository;
 import com.jungle.Tabbit.domain.restaurant.repository.RestaurantRepository;
+import com.jungle.Tabbit.domain.stampBadge.repository.StampRepository;
 import com.jungle.Tabbit.global.exception.InvalidRequestException;
 import com.jungle.Tabbit.global.exception.NotFoundException;
 import com.jungle.Tabbit.global.model.ResponseStatus;
@@ -31,12 +32,15 @@ public class RestaurantService {
     private final RestaurantRepository restaurantRepository;
     private final MemberRepository memberRepository;
     private final CategoryRepository categoryRepository;
+    private final StampRepository stampRepository;
 
-    public List<RestaurantResponseDto> getAllRestaurant() {
+    public List<RestaurantResponseDto> getAllRestaurant(String username) {
+        Member member = memberRepository.findMemberByUsername(username)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
         List<Restaurant> restaurants = restaurantRepository.findAll();
 
         return restaurants.stream()
-                .map(restaurant -> RestaurantResponseDto.of(restaurant, false))
+                .map(restaurant -> RestaurantResponseDto.of(restaurant, stampRepository.findByMemberAndRestaurant(member, restaurant).isPresent()))
                 .collect(Collectors.toList());
     }
 
@@ -50,15 +54,10 @@ public class RestaurantService {
         Category category = categoryRepository.findByCategoryCd(requestDto.getCategoryCd())
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_CATEGORY_NOT_FOUND));
 
-        String[] parts = requestDto.getAddress_name().split(" ");
-        if (parts.length < 3) {
-            throw new InvalidRequestException(ResponseStatus.FAIL_ADDRESS_NOT_SUCCESS);
-        }
-
         Address address = new Address(
-                parts[0],
-                parts[1],
-                parts[2],
+                requestDto.getSido(),
+                requestDto.getSigungu(),
+                requestDto.getEupmyeondong(),
                 requestDto.getRoad_address_name(),
                 requestDto.getAddress_name(),
                 requestDto.getDetail_address()
@@ -83,5 +82,16 @@ public class RestaurantService {
                 requestDto.getEstimatedTimePerTeam()
         );
         restaurantRepository.save(restaurant);
+    }
+
+    public RestaurantResponseDto getRestaurantSummaryInfo(Long restaurantId, String username) {
+        Member member = memberRepository.findMemberByUsername(username)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
+        Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
+
+        boolean is_earned_stamp = stampRepository.findByMemberAndRestaurant(member, restaurant).isPresent();
+
+        return RestaurantResponseDto.of(restaurant, is_earned_stamp);
     }
 }

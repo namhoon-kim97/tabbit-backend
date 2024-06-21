@@ -19,13 +19,18 @@ public class RestaurantController {
     private final RestaurantService restaurantService;
 
     @GetMapping
-    public CommonResponse<?> getRestaurantAll() {
-        return CommonResponse.success(ResponseStatus.SUCCESS_OK, restaurantService.getAllRestaurant());
+    public CommonResponse<?> getRestaurantAll(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK, restaurantService.getAllRestaurant(userDetails.getUsername()));
     }
 
     @PostMapping
     public CommonResponse<?> createRestaurant(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody RestaurantCreateRequestDto requestDto) {
         restaurantService.createRestaurant(requestDto, userDetails.getUsername());
         return CommonResponse.success(ResponseStatus.SUCCESS_CREATE);
+    }
+
+    @GetMapping("/{restaurantId}")
+    public CommonResponse<?> getRestaurantSummaryById(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId) {
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK, restaurantService.getRestaurantSummaryInfo(restaurantId, userDetails.getUsername()));
     }
 }
