@@ -10,6 +10,7 @@ import com.jungle.Tabbit.domain.waiting.dto.WaitingResponseDto;
 import com.jungle.Tabbit.domain.waiting.entity.Waiting;
 import com.jungle.Tabbit.domain.waiting.entity.WaitingStatus;
 import com.jungle.Tabbit.domain.waiting.repository.WaitingRepository;
+import com.jungle.Tabbit.global.exception.BusinessLogicException;
 import com.jungle.Tabbit.global.exception.DuplicatedException;
 import com.jungle.Tabbit.global.exception.NotFoundException;
 import com.jungle.Tabbit.global.model.ResponseStatus;
@@ -70,7 +71,7 @@ public class WaitingService {
                 return i;
             }
         }
-        return -1; // 실패
+        throw new BusinessLogicException(ResponseStatus.FAIL_MEMBER_WAITING_DUPLICATED);
     }
 
     public Long calculateEstimatedWaitTime(int position, Long estimatedTimePerTeam) {

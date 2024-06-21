@@ -64,8 +64,8 @@ public enum ResponseStatus {
     FAIL_NFC_NOT_FOUND("등록된 NFC ID가 없습니다.", HttpStatus.NOT_FOUND),
 
     // Waiting
-    FAIL_MEMBER_WAITING_DUPLICATED("이미 이 레스토랑의 대기자 명단에 등록되어 있습니다.", HttpStatus.BAD_REQUEST);
-
+    FAIL_MEMBER_WAITING_DUPLICATED("이미 이 레스토랑의 대기자 명단에 등록되어 있습니다.", HttpStatus.BAD_REQUEST),
+    FAIL_GET_CURRENT_WAIT_POSITION("해당 대기순번을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
 
     private String message;
 
