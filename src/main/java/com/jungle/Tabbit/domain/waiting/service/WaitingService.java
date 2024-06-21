@@ -77,16 +77,13 @@ public class WaitingService {
     public Long calculateEstimatedWaitTime(int position, Long estimatedTimePerTeam) {
         return position * estimatedTimePerTeam;
     }
-    
+
     public WaitingResponseDto getWaitingOverview(Long restaurantId, String username) {
         Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId);
         Member member = memberRepository.findMemberByUsername(username)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
-        List<Waiting> waitingList = waitingRepository.findByRestaurant(restaurant);
 
-        Waiting userWaiting = waitingList.stream()
-                .filter(waiting -> waiting.getMember().equals(member))
-                .findFirst()
+        Waiting userWaiting = waitingRepository.findByRestaurantAndMemberAndWaitingStatus(restaurant, member, WaitingStatus.STATUS_WAITING)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_GET_CURRENT_WAIT_POSITION));
 
         int currentWaitingPosition = getCurrentWaitingPosition(userWaiting);
