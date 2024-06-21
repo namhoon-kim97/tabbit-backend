@@ -6,7 +6,7 @@ import com.jungle.Tabbit.domain.nfc.entity.Nfc;
 import com.jungle.Tabbit.domain.nfc.repository.NfcRepository;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
 import com.jungle.Tabbit.domain.restaurant.repository.RestaurantRepository;
-import com.jungle.Tabbit.domain.waiting.dto.WaitingListResponseDtoList;
+import com.jungle.Tabbit.domain.waiting.dto.WaitingListResponseDto;
 import com.jungle.Tabbit.domain.waiting.dto.WaitingRequestCreateDto;
 import com.jungle.Tabbit.domain.waiting.dto.WaitingResponseDto;
 import com.jungle.Tabbit.domain.waiting.entity.Waiting;
@@ -94,7 +94,7 @@ public class WaitingService {
         return WaitingResponseDto.of(userWaiting, estimatedWaitTime, currentWaitingPosition);
     }
 
-    public WaitingListResponseDtoList getUserWaitingList(String username) {
+    public WaitingListResponseDto getUserWaitingList(String username) {
         Member member = memberRepository.findMemberByUsername(username)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
 
@@ -108,7 +108,7 @@ public class WaitingService {
                 })
                 .collect(Collectors.toList());
 
-        return WaitingListResponseDtoList.builder()
+        return WaitingListResponseDto.builder()
                 .waitingResponseDtos(waitingResponseDtos)
                 .build();
     }

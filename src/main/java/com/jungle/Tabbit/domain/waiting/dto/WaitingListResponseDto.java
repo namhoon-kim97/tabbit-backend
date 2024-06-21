@@ -7,6 +7,6 @@ import java.util.List;
 
 @Getter
 @Builder
-public class WaitingListResponseDtoList {
+public class WaitingListResponseDto {
     private List<WaitingResponseDto> waitingResponseDtos;
 }

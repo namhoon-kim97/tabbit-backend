@@ -1,6 +1,6 @@
 package com.jungle.Tabbit.domain.waiting.controller;
 
-import com.jungle.Tabbit.domain.waiting.dto.WaitingListResponseDtoList;
+import com.jungle.Tabbit.domain.waiting.dto.WaitingListResponseDto;
 import com.jungle.Tabbit.domain.waiting.dto.WaitingRequestCreateDto;
 import com.jungle.Tabbit.domain.waiting.dto.WaitingResponseDto;
 import com.jungle.Tabbit.domain.waiting.service.WaitingService;
@@ -31,7 +31,7 @@ public class WaitingController {
 
     @GetMapping("/list")
     public CommonResponse<?> getUserWaitingList(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        WaitingListResponseDtoList responseDto = waitingService.getUserWaitingList(userDetails.getUsername());
+        WaitingListResponseDto responseDto = waitingService.getUserWaitingList(userDetails.getUsername());
         return CommonResponse.success(ResponseStatus.SUCCESS_OK, responseDto);
     }
 }
