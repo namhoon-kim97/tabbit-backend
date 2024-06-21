@@ -1,6 +1,7 @@
 package com.jungle.Tabbit.domain.restaurant.service;
 
 import com.jungle.Tabbit.domain.member.entity.Member;
+import com.jungle.Tabbit.domain.member.entity.MemberRole;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
 import com.jungle.Tabbit.domain.restaurant.dto.RestaurantCreateRequestDto;
 import com.jungle.Tabbit.domain.restaurant.dto.RestaurantResponseDto;
@@ -8,9 +9,7 @@ import com.jungle.Tabbit.domain.restaurant.entity.Address;
 import com.jungle.Tabbit.domain.restaurant.entity.Category;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
 import com.jungle.Tabbit.domain.restaurant.entity.RestaurantDetail;
-import com.jungle.Tabbit.domain.restaurant.repository.AddressRepository;
 import com.jungle.Tabbit.domain.restaurant.repository.CategoryRepository;
-import com.jungle.Tabbit.domain.restaurant.repository.RestaurantDetailRepository;
 import com.jungle.Tabbit.domain.restaurant.repository.RestaurantRepository;
 import com.jungle.Tabbit.global.exception.InvalidRequestException;
 import com.jungle.Tabbit.global.exception.NotFoundException;
@@ -31,9 +30,7 @@ import java.util.stream.Collectors;
 public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
-    private final RestaurantDetailRepository restaurantDetailRepository;
     private final MemberRepository memberRepository;
-    private final AddressRepository addressRepository;
     private final CategoryRepository categoryRepository;
 
     public List<RestaurantResponseDto> getAllRestaurant() {
@@ -47,6 +44,10 @@ public class RestaurantService {
     public void createRestaurant(RestaurantCreateRequestDto restaurantCreateRequestDto) {
         Member owner = memberRepository.findMemberByUsername(SecurityUtil.getCurrentUsername())
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
+        if (!owner.getMemberRole().equals(MemberRole.ROLE_MANAGER)) {
+            throw new InvalidRequestException(ResponseStatus.FAIL_MEMBER_ROLE_INVALID);
+        }
+
         Category category = categoryRepository.findByCategoryCd(restaurantCreateRequestDto.getCategoryCd())
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_CATEGORY_NOT_FOUND));
 
@@ -54,6 +55,7 @@ public class RestaurantService {
         if (parts.length < 3) {
             throw new InvalidRequestException(ResponseStatus.FAIL_ADDRESS_NOT_SUCCESS);
         }
+
         Address address = new Address(
                 parts[0],
                 parts[1],
@@ -62,7 +64,6 @@ public class RestaurantService {
                 restaurantCreateRequestDto.getAddress_name(),
                 restaurantCreateRequestDto.getDetail_address()
         );
-//        address = addressRepository.save(address);
 
         RestaurantDetail restaurantDetail = new RestaurantDetail(
                 restaurantCreateRequestDto.getOpening_hours(),
@@ -71,7 +72,6 @@ public class RestaurantService {
                 restaurantCreateRequestDto.getRestaurant_number(),
                 restaurantCreateRequestDto.getDescription()
         );
-//        restaurantDetail = restaurantDetailRepository.save(restaurantDetail);
 
         Restaurant restaurant = new Restaurant(
                 restaurantDetail,
@@ -84,7 +84,5 @@ public class RestaurantService {
                 restaurantCreateRequestDto.getEstimatedTimePerTeam()
         );
         restaurantRepository.save(restaurant);
-
-//        return RestaurantResponseDto.of(restaurant, false);
     }
 }

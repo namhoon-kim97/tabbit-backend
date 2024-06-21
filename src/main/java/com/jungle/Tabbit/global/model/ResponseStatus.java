@@ -36,7 +36,7 @@ public enum ResponseStatus {
     FAIL_MEMBER_PASSWORD_NOT_MATCHED("클라이언트가 입력한 비밀번호가 소유자의 비밀번호와 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
     FAIL_MEMBER_USERNAME_INVALID("최소 4자 이상, 10자 이하이며 알파벳 소문자(a~z), 숫자(0~9)로 이루어져있지 않습니다.", HttpStatus.BAD_REQUEST),
     FAIL_MEMBER_PASSWORD_INVALID("최소 8자 이상, 15자 이하이며 알파벳 대소문자(a~z, A~Z), 숫자(0~9), 특수문자로 이루어져있지 않습니다.", HttpStatus.BAD_REQUEST),
-    FAㅣIL_MEMBER_ROLE_INVALID("클라이언트의 권한이 없습니다.", HttpStatus.BAD_REQUEST),
+    FAIL_MEMBER_ROLE_INVALID("클라이언트의 권한이 없습니다.", HttpStatus.BAD_REQUEST),
 
     // Post
     FAIL_BOARD_NOT_FOUND("클라이언트가 요청한 게시글을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
