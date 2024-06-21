@@ -11,21 +11,22 @@ import lombok.NoArgsConstructor;
 public class RestaurantDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long restaurant_detail_id;
+    @Column(name = "restaurant_detail_id")
+    private Long restaurantDetailId;
 
-    @Column(length = 255)
+    @Column(name = "opening_hours", length = 255)
     private String openingHours;
 
-    @Column(length = 255)
+    @Column(name = "break_time", length = 255)
     private String breakTime;
 
-    @Column(length = 255)
+    @Column(name = "holidays", length = 255)
     private String holidays;
 
-    @Column(length = 255)
+    @Column(name = "restaurant_number", length = 255)
     private String restaurantNumber;
 
-    @Column(length = 255)
+    @Column(name = "description", length = 255)
     private String description;
 
     public RestaurantDetail(String openingHours, String breakTime, String holidays, String restaurantNumber, String description) {
