@@ -16,11 +16,11 @@ public class Guestbook extends Timestamped {
     private Long guestbookId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+//    @JoinColumn(name = "member_id")
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "restaurant_id")
+//    @JoinColumn(name = "restaurant_id")
     private Restaurant restaurant;
 
     @Column(nullable = false, length = 255)

@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface RestaurantRepository extends Repository<Restaurant, Long> {
     List<Restaurant> findAll();
+
+    Restaurant save(Restaurant restaurant);
 }
