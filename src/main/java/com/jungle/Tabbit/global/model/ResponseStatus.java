@@ -68,7 +68,7 @@ public enum ResponseStatus {
     FAIL_GET_CURRENT_WAIT_POSITION("해당 대기순번을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
     // Restaurant
-    FAIL_RESTAURANT_NOT_FOUND("클라이언트가 요청한 레스토랑을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
+    FAIL_RESTAURANT_NOT_FOUND("클라이언트가 요청한 맛집을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
 
     private String message;
 
