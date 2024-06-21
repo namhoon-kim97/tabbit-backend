@@ -8,10 +8,7 @@ import com.jungle.Tabbit.global.model.CommonResponse;
 import com.jungle.Tabbit.global.model.ResponseStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/waitings")
@@ -23,5 +20,11 @@ public class WaitingController {
     public CommonResponse<?> registerWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody WaitingRequestCreateDto requestDto) {
         WaitingResponseDto responseDto = waitingService.registerWaiting(requestDto, userDetails.getUsername());
         return CommonResponse.success(ResponseStatus.SUCCESS_CREATE, responseDto);
+    }
+
+    @GetMapping("/{restaurantId}")
+    public CommonResponse<?> getWaitingOverview(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId) {
+        WaitingResponseDto responseDto = waitingService.getWaitingOverview(restaurantId, userDetails.getUsername());
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK, responseDto);
     }
 }

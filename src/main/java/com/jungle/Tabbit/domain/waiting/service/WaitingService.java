@@ -5,6 +5,7 @@ import com.jungle.Tabbit.domain.member.repository.MemberRepository;
 import com.jungle.Tabbit.domain.nfc.entity.Nfc;
 import com.jungle.Tabbit.domain.nfc.repository.NfcRepository;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
+import com.jungle.Tabbit.domain.restaurant.repository.RestaurantRepository;
 import com.jungle.Tabbit.domain.waiting.dto.WaitingRequestCreateDto;
 import com.jungle.Tabbit.domain.waiting.dto.WaitingResponseDto;
 import com.jungle.Tabbit.domain.waiting.entity.Waiting;
@@ -30,6 +31,7 @@ public class WaitingService {
     private final NfcRepository nfcRepository;
     private final MemberRepository memberRepository;
     private static final ConcurrentHashMap<Long, AtomicLong> storeQueueNumbers = new ConcurrentHashMap<>();  // 가게별 전역 대기번호 변수
+    private final RestaurantRepository restaurantRepository;
 
     @Transactional
     public WaitingResponseDto registerWaiting(WaitingRequestCreateDto requestDto, String username) {
@@ -74,6 +76,23 @@ public class WaitingService {
 
     public Long calculateEstimatedWaitTime(int position, Long estimatedTimePerTeam) {
         return position * estimatedTimePerTeam;
+    }
+    
+    public WaitingResponseDto getWaitingOverview(Long restaurantId, String username) {
+        Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId);
+        Member member = memberRepository.findMemberByUsername(username)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
+        List<Waiting> waitingList = waitingRepository.findByRestaurant(restaurant);
+
+        Waiting userWaiting = waitingList.stream()
+                .filter(waiting -> waiting.getMember().equals(member))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_GET_CURRENT_WAIT_POSITION));
+
+        int currentWaitingPosition = getCurrentWaitingPosition(userWaiting);
+        Long estimatedWaitTime = calculateEstimatedWaitTime(currentWaitingPosition, restaurant.getEstimatedTimePerTeam());
+
+        return WaitingResponseDto.of(userWaiting, estimatedWaitTime, currentWaitingPosition);
     }
 
     @Scheduled(cron = "0 0 0 * * ?")
