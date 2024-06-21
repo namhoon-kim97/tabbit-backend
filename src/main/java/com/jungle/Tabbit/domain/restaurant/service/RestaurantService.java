@@ -14,7 +14,6 @@ import com.jungle.Tabbit.domain.restaurant.repository.RestaurantRepository;
 import com.jungle.Tabbit.global.exception.InvalidRequestException;
 import com.jungle.Tabbit.global.exception.NotFoundException;
 import com.jungle.Tabbit.global.model.ResponseStatus;
-import com.jungle.Tabbit.global.util.SecurityUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,8 +40,8 @@ public class RestaurantService {
                 .collect(Collectors.toList());
     }
 
-    public void createRestaurant(RestaurantCreateRequestDto requestDto) {
-        Member owner = memberRepository.findMemberByUsername(SecurityUtil.getCurrentUsername())
+    public void createRestaurant(RestaurantCreateRequestDto requestDto, String username) {
+        Member owner = memberRepository.findMemberByUsername(username)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
         if (!owner.getMemberRole().equals(MemberRole.ROLE_MANAGER)) {
             throw new InvalidRequestException(ResponseStatus.FAIL_MEMBER_ROLE_INVALID);
