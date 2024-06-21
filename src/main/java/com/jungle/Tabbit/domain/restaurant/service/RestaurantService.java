@@ -61,23 +61,23 @@ public class RestaurantService {
                 requestDto.getSido(),
                 requestDto.getSigungu(),
                 requestDto.getEupmyeondong(),
-                requestDto.getRoad_address_name(),
-                requestDto.getAddress_name(),
-                requestDto.getDetail_address()
+                requestDto.getRoadAddressName(),
+                requestDto.getAddressName(),
+                requestDto.getDetailAddress()
         );
 
         RestaurantDetail restaurantDetail = new RestaurantDetail(
-                requestDto.getOpening_hours(),
-                requestDto.getBreak_time(),
+                requestDto.getOpeningHours(),
+                requestDto.getBreakTime(),
                 requestDto.getHolidays(),
-                requestDto.getRestaurant_number(),
+                requestDto.getRestaurantNumber(),
                 requestDto.getDescription()
         );
 
         Restaurant restaurant = new Restaurant(
                 restaurantDetail,
                 owner,
-                requestDto.getPlace_name(),
+                requestDto.getPlaceName(),
                 category,
                 address,
                 requestDto.getLatitude(),
