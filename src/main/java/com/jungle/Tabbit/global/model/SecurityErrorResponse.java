@@ -7,18 +7,18 @@ import org.springframework.http.HttpStatus;
 
 import java.util.Optional;
 
-public class SecurityErrorResponse extends CommonResponse {
+public class SecurityErrorResponse<T> extends CommonResponse<T> {
     private static final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     public String convertToJson() throws JsonProcessingException {
         return objectMapper.writeValueAsString(this);
     }
 
-    public SecurityErrorResponse(boolean success, Optional data, String message, HttpStatus statusCode) {
-        super(success, data, message, statusCode);
+    public SecurityErrorResponse(boolean success, T data, String message, HttpStatus statusCode) {
+        super(success, Optional.ofNullable(data), message, statusCode);
     }
 
-    public static SecurityErrorResponse of(ResponseStatus responseStatus) {
-        return new SecurityErrorResponse(true, null, responseStatus.getMessage(), responseStatus.getStatusCode());
+    public static <T> SecurityErrorResponse<T> of(ResponseStatus responseStatus) {
+        return new SecurityErrorResponse<>(true, null, responseStatus.getMessage(), responseStatus.getStatusCode());
     }
 }
