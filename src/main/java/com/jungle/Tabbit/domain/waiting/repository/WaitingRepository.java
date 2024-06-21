@@ -17,4 +17,6 @@ public interface WaitingRepository extends Repository<Waiting, Long> {
     boolean existsByMemberAndRestaurantAndWaitingStatus(Member member, Restaurant restaurant, WaitingStatus waitingStatus);
 
     Optional<Waiting> findByRestaurantAndMemberAndWaitingStatus(Restaurant restaurant, Member member, WaitingStatus status);
+
+    List<Waiting> findByMemberAndWaitingStatus(Member member, WaitingStatus status);
 }

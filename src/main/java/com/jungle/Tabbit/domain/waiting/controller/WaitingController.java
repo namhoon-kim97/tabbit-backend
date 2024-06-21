@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/waitings")
 @RequiredArgsConstructor
@@ -26,5 +28,11 @@ public class WaitingController {
     public CommonResponse<?> getWaitingOverview(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId) {
         WaitingResponseDto responseDto = waitingService.getWaitingOverview(restaurantId, userDetails.getUsername());
         return CommonResponse.success(ResponseStatus.SUCCESS_OK, responseDto);
+    }
+
+    @GetMapping("/list")
+    public CommonResponse<?> getUserWaitingList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<WaitingResponseDto> waitingList = waitingService.getUserWaitingList(userDetails.getUsername());
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK, waitingList);
     }
 }
