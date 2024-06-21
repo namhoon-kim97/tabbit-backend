@@ -19,22 +19,23 @@ public class Restaurant extends Timestamped {
     private Long restaurantId;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "restaurant_detail_id", nullable = false)
+//    @JoinColumn(name = "restaurant_detail_id", nullable = false)
     private RestaurantDetail restaurantDetail;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member owner;
+//    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     @Column(nullable = false, length = 255)
     private String name;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_cd", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "category_cd", nullable = false)
+//    @Column(name = "category_cd", nullable = false)
     private Category category;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "address_id", nullable = false)
+//    @JoinColumn(name = "address_id", nullable = false)
     private Address address;
 
     @Column(nullable = false, precision = 13, scale = 10)
@@ -47,9 +48,9 @@ public class Restaurant extends Timestamped {
     @ColumnDefault("10")
     private Long estimatedTimePerTeam = 10L;
 
-    public Restaurant(RestaurantDetail restaurantDetail, Member owner, String name, Category category, Address address, BigDecimal latitude, BigDecimal longitude, Long estimatedTimePerTeam) {
+    public Restaurant(RestaurantDetail restaurantDetail, Member member, String name, Category category, Address address, BigDecimal latitude, BigDecimal longitude, Long estimatedTimePerTeam) {
         this.restaurantDetail = restaurantDetail;
-        this.owner = owner;
+        this.member = member;
         this.name = name;
         this.category = category;
         this.address = address;
