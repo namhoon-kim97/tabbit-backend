@@ -4,8 +4,9 @@ import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.entity.MemberRole;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
 import com.jungle.Tabbit.domain.restaurant.dto.RestaurantCreateRequestDto;
-import com.jungle.Tabbit.domain.restaurant.dto.RestaurantListResponseDto;
 import com.jungle.Tabbit.domain.restaurant.dto.RestaurantResponseDto;
+import com.jungle.Tabbit.domain.restaurant.dto.RestaurantResponseListDto;
+import com.jungle.Tabbit.domain.restaurant.dto.RestaurantResponseSummaryDto;
 import com.jungle.Tabbit.domain.restaurant.entity.Address;
 import com.jungle.Tabbit.domain.restaurant.entity.Category;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
@@ -13,6 +14,8 @@ import com.jungle.Tabbit.domain.restaurant.entity.RestaurantDetail;
 import com.jungle.Tabbit.domain.restaurant.repository.CategoryRepository;
 import com.jungle.Tabbit.domain.restaurant.repository.RestaurantRepository;
 import com.jungle.Tabbit.domain.stampBadge.repository.StampRepository;
+import com.jungle.Tabbit.domain.waiting.entity.WaitingStatus;
+import com.jungle.Tabbit.domain.waiting.repository.WaitingRepository;
 import com.jungle.Tabbit.global.exception.InvalidRequestException;
 import com.jungle.Tabbit.global.exception.NotFoundException;
 import com.jungle.Tabbit.global.model.ResponseStatus;
@@ -22,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,19 +36,25 @@ public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
     private final MemberRepository memberRepository;
-    private final CategoryRepository categoryRepository;
     private final StampRepository stampRepository;
+    private final CategoryRepository categoryRepository;
+    private final WaitingRepository waitingRepository;
 
-    public RestaurantListResponseDto getAllRestaurant(String username) {
+    public RestaurantResponseListDto getAllRestaurant(String username) {
         Member member = memberRepository.findMemberByUsername(username)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
 
         List<Restaurant> restaurantList = restaurantRepository.findAll();
+
+        Set<Long> stampedRestaurantIds = member.getMemberStampList().stream()
+                .map(stamp -> stamp.getRestaurant().getRestaurantId())
+                .collect(Collectors.toSet());
+
         List<RestaurantResponseDto> restaurantResponseList = restaurantList.stream()
-                .map(restaurant -> RestaurantResponseDto.of(restaurant, stampRepository.findByMemberAndRestaurant(member, restaurant).isPresent()))
+                .map(restaurant -> RestaurantResponseDto.of(restaurant, stampedRestaurantIds.contains(restaurant.getRestaurantId())))
                 .collect(Collectors.toList());
 
-        return RestaurantListResponseDto.builder().restaurantResponseList(restaurantResponseList).build();
+        return RestaurantResponseListDto.builder().restaurantResponseList(restaurantResponseList).build();
     }
 
     public void createRestaurant(RestaurantCreateRequestDto requestDto, String username) {
@@ -87,14 +97,16 @@ public class RestaurantService {
         restaurantRepository.save(restaurant);
     }
 
-    public RestaurantResponseDto getRestaurantSummaryInfo(Long restaurantId, String username) {
+    public RestaurantResponseSummaryDto getRestaurantSummaryInfo(Long restaurantId, String username) {
         Member member = memberRepository.findMemberByUsername(username)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
         Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
 
-        boolean isEarnedStamp = stampRepository.findByMemberAndRestaurant(member, restaurant).isPresent();
+        boolean earnedStamp = stampRepository.findByMemberAndRestaurant(member, restaurant).isPresent();
 
-        return RestaurantResponseDto.of(restaurant, isEarnedStamp);
+        Long currentWaitingNumber = waitingRepository.countByRestaurantAndWaitingStatus(restaurant, WaitingStatus.STATUS_WAITING);
+
+        return RestaurantResponseSummaryDto.of(restaurant, earnedStamp, currentWaitingNumber);
     }
 }
