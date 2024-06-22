@@ -88,7 +88,8 @@ jobs:
         key: ${{ secrets.EC2_KEY }}
         script: |
           nohup java -jar /home/ubuntu/tabbit/build/libs/app.jar --spring.config.location=/home/ubuntu/tabbit/application.yaml &
-          sleep 5
+          disown
+          exit
 
     # 오래된 백업 파일 삭제
     - name: Cleanup old backups
