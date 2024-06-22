@@ -46,7 +46,7 @@ jobs:
         username: ${{ secrets.EC2_USER }} #ec2 서버 유저
         key: ${{ secrets.EC2_KEY }} #ec2 서버 ssh 키
         source: "build/libs/*.jar"
-        target: "/home/ubuntu/tabbit/build/libs/"
+        target: "/home/ubuntu/tabbit/"
         debug: true 
 
     # 애플리케이션 중지
