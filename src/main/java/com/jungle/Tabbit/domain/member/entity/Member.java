@@ -1,9 +1,13 @@
 package com.jungle.Tabbit.domain.member.entity;
 
+import com.jungle.Tabbit.domain.stampBadge.entity.MemberStamp;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -29,6 +33,9 @@ public class Member {
 
     @Column(nullable = false, name = "badge_id")
     private Long BadgeId;
+
+    @OneToMany(mappedBy = "member")
+    private List<MemberStamp> memberStampList = new ArrayList<>();
 
     public Member(String nickname, String password, String username, MemberRole memberRole, Long badgeId) {
         this.nickname = nickname;
