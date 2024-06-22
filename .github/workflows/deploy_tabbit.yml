@@ -64,8 +64,7 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
         script: |
-          pkill -f 'java -jar' || true
-          sleep 5
+          tmux new-session -d -s stop_app 'pkill -f "java -jar" || true'
 
     # 현재 JAR 파일 백업
     - name: Backup current JAR
@@ -75,7 +74,7 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
         script: |
-          mv /home/ubuntu/tabbit/app.jar /home/ubuntu/tabbit/app_backup.jar || true
+          tmux new-session -d -s backup_jar 'mv /home/ubuntu/tabbit/app.jar /home/ubuntu/tabbit/app_backup.jar || true'
 
     # 새 JAR 파일 배포
     - name: Deploy new JAR
@@ -85,7 +84,7 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
         script: |
-          mv /home/ubuntu/tabbit/tabbit.jar /home/ubuntu/tabbit/app.jar
+          tmux new-session -d -s deploy_jar 'mv /home/ubuntu/tabbit/tabbit.jar /home/ubuntu/tabbit/app.jar'
 
     # 새로운 애플리케이션 시작
     - name: Start new application
@@ -95,9 +94,7 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
         script: |
-          mkdir -p /home/ubuntu/tabbit/log
-          nohup java -jar /home/ubuntu/tabbit/app.jar --spring.config.location=/home/ubuntu/tabbit/application.yaml > /home/ubuntu/tabbit/log/log.txt 2>&1 &
-          sleep 5
+          tmux new-session -d -s start_app 'mkdir -p /home/ubuntu/tabbit/log && nohup java -jar /home/ubuntu/tabbit/app.jar --spring.config.location=/home/ubuntu/tabbit/application.yaml > /home/ubuntu/tabbit/log/log.txt 2>&1 &'
 
     # 오래된 백업 파일 삭제
     - name: Cleanup old backups
@@ -107,4 +104,4 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
         script: |
-          find /home/ubuntu/tabbit/ -name 'app_backup.jar' -mtime +1 -exec rm {} \;
+          tmux new-session -d -s cleanup 'find /home/ubuntu/tabbit/ -name "app_backup.jar" -mtime +1 -exec rm {} \;'
