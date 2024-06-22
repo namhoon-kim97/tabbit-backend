@@ -10,7 +10,8 @@ public enum WaitingStatus {
 
     STATUS_CALLED("CALLED"),
     STATUS_SEATED("SEATED"),
-    STATUS_NOSHOW("NOSHOW");
+    STATUS_NOSHOW("NOSHOW"),
+    STATUS_CANCELLED("CANCELLED");
 
     final String waitingStatus;
 
