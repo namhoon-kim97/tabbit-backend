@@ -55,7 +55,7 @@ jobs:
         source: "build/libs/*.jar"
         target: "/home/ubuntu/tabbit/"
         debug: true 
-        
+
     # 애플리케이션 중지
     - name: Stop current application
       uses: appleboy/ssh-action@v0.1.1
@@ -65,6 +65,7 @@ jobs:
         key: ${{ secrets.EC2_KEY }}
         script: |
           pkill -f 'java -jar' || true
+          sleep 5
 
     # 현재 JAR 파일 백업
     - name: Backup current JAR
@@ -95,7 +96,8 @@ jobs:
         key: ${{ secrets.EC2_KEY }}
         script: |
           mkdir -p /home/ubuntu/tabbit/log
-          setsid nohup java -jar /home/ubuntu/tabbit/app.jar --spring.config.location=/home/ubuntu/tabbit/application.yaml > /home/ubuntu/tabbit/log/log.txt 2>&1 &
+          nohup java -jar /home/ubuntu/tabbit/app.jar --spring.config.location=/home/ubuntu/tabbit/application.yaml > /home/ubuntu/tabbit/log/log.txt 2>&1 &
+          sleep 5
 
     # 오래된 백업 파일 삭제
     - name: Cleanup old backups
