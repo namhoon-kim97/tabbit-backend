@@ -33,4 +33,9 @@ public class RestaurantController {
     public CommonResponse<?> getRestaurantSummary(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId) {
         return CommonResponse.success(ResponseStatus.SUCCESS_OK, restaurantService.getRestaurantSummaryInfo(restaurantId, userDetails.getUsername()));
     }
+
+    @GetMapping("/detail/{restaurantId}")
+    public CommonResponse<?> getRestaurantDetail(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId) {
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK, restaurantService.getRestaurantDetailInfo(restaurantId, userDetails.getUsername()));
+    }
 }

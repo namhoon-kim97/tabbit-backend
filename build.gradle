@@ -11,6 +11,9 @@ bootJar{
 	archivesBaseName = 'tabbit'
 	archiveFileName = 'tabbit.jar'
 	archiveVersion = "0.0.1"
+	exclude 'application.yml'
+	exclude 'application.properties'
+	exclude 'application.yaml'
 }
 
 java {

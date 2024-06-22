@@ -1,6 +1,7 @@
 package com.jungle.Tabbit.domain.restaurant.repository;
 
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.repository.Repository;
 
 import java.util.List;
@@ -11,5 +12,6 @@ public interface RestaurantRepository extends Repository<Restaurant, Long> {
 
     void save(Restaurant restaurant);
 
+    @EntityGraph(attributePaths = {"category", "address"})
     Optional<Restaurant> findByRestaurantId(Long id);
 }
