@@ -7,28 +7,29 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity(name = "Address")
+@Entity(name = "address")
 public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "address_id")
     private Long addressId;
 
-    @Column(length = 255)
+    @Column(name = "sido", length = 255)
     private String sido;
 
-    @Column(length = 255)
+    @Column(name = "sigungu", length = 255)
     private String sigungu;
 
-    @Column(length = 255)
+    @Column(name = "eupmyeondong", length = 255)
     private String eupmyeondong;
 
-    @Column(length = 255)
+    @Column(name = "road_address", length = 255)
     private String roadAddress;
 
-    @Column(length = 255)
+    @Column(name = "street_address", length = 255)
     private String streetAddress;
 
-    @Column(length = 255)
+    @Column(name = "detail_address", length = 255)
     private String detailAddress;
 
     public Address(String sido, String sigungu, String eupmyeondong, String roadAddress, String streetAddress, String detailAddress) {

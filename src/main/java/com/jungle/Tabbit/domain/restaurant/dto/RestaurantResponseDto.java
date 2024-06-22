@@ -11,22 +11,18 @@ import java.math.BigDecimal;
 public class RestaurantResponseDto {
 
     private Long restaurantId;
+    private String name; // 가게 이름
+    private BigDecimal latitude; // 위도
+    private BigDecimal longitude; // 경도
+    private Boolean earnedStamp; // 스탬프 획득 유무
 
-    private String name;
-
-    private BigDecimal latitude;
-
-    private BigDecimal longitude;
-
-    private boolean is_stamp;
-
-    public static RestaurantResponseDto of(Restaurant restaurant, boolean is_stamp) {
+    public static RestaurantResponseDto of(Restaurant restaurant, Boolean earnedStamp) {
         return RestaurantResponseDto.builder()
                 .restaurantId(restaurant.getRestaurantId())
                 .name(restaurant.getName())
                 .latitude(restaurant.getLatitude())
                 .longitude(restaurant.getLongitude())
-                .is_stamp(is_stamp)
+                .earnedStamp(earnedStamp)
                 .build();
     }
 }

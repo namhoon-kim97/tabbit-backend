@@ -16,20 +16,21 @@ import java.math.BigDecimal;
 public class Restaurant extends Timestamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "restaurant_id")
     private Long restaurantId;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "restaurant_detail_id", nullable = false)
     private RestaurantDetail restaurantDetail;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    private Member owner;
+    private Member member;
 
-    @Column(nullable = false, length = 255)
+    @Column(name = "name", nullable = false, length = 255)
     private String name;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_cd", nullable = false)
     private Category category;
 
@@ -37,19 +38,19 @@ public class Restaurant extends Timestamped {
     @JoinColumn(name = "address_id", nullable = false)
     private Address address;
 
-    @Column(nullable = false, precision = 13, scale = 10)
+    @Column(name = "latitude", nullable = false, precision = 13, scale = 10)
     private BigDecimal latitude;
 
-    @Column(nullable = false, precision = 13, scale = 10)
+    @Column(name = "longitude", nullable = false, precision = 13, scale = 10)
     private BigDecimal longitude;
 
-    @Column(nullable = false)
+    @Column(name = "estimated_time_per_team", nullable = false)
     @ColumnDefault("10")
     private Long estimatedTimePerTeam = 10L;
 
-    public Restaurant(RestaurantDetail restaurantDetail, Member owner, String name, Category category, Address address, BigDecimal latitude, BigDecimal longitude, Long estimatedTimePerTeam) {
+    public Restaurant(RestaurantDetail restaurantDetail, Member member, String name, Category category, Address address, BigDecimal latitude, BigDecimal longitude, Long estimatedTimePerTeam) {
         this.restaurantDetail = restaurantDetail;
-        this.owner = owner;
+        this.member = member;
         this.name = name;
         this.category = category;
         this.address = address;

@@ -9,13 +9,13 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity(name = "Category")
+@Entity(name = "category")
 public class Category {
     @Id
-    @Column(length = 255, nullable = false)
+    @Column(name = "category_cd", length = 255, nullable = false)
     private String categoryCd;
 
-    @Column(length = 255)
+    @Column(name = "category_name", length = 255, nullable = false)
     private String categoryName;
 
     public Category(String categoryCd, String categoryName) {
