@@ -7,6 +7,6 @@ import java.util.List;
 
 @Getter
 @Builder
-public class RestaurantListResponseDto {
+public class RestaurantResponseListDto {
     private List<RestaurantResponseDto> restaurantResponseList;
 }
