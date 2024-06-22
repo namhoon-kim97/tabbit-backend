@@ -16,10 +16,10 @@ import com.jungle.Tabbit.domain.waiting.repository.WaitingRepository;
 import com.jungle.Tabbit.global.exception.InvalidRequestException;
 import com.jungle.Tabbit.global.exception.NotFoundException;
 import com.jungle.Tabbit.global.model.ResponseStatus;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
@@ -37,6 +37,7 @@ public class RestaurantService {
     private final CategoryRepository categoryRepository;
     private final WaitingRepository waitingRepository;
 
+    @Transactional(readOnly = true)
     public RestaurantResponseListDto getAllRestaurant(String username) {
         Member member = memberRepository.findMemberByUsername(username)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
@@ -94,6 +95,7 @@ public class RestaurantService {
         restaurantRepository.save(restaurant);
     }
 
+    @Transactional(readOnly = true)
     public RestaurantResponseSummaryDto getRestaurantSummaryInfo(Long restaurantId, String username) {
         Member member = memberRepository.findMemberByUsername(username)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
@@ -107,6 +109,7 @@ public class RestaurantService {
         return RestaurantResponseSummaryDto.of(restaurant, earnedStamp, currentWaitingNumber);
     }
 
+    @Transactional(readOnly = true)
     public RestaurantResponseDetailDto getRestaurantDetailInfo(Long restaurantId, String username) {
         Member member = memberRepository.findMemberByUsername(username)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
