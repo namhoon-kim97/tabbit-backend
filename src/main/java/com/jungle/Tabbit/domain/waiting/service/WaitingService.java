@@ -32,26 +32,18 @@ public class WaitingService {
     private final WaitingRepository waitingRepository;
     private final NfcRepository nfcRepository;
     private final MemberRepository memberRepository;
-    private static final ConcurrentHashMap<Long, AtomicLong> storeQueueNumbers = new ConcurrentHashMap<>();  // 가게별 전역 대기번호 변수
     private final RestaurantRepository restaurantRepository;
+    private static final ConcurrentHashMap<Long, AtomicLong> storeQueueNumbers = new ConcurrentHashMap<>();  // 가게별 전역 대기번호 변수
 
     @Transactional
     public WaitingResponseDto registerWaiting(WaitingRequestCreateDto requestDto, String username) {
-        Member member = memberRepository.findMemberByUsername(username)
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
-        Nfc nfc = nfcRepository.findByNfcId(requestDto.getNfcId())
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_NFC_NOT_FOUND));
-
+        Member member = getMemberByUsername(username);
+        Nfc nfc = getNfcById(requestDto.getNfcId());
         Restaurant restaurant = nfc.getRestaurant();
 
-        // 사용자가 동일한 레스토랑에서 대기 중인지 확인
-        boolean alreadyWaiting = waitingRepository.existsByMemberAndRestaurantAndWaitingStatus(member, restaurant, WaitingStatus.STATUS_WAITING);
-        if (alreadyWaiting) {
-            throw new DuplicatedException(ResponseStatus.FAIL_MEMBER_WAITING_DUPLICATED);
-        }
+        validateDuplicateWaiting(member, restaurant);
 
         Long queueNumber = getNextQueueNumber(restaurant.getRestaurantId());
-
         Waiting waiting = new Waiting(requestDto.getPeopleNumber(), queueNumber.intValue(), restaurant, WaitingStatus.STATUS_WAITING, member);
         waitingRepository.save(waiting);
 
@@ -63,12 +55,9 @@ public class WaitingService {
 
     @Transactional(readOnly = true)
     public WaitingResponseDto getWaitingOverview(Long restaurantId, String username) {
-        Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId)
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
-        Member member = memberRepository.findMemberByUsername(username)
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
-        Waiting userWaiting = waitingRepository.findByRestaurantAndMemberAndWaitingStatus(restaurant, member, WaitingStatus.STATUS_WAITING)
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_GET_CURRENT_WAIT_POSITION));
+        Member member = getMemberByUsername(username);
+        Restaurant restaurant = getRestaurantById(restaurantId);
+        Waiting userWaiting = getWaitingByMemberAndRestaurant(member, restaurant);
 
         int currentWaitingPosition = getCurrentWaitingPosition(userWaiting);
         Long estimatedWaitTime = calculateEstimatedWaitTime(currentWaitingPosition, restaurant.getEstimatedTimePerTeam());
@@ -76,12 +65,9 @@ public class WaitingService {
         return WaitingResponseDto.of(userWaiting, estimatedWaitTime, currentWaitingPosition);
     }
 
-
     @Transactional(readOnly = true)
     public WaitingListResponseDto getUserWaitingList(String username) {
-        Member member = memberRepository.findMemberByUsername(username)
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
-
+        Member member = getMemberByUsername(username);
         List<Waiting> waitingList = waitingRepository.findByMemberAndWaitingStatus(member, WaitingStatus.STATUS_WAITING);
 
         List<WaitingResponseDto> waitingResponseDtos = waitingList.stream()
@@ -98,16 +84,40 @@ public class WaitingService {
     }
 
     @Transactional
-    public void deleteWaiting(Long restaurantId, String username) {
-        Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId)
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
-        Member member = memberRepository.findMemberByUsername(username)
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
-        Waiting waiting = waitingRepository.findByRestaurantAndMemberAndWaitingStatus(restaurant, member, WaitingStatus.STATUS_WAITING)
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_GET_CURRENT_WAIT_POSITION));
+    public void cancelWaiting(Long restaurantId, String username) {
+        Member member = getMemberByUsername(username);
+        Restaurant restaurant = getRestaurantById(restaurantId);
+        Waiting waiting = getWaitingByMemberAndRestaurant(member, restaurant);
 
         waiting.updateStatus(WaitingStatus.STATUS_CANCELLED);
         waitingRepository.save(waiting);
+    }
+
+    private Member getMemberByUsername(String username) {
+        return memberRepository.findMemberByUsername(username)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
+    }
+
+    private Nfc getNfcById(String nfcId) {
+        return nfcRepository.findByNfcId(nfcId)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_NFC_NOT_FOUND));
+    }
+
+    private Restaurant getRestaurantById(Long restaurantId) {
+        return restaurantRepository.findByRestaurantId(restaurantId)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
+    }
+
+    private Waiting getWaitingByMemberAndRestaurant(Member member, Restaurant restaurant) {
+        return waitingRepository.findByRestaurantAndMemberAndWaitingStatus(restaurant, member, WaitingStatus.STATUS_WAITING)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_GET_CURRENT_WAIT_POSITION));
+    }
+
+    private void validateDuplicateWaiting(Member member, Restaurant restaurant) {
+        boolean alreadyWaiting = waitingRepository.existsByMemberAndRestaurantAndWaitingStatus(member, restaurant, WaitingStatus.STATUS_WAITING);
+        if (alreadyWaiting) {
+            throw new DuplicatedException(ResponseStatus.FAIL_MEMBER_WAITING_DUPLICATED);
+        }
     }
 
     private Long getNextQueueNumber(Long storeId) {
