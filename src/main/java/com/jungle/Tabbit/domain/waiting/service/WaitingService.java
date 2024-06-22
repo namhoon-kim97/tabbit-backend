@@ -97,6 +97,19 @@ public class WaitingService {
                 .build();
     }
 
+    @Transactional
+    public void deleteWaiting(Long restaurantId, String username) {
+        Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
+        Member member = memberRepository.findMemberByUsername(username)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
+        Waiting waiting = waitingRepository.findByRestaurantAndMember(restaurant, member)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_GET_CURRENT_WAIT_POSITION));
+
+        waiting.updateStatus(WaitingStatus.STATUS_CANCELLED);
+        waitingRepository.save(waiting);
+    }
+
     private Long getNextQueueNumber(Long storeId) {
         storeQueueNumbers.putIfAbsent(storeId, new AtomicLong(0));
         return storeQueueNumbers.get(storeId).incrementAndGet();

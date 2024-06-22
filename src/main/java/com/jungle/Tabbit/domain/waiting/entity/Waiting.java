@@ -41,4 +41,8 @@ public class Waiting extends Timestamped {
         this.restaurant = restaurant;
         this.member = member;
     }
+
+    public void updateStatus(WaitingStatus newStatus) {
+        this.waitingStatus = newStatus;
+    }
 }

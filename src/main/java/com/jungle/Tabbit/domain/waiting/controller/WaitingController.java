@@ -34,4 +34,10 @@ public class WaitingController {
         WaitingListResponseDto responseDto = waitingService.getUserWaitingList(userDetails.getUsername());
         return CommonResponse.success(ResponseStatus.SUCCESS_OK, responseDto);
     }
+
+    @PutMapping("/{restaurantId}/cancel")
+    public CommonResponse<?> cancelWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId) {
+        waitingService.deleteWaiting(restaurantId, userDetails.getUsername());
+        return CommonResponse.success(ResponseStatus.SUCCESS_DELETE);
+    }
 }
