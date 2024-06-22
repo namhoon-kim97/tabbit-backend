@@ -102,7 +102,7 @@ public class RestaurantService {
         Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
 
-        boolean earnedStamp = stampRepository.findByMemberAndRestaurant(member, restaurant).isPresent();
+        Boolean earnedStamp = stampRepository.findByMemberAndRestaurant(member, restaurant).isPresent();
 
         Long currentWaitingNumber = waitingRepository.countByRestaurantAndWaitingStatus(restaurant, WaitingStatus.STATUS_WAITING);
 
@@ -116,7 +116,7 @@ public class RestaurantService {
         Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
 
-        boolean earnedStamp = stampRepository.findByMemberAndRestaurant(member, restaurant).isPresent();
+        Boolean earnedStamp = stampRepository.findByMemberAndRestaurant(member, restaurant).isPresent();
 
         return RestaurantResponseDetailDto.of(restaurant, earnedStamp);
     }
