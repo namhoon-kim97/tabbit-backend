@@ -14,9 +14,9 @@ public class RestaurantResponseDto {
     private String name; // 가게 이름
     private BigDecimal latitude; // 위도
     private BigDecimal longitude; // 경도
-    private boolean earnedStamp; // 스탬프 획득 유무
+    private Boolean earnedStamp; // 스탬프 획득 유무
 
-    public static RestaurantResponseDto of(Restaurant restaurant, boolean earnedStamp) {
+    public static RestaurantResponseDto of(Restaurant restaurant, Boolean earnedStamp) {
         return RestaurantResponseDto.builder()
                 .restaurantId(restaurant.getRestaurantId())
                 .name(restaurant.getName())

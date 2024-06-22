@@ -18,9 +18,9 @@ public class RestaurantResponseDetailDto {
     private String holidays; // 휴무일
     private String restaurantNumber; // 전화번호
     private String description; // 매장소개
-    private boolean earnedStamp; // 스탬프 획득 유무
+    private Boolean earnedStamp; // 스탬프 획득 유무
 
-    public static RestaurantResponseDetailDto of(Restaurant restaurant, boolean earnedStamp) {
+    public static RestaurantResponseDetailDto of(Restaurant restaurant, Boolean earnedStamp) {
         return RestaurantResponseDetailDto.builder()
                 .restaurantId(restaurant.getRestaurantId())
                 .name(restaurant.getName())
