@@ -16,10 +16,10 @@ import com.jungle.Tabbit.global.exception.BusinessLogicException;
 import com.jungle.Tabbit.global.exception.DuplicatedException;
 import com.jungle.Tabbit.global.exception.NotFoundException;
 import com.jungle.Tabbit.global.model.ResponseStatus;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -61,25 +61,7 @@ public class WaitingService {
         return WaitingResponseDto.of(waiting, estimatedWaitTime, currentWaitingPosition);
     }
 
-    private Long getNextQueueNumber(Long storeId) {
-        storeQueueNumbers.putIfAbsent(storeId, new AtomicLong(0));
-        return storeQueueNumbers.get(storeId).incrementAndGet();
-    }
-
-    public int getCurrentWaitingPosition(Waiting waiting) {
-        List<Waiting> waitingList = waitingRepository.findByRestaurantAndWaitingStatusOrderByWaitingNumberAsc(waiting.getRestaurant(), WaitingStatus.STATUS_WAITING);
-        for (int i = 0; i < waitingList.size(); i++) {
-            if (waitingList.get(i).getWaitingId().equals(waiting.getWaitingId())) {
-                return i;
-            }
-        }
-        throw new BusinessLogicException(ResponseStatus.FAIL_MEMBER_WAITING_DUPLICATED);
-    }
-
-    public Long calculateEstimatedWaitTime(int position, Long estimatedTimePerTeam) {
-        return position * estimatedTimePerTeam;
-    }
-
+    @Transactional(readOnly = true)
     public WaitingResponseDto getWaitingOverview(Long restaurantId, String username) {
         Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
@@ -94,6 +76,8 @@ public class WaitingService {
         return WaitingResponseDto.of(userWaiting, estimatedWaitTime, currentWaitingPosition);
     }
 
+
+    @Transactional(readOnly = true)
     public WaitingListResponseDto getUserWaitingList(String username) {
         Member member = memberRepository.findMemberByUsername(username)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
@@ -111,6 +95,25 @@ public class WaitingService {
         return WaitingListResponseDto.builder()
                 .waitingResponseDtos(waitingResponseDtos)
                 .build();
+    }
+
+    private Long getNextQueueNumber(Long storeId) {
+        storeQueueNumbers.putIfAbsent(storeId, new AtomicLong(0));
+        return storeQueueNumbers.get(storeId).incrementAndGet();
+    }
+
+    private int getCurrentWaitingPosition(Waiting waiting) {
+        List<Waiting> waitingList = waitingRepository.findByRestaurantAndWaitingStatusOrderByWaitingNumberAsc(waiting.getRestaurant(), WaitingStatus.STATUS_WAITING);
+        for (int i = 0; i < waitingList.size(); i++) {
+            if (waitingList.get(i).getWaitingId().equals(waiting.getWaitingId())) {
+                return i;
+            }
+        }
+        throw new BusinessLogicException(ResponseStatus.FAIL_MEMBER_WAITING_DUPLICATED);
+    }
+
+    private Long calculateEstimatedWaitTime(int position, Long estimatedTimePerTeam) {
+        return position * estimatedTimePerTeam;
     }
 
     @Scheduled(cron = "0 0 0 * * ?")
