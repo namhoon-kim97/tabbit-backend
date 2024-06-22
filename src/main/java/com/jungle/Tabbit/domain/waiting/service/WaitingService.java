@@ -103,7 +103,7 @@ public class WaitingService {
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
         Member member = memberRepository.findMemberByUsername(username)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
-        Waiting waiting = waitingRepository.findByRestaurantAndMember(restaurant, member)
+        Waiting waiting = waitingRepository.findByRestaurantAndMemberAndWaitingStatus(restaurant, member, WaitingStatus.STATUS_WAITING)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_GET_CURRENT_WAIT_POSITION));
 
         waiting.updateStatus(WaitingStatus.STATUS_CANCELLED);
