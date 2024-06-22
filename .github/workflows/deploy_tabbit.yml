@@ -56,8 +56,38 @@ jobs:
         target: "/home/ubuntu/tabbit/"
         debug: true 
         
-    # ssh를 통해 원격 서버에서 명령어 실행
-    - name: Execute remote command via SSH 
+    # 애플리케이션 중지
+    - name: Stop current application
+      uses: appleboy/ssh-action@v0.1.1
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          pkill -f 'java -jar' || true
+
+    # 현재 JAR 파일 백업
+    - name: Backup current JAR
+      uses: appleboy/ssh-action@v0.1.1
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          mv /home/ubuntu/tabbit/app.jar /home/ubuntu/tabbit/app_backup.jar || true
+
+    # 새 JAR 파일 배포
+    - name: Deploy new JAR
+      uses: appleboy/ssh-action@v0.1.1
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          mv /home/ubuntu/tabbit/tabbit.jar /home/ubuntu/tabbit/app.jar
+
+    # 새로운 애플리케이션 시작
+    - name: Start new application
       uses: appleboy/ssh-action@v0.1.1
       with:
         host: ${{ secrets.EC2_HOST }}
@@ -65,15 +95,14 @@ jobs:
         key: ${{ secrets.EC2_KEY }}
         script: |
           mkdir -p /home/ubuntu/tabbit/log
-          pkill -f 'java -jar' || true
-          # 백업 현재 JAR 파일
-          mv /home/ubuntu/tabbit/app.jar /home/ubuntu/tabbit/app_backup.jar || true
-          # 새 JAR 파일을 app.jar로 이동
-          mv /home/ubuntu/tabbit/tabbit.jar /home/ubuntu/tabbit/app.jar
-          # 백그라운드에서 새로운 JAR 파일 실행
-          nohup java -jar /home/ubuntu/tabbit/app.jar --spring.config.location=/home/ubuntu/tabbit/application.yaml > /home/ubuntu/tabbit/log/log.txt 2>&1 & disown
-          # 오래된 백업 파일 삭제
+          setsid nohup java -jar /home/ubuntu/tabbit/app.jar --spring.config.location=/home/ubuntu/tabbit/application.yaml > /home/ubuntu/tabbit/log/log.txt 2>&1 &
+
+    # 오래된 백업 파일 삭제
+    - name: Cleanup old backups
+      uses: appleboy/ssh-action@v0.1.1
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_KEY }}
+        script: |
           find /home/ubuntu/tabbit/ -name 'app_backup.jar' -mtime +1 -exec rm {} \;
-
-
-
