@@ -53,7 +53,7 @@ jobs:
         username: ${{ secrets.EC2_USER }} #ec2 서버 유저
         key: ${{ secrets.EC2_KEY }} #ec2 서버 ssh 키
         source: "build/libs/*.jar"
-        target: "/home/ubuntu/tabbit/"
+        target: "/home/ubuntu/tabbit/build/libs/"
         debug: true 
 
     # 애플리케이션 중지
@@ -84,7 +84,7 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
         script: |
-          tmux new-session -d -s deploy_jar 'mv /home/ubuntu/tabbit/build/libs/tabbit.jar /home/ubuntu/tabbit/build/libs/app.jar'
+          tmux new-session -d -s deploy_jar 'mv /home/ubuntu/tabbit/build/libs/*.jar /home/ubuntu/tabbit/build/libs/app.jar'
 
     # 새로운 애플리케이션 시작
     - name: Start new application
@@ -94,7 +94,7 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
         script: |
-          mkdir -p /home/ubuntu/tabbit/log && nohup java -jar /home/ubuntu/tabbit/build/libs/app.jar --spring.config.location=/home/ubuntu/tabbit/application.yaml > /home/ubuntu/tabbit/log/log.txt 2>&1 &
+          tmux new-session -d -s start_app 'mkdir -p /home/ubuntu/tabbit/log && nohup java -jar /home/ubuntu/tabbit/build/libs/app.jar --spring.config.location=/home/ubuntu/tabbit/application.yaml > /home/ubuntu/tabbit/log/log.txt 2>&1 &'
 
     # 오래된 백업 파일 삭제
     - name: Cleanup old backups
