@@ -3,10 +3,7 @@ package com.jungle.Tabbit.domain.restaurant.service;
 import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.entity.MemberRole;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
-import com.jungle.Tabbit.domain.restaurant.dto.RestaurantCreateRequestDto;
-import com.jungle.Tabbit.domain.restaurant.dto.RestaurantResponseDto;
-import com.jungle.Tabbit.domain.restaurant.dto.RestaurantResponseListDto;
-import com.jungle.Tabbit.domain.restaurant.dto.RestaurantResponseSummaryDto;
+import com.jungle.Tabbit.domain.restaurant.dto.*;
 import com.jungle.Tabbit.domain.restaurant.entity.Address;
 import com.jungle.Tabbit.domain.restaurant.entity.Category;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
@@ -108,5 +105,16 @@ public class RestaurantService {
         Long currentWaitingNumber = waitingRepository.countByRestaurantAndWaitingStatus(restaurant, WaitingStatus.STATUS_WAITING);
 
         return RestaurantResponseSummaryDto.of(restaurant, earnedStamp, currentWaitingNumber);
+    }
+
+    public RestaurantResponseDetailDto getRestaurantDetailInfo(Long restaurantId, String username) {
+        Member member = memberRepository.findMemberByUsername(username)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
+        Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
+
+        boolean earnedStamp = stampRepository.findByMemberAndRestaurant(member, restaurant).isPresent();
+
+        return RestaurantResponseDetailDto.of(restaurant, earnedStamp);
     }
 }
