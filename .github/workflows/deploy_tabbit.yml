@@ -71,7 +71,7 @@ jobs:
           # 새 JAR 파일을 app.jar로 이동
           mv /home/ubuntu/tabbit/tabbit.jar /home/ubuntu/tabbit/app.jar
           # 백그라운드에서 새로운 JAR 파일 실행
-          nohup java -jar /home/ubuntu/tabbit/app.jar --spring.config.location=/home/ubuntu/tabbit/application.yaml > /home/ubuntu/tabbit/log/log.txt 2>&1 &
+          nohup java -jar /home/ubuntu/tabbit/app.jar --spring.config.location=/home/ubuntu/tabbit/application.yaml > /home/ubuntu/tabbit/log/log.txt 2>&1 & disown
           # 오래된 백업 파일 삭제
           find /home/ubuntu/tabbit/ -name 'app_backup.jar' -mtime +1 -exec rm {} \;
 
