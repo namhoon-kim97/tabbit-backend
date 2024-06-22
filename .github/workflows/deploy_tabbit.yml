@@ -1,10 +1,3 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
-
 name: tabbit-deploy
 run-name: Running
 on:
@@ -45,6 +38,10 @@ jobs:
     - name: Build with Gradle Wrapper 
       run: ./gradlew build -x test
     
+    # 빌드 파일 목록 출력
+    - name: List build directory
+      run: ls -l build/libs
+    
     # jar파일을 scp를 통해 원격 서버로 복사
     - name: Copy files via SCP 
       uses: appleboy/scp-action@v0.1.1
@@ -56,6 +53,16 @@ jobs:
         target: "/home/ubuntu/tabbit/build/libs/"
         debug: true 
 
+    # 원격 서버의 파일 목록 확인
+    - name: List remote directory
+      uses: appleboy/ssh-action@v0.1.1
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          ls -l /home/ubuntu/tabbit/build/libs/
+
     # 애플리케이션 중지
     - name: Stop current application
       uses: appleboy/ssh-action@v0.1.1
@@ -64,7 +71,7 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
         script: |
-          tmux new-session -d -s stop_app 'pkill -f "java -jar" || true'
+          screen -dmS stop_app bash -c 'pkill -f "java -jar" || true'
 
     # 현재 JAR 파일 백업
     - name: Backup current JAR
@@ -74,7 +81,7 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
         script: |
-          tmux new-session -d -s backup_jar 'mv /home/ubuntu/tabbit/build/libs/app.jar /home/ubuntu/tabbit/build/libs/app_backup.jar || true'
+          screen -dmS backup_jar bash -c 'mv /home/ubuntu/tabbit/build/libs/app.jar /home/ubuntu/tabbit/build/libs/app_backup.jar || true'
 
     # 새 JAR 파일 배포
     - name: Deploy new JAR
@@ -84,7 +91,7 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
         script: |
-          tmux new-session -d -s deploy_jar 'mv /home/ubuntu/tabbit/build/libs/*.jar /home/ubuntu/tabbit/build/libs/app.jar'
+          screen -dmS deploy_jar bash -c 'mv /home/ubuntu/tabbit/build/libs/*.jar /home/ubuntu/tabbit/build/libs/app.jar'
 
     # 새로운 애플리케이션 시작
     - name: Start new application
@@ -94,7 +101,7 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
         script: |
-          tmux new-session -d -s start_app 'mkdir -p /home/ubuntu/tabbit/log && nohup java -jar /home/ubuntu/tabbit/build/libs/app.jar --spring.config.location=/home/ubuntu/tabbit/application.yaml > /home/ubuntu/tabbit/log/log.txt 2>&1 &'
+          screen -dmS start_app bash -c 'mkdir -p /home/ubuntu/tabbit/log && nohup java -jar /home/ubuntu/tabbit/build/libs/app.jar --spring.config.location=/home/ubuntu/tabbit/application.yaml > /home/ubuntu/tabbit/log/log.txt 2>&1 &'
 
     # 오래된 백업 파일 삭제
     - name: Cleanup old backups
@@ -104,4 +111,4 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
         script: |
-          tmux new-session -d -s cleanup 'find /home/ubuntu/tabbit/build/libs/ -name "app_backup.jar" -mtime +1 -exec rm {} \;'
+          screen -dmS cleanup bash -c 'find /home/ubuntu/tabbit/build/libs/ -name "app_backup.jar" -mtime +1 -exec rm {} \;'
