@@ -50,7 +50,8 @@ jobs:
         username: ${{ secrets.EC2_USER }} #ec2 서버 유저
         key: ${{ secrets.EC2_KEY }} #ec2 서버 ssh 키
         source: "build/libs/*.jar"
-        target: "~/tabbit/"
+        target: "/home/ubuntu/tabbit/"
+        debug: true 
         
     # ssh를 통해 원격 서버에서 명령어 실행
     - name: Execute remote command via SSH 
