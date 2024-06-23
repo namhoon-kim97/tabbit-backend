@@ -36,6 +36,7 @@ public class RestaurantService {
     private final StampRepository stampRepository;
     private final CategoryRepository categoryRepository;
     private final WaitingRepository waitingRepository;
+    private final FileService fileService;
 
     @Transactional(readOnly = true)
     public RestaurantResponseListDto getAllRestaurant(String username) {
@@ -65,6 +66,11 @@ public class RestaurantService {
         Category category = categoryRepository.findByCategoryCd(requestDto.getCategoryCd())
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_CATEGORY_NOT_FOUND));
 
+//        String fileName = fileService.storeFile(requestDto.getFile());
+//        if (fileName == null) {
+//            throw new InvalidRequestException(ResponseStatus.FAIL_FILE_NOT_SAVE);
+//        }
+
         Address address = new Address(
                 requestDto.getSido(),
                 requestDto.getSigungu(),
@@ -86,6 +92,7 @@ public class RestaurantService {
                 restaurantDetail,
                 owner,
                 requestDto.getPlaceName(),
+//                fileName,
                 category,
                 address,
                 requestDto.getLatitude(),
