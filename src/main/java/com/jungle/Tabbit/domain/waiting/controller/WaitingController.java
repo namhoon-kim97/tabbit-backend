@@ -52,4 +52,10 @@ public class WaitingController {
         waitingService.requestEntrance(restaurantId, userDetails.getUsername());
         return CommonResponse.success(ResponseStatus.SUCCESS_UPDATE);
     }
+
+    @PutMapping("/{restaurantId}/no-show")
+    public CommonResponse<?> noShowWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId) {
+        waitingService.noShowWaiting(restaurantId, userDetails.getUsername());
+        return CommonResponse.success(ResponseStatus.SUCCESS_UPDATE);
+    }
 }
