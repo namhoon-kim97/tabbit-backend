@@ -1,5 +1,6 @@
 package com.jungle.Tabbit.domain.waiting.controller;
 
+import com.jungle.Tabbit.domain.waiting.dto.OwnerWaitingListResponseDto;
 import com.jungle.Tabbit.domain.waiting.dto.WaitingListResponseDto;
 import com.jungle.Tabbit.domain.waiting.dto.WaitingRequestCreateDto;
 import com.jungle.Tabbit.domain.waiting.dto.WaitingResponseDto;
@@ -57,5 +58,11 @@ public class WaitingController {
     public CommonResponse<?> noShowWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId) {
         waitingService.noShowWaiting(restaurantId, userDetails.getUsername());
         return CommonResponse.success(ResponseStatus.SUCCESS_UPDATE);
+    }
+
+    @GetMapping("/{restaurantId}/owner-list")
+    public CommonResponse<?> getOwnerWaitingList(@PathVariable Long restaurantId) {
+        OwnerWaitingListResponseDto responseDto = waitingService.getOwnerWaitingList(restaurantId);
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK, responseDto);
     }
 }

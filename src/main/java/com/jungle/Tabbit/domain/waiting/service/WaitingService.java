@@ -8,6 +8,7 @@ import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
 import com.jungle.Tabbit.domain.restaurant.repository.RestaurantRepository;
 import com.jungle.Tabbit.domain.stampBadge.entity.MemberStamp;
 import com.jungle.Tabbit.domain.stampBadge.repository.StampRepository;
+import com.jungle.Tabbit.domain.waiting.dto.OwnerWaitingListResponseDto;
 import com.jungle.Tabbit.domain.waiting.dto.WaitingListResponseDto;
 import com.jungle.Tabbit.domain.waiting.dto.WaitingRequestCreateDto;
 import com.jungle.Tabbit.domain.waiting.dto.WaitingResponseDto;
@@ -121,6 +122,23 @@ public class WaitingService {
         Waiting waiting = getWaitingByMemberAndRestaurant(member, restaurant);
 
         waiting.updateStatus(WaitingStatus.STATUS_NOSHOW);
+    }
+
+    @Transactional(readOnly = true)
+    public OwnerWaitingListResponseDto getOwnerWaitingList(Long restaurantId) {
+        Restaurant restaurant = getRestaurantById(restaurantId);
+        List<Waiting> calledWaitingList = waitingRepository.findByRestaurantAndWaitingStatus(restaurant, WaitingStatus.STATUS_CALLED);
+        List<Waiting> waitingList = waitingRepository.findByRestaurantAndWaitingStatus(restaurant, WaitingStatus.STATUS_WAITING);
+
+        List<WaitingResponseDto> calledWaitingDtos = calledWaitingList.stream()
+                .map(waiting -> WaitingResponseDto.of(waiting, 0L, getCurrentWaitingPosition(waiting)))
+                .collect(Collectors.toList());
+
+        List<WaitingResponseDto> waitingDtos = waitingList.stream()
+                .map(waiting -> WaitingResponseDto.of(waiting, calculateEstimatedWaitTime(getCurrentWaitingPosition(waiting), restaurant.getEstimatedTimePerTeam()), getCurrentWaitingPosition(waiting)))
+                .collect(Collectors.toList());
+
+        return new OwnerWaitingListResponseDto(calledWaitingDtos, waitingDtos);
     }
 
 
