@@ -93,7 +93,6 @@ public class WaitingService {
         Waiting waiting = getWaitingByMemberAndRestaurant(member, restaurant);
 
         waiting.updateStatus(WaitingStatus.STATUS_CANCELLED);
-        waitingRepository.save(waiting);
     }
 
     @Transactional
@@ -104,8 +103,6 @@ public class WaitingService {
 
         waiting.updateStatus(WaitingStatus.STATUS_SEATED);
         stampRepository.save(new MemberStamp(member, restaurant));
-
-        waitingRepository.save(waiting);
     }
 
     @Transactional
@@ -115,7 +112,6 @@ public class WaitingService {
         Waiting waiting = getWaitingByMemberAndRestaurant(member, restaurant);
 
         waiting.updateStatus(WaitingStatus.STATUS_CALLED);
-        waitingRepository.save(waiting);
     }
 
 
