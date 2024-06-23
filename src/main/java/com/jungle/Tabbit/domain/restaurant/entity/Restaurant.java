@@ -30,6 +30,9 @@ public class Restaurant extends Timestamped {
     @Column(name = "name", nullable = false, length = 255)
     private String name;
 
+    @Column(name = "image_url", length = 255)
+    private String imageUrl;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_cd", nullable = false)
     private Category category;
@@ -48,10 +51,12 @@ public class Restaurant extends Timestamped {
     @ColumnDefault("10")
     private Long estimatedTimePerTeam = 10L;
 
-    public Restaurant(RestaurantDetail restaurantDetail, Member member, String name, Category category, Address address, BigDecimal latitude, BigDecimal longitude, Long estimatedTimePerTeam) {
+    public Restaurant(RestaurantDetail restaurantDetail, Member member, String name, Category category,
+                      Address address, BigDecimal latitude, BigDecimal longitude, Long estimatedTimePerTeam) {
         this.restaurantDetail = restaurantDetail;
         this.member = member;
         this.name = name;
+//        this.imageUrl = imageUrl;
         this.category = category;
         this.address = address;
         this.latitude = latitude;
