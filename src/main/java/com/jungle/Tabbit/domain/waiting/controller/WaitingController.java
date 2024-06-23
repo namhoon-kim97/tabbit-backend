@@ -1,13 +1,12 @@
 package com.jungle.Tabbit.domain.waiting.controller;
 
-import com.jungle.Tabbit.domain.waiting.dto.WaitingListResponseDto;
-import com.jungle.Tabbit.domain.waiting.dto.WaitingRequestCreateDto;
-import com.jungle.Tabbit.domain.waiting.dto.WaitingResponseDto;
+import com.jungle.Tabbit.domain.waiting.dto.*;
 import com.jungle.Tabbit.domain.waiting.service.WaitingService;
 import com.jungle.Tabbit.global.config.security.CustomUserDetails;
 import com.jungle.Tabbit.global.model.CommonResponse;
 import com.jungle.Tabbit.global.model.ResponseStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,20 +41,30 @@ public class WaitingController {
     }
 
     @PutMapping("/{restaurantId}/confirm")
-    public CommonResponse<?> confirmWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId) {
-        waitingService.confirmWaiting(restaurantId, userDetails.getUsername());
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    public CommonResponse<?> confirmWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId, @RequestBody WaitingRequestUpdateDto requestDto) {
+        waitingService.confirmWaiting(restaurantId, userDetails.getUsername(), requestDto.getWaitingNumber());
         return CommonResponse.success(ResponseStatus.SUCCESS_UPDATE);
     }
 
-    @PutMapping("/{restaurantId}/request-entrance")
-    public CommonResponse<?> requestEntrance(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId) {
-        waitingService.requestEntrance(restaurantId, userDetails.getUsername());
+    @PutMapping("/{restaurantId}/call")
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    public CommonResponse<?> callWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId, @RequestBody WaitingRequestUpdateDto requestDto) {
+        waitingService.callWaiting(restaurantId, userDetails.getUsername(), requestDto.getWaitingNumber());
         return CommonResponse.success(ResponseStatus.SUCCESS_UPDATE);
     }
 
     @PutMapping("/{restaurantId}/no-show")
-    public CommonResponse<?> noShowWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId) {
-        waitingService.noShowWaiting(restaurantId, userDetails.getUsername());
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    public CommonResponse<?> noShowWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId, @RequestBody WaitingRequestUpdateDto requestDto) {
+        waitingService.noShowWaiting(restaurantId, userDetails.getUsername(), requestDto.getWaitingNumber());
         return CommonResponse.success(ResponseStatus.SUCCESS_UPDATE);
+    }
+
+    @GetMapping("/{restaurantId}/owner-list")
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    public CommonResponse<?> getOwnerWaitingList(@PathVariable Long restaurantId) {
+        OwnerWaitingListResponseDto responseDto = waitingService.getOwnerWaitingList(restaurantId);
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK, responseDto);
     }
 }
