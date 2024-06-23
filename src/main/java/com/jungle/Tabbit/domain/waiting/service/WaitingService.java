@@ -90,7 +90,7 @@ public class WaitingService {
         Restaurant restaurant = getRestaurantById(restaurantId);
         Waiting waiting = getWaitingByMemberAndRestaurant(member, restaurant);
 
-        waiting.updateStatus(WaitingStatus.STATUS_CANCELLED, -1);
+        waiting.updateStatus(WaitingStatus.STATUS_CANCELLED);
     }
 
     @Transactional
@@ -102,7 +102,7 @@ public class WaitingService {
 
         Waiting waiting = getWaitingByNumberAndRestaurant(waitingNumber, restaurant, WaitingStatus.STATUS_CALLED);
 
-        waiting.updateStatus(WaitingStatus.STATUS_SEATED, -1);
+        waiting.updateStatus(WaitingStatus.STATUS_SEATED);
         stampRepository.save(new MemberStamp(waiting.getMember(), restaurant));
     }
 
@@ -115,7 +115,7 @@ public class WaitingService {
 
         Waiting waiting = getWaitingByNumberAndRestaurant(waitingNumber, restaurant, WaitingStatus.STATUS_WAITING);
 
-        waiting.updateStatus(WaitingStatus.STATUS_CALLED, waitingNumber);
+        waiting.updateStatus(WaitingStatus.STATUS_CALLED);
     }
 
     @Transactional
@@ -127,7 +127,7 @@ public class WaitingService {
 
         Waiting waiting = getWaitingByNumberAndRestaurant(waitingNumber, restaurant, WaitingStatus.STATUS_WAITING);
 
-        waiting.updateStatus(WaitingStatus.STATUS_NOSHOW, -1);
+        waiting.updateStatus(WaitingStatus.STATUS_NOSHOW);
     }
 
     @Transactional(readOnly = true)
