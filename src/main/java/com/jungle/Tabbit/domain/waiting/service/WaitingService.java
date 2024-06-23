@@ -108,6 +108,16 @@ public class WaitingService {
         waitingRepository.save(waiting);
     }
 
+    @Transactional
+    public void requestEntrance(Long restaurantId, String username) {
+        Member member = getMemberByUsername(username);
+        Restaurant restaurant = getRestaurantById(restaurantId);
+        Waiting waiting = getWaitingByMemberAndRestaurant(member, restaurant);
+
+        waiting.updateStatus(WaitingStatus.STATUS_CALLED);
+        waitingRepository.save(waiting);
+    }
+
 
     private Member getMemberByUsername(String username) {
         return memberRepository.findMemberByUsername(username)
