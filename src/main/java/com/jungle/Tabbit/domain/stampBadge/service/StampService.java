@@ -42,6 +42,7 @@ public class StampService {
         Map<String, List<Restaurant>> restaurantsBySido = restaurantRepository.findAllWithAddress().stream()
                 .collect(Collectors.groupingBy(restaurant -> restaurant.getAddress().getSido()));
 
+        // Todo: 추후 로직 개선
         for (String sido : sidos) {
             List<RestaurantResponseDto> restaurantResponseList = restaurantsBySido.getOrDefault(sido, Collections.emptyList()).stream()
                     .map(restaurant -> RestaurantResponseDto.of(restaurant, stampedRestaurantIds.contains(restaurant.getRestaurantId())))
