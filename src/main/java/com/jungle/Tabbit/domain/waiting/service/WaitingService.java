@@ -114,6 +114,15 @@ public class WaitingService {
         waiting.updateStatus(WaitingStatus.STATUS_CALLED);
     }
 
+    @Transactional
+    public void noShowWaiting(Long restaurantId, String username) {
+        Member member = getMemberByUsername(username);
+        Restaurant restaurant = getRestaurantById(restaurantId);
+        Waiting waiting = getWaitingByMemberAndRestaurant(member, restaurant);
+
+        waiting.updateStatus(WaitingStatus.STATUS_NOSHOW);
+    }
+
 
     private Member getMemberByUsername(String username) {
         return memberRepository.findMemberByUsername(username)
