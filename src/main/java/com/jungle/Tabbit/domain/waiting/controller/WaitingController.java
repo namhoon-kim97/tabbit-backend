@@ -41,7 +41,7 @@ public class WaitingController {
         return CommonResponse.success(ResponseStatus.SUCCESS_DELETE);
     }
 
-    @PutMapping("/confirm/{restaurantId}")
+    @PutMapping("/{restaurantId}/confirm")
     public CommonResponse<?> confirmWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId) {
         waitingService.confirmWaiting(restaurantId, userDetails.getUsername());
         return CommonResponse.success(ResponseStatus.SUCCESS_UPDATE);
