@@ -6,6 +6,8 @@ import com.jungle.Tabbit.domain.nfc.entity.Nfc;
 import com.jungle.Tabbit.domain.nfc.repository.NfcRepository;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
 import com.jungle.Tabbit.domain.restaurant.repository.RestaurantRepository;
+import com.jungle.Tabbit.domain.stampBadge.entity.MemberStamp;
+import com.jungle.Tabbit.domain.stampBadge.repository.StampRepository;
 import com.jungle.Tabbit.domain.waiting.dto.WaitingListResponseDto;
 import com.jungle.Tabbit.domain.waiting.dto.WaitingRequestCreateDto;
 import com.jungle.Tabbit.domain.waiting.dto.WaitingResponseDto;
@@ -33,6 +35,7 @@ public class WaitingService {
     private final NfcRepository nfcRepository;
     private final MemberRepository memberRepository;
     private final RestaurantRepository restaurantRepository;
+    private final StampRepository stampRepository;
     private static final ConcurrentHashMap<Long, AtomicLong> storeQueueNumbers = new ConcurrentHashMap<>();  // 가게별 전역 대기번호 변수
 
     @Transactional
@@ -92,6 +95,19 @@ public class WaitingService {
         waiting.updateStatus(WaitingStatus.STATUS_CANCELLED);
         waitingRepository.save(waiting);
     }
+
+    @Transactional
+    public void confirmWaiting(Long restaurantId, String username) {
+        Member member = getMemberByUsername(username);
+        Restaurant restaurant = getRestaurantById(restaurantId);
+        Waiting waiting = getWaitingByMemberAndRestaurant(member, restaurant);
+
+        waiting.updateStatus(WaitingStatus.STATUS_SEATED);
+        stampRepository.save(new MemberStamp(member, restaurant));
+
+        waitingRepository.save(waiting);
+    }
+
 
     private Member getMemberByUsername(String username) {
         return memberRepository.findMemberByUsername(username)

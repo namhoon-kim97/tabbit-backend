@@ -8,5 +8,7 @@ import org.springframework.data.repository.Repository;
 import java.util.Optional;
 
 public interface StampRepository extends Repository<MemberStamp, Long> {
+    void save(MemberStamp memberStamp);
+
     Optional<MemberStamp> findByMemberAndRestaurant(Member member, Restaurant restaurant);
 }
