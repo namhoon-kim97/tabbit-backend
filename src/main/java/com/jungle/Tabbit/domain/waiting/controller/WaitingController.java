@@ -40,4 +40,16 @@ public class WaitingController {
         waitingService.cancelWaiting(restaurantId, userDetails.getUsername());
         return CommonResponse.success(ResponseStatus.SUCCESS_DELETE);
     }
+
+    @PutMapping("/{restaurantId}/confirm")
+    public CommonResponse<?> confirmWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId) {
+        waitingService.confirmWaiting(restaurantId, userDetails.getUsername());
+        return CommonResponse.success(ResponseStatus.SUCCESS_UPDATE);
+    }
+
+    @PutMapping("/{restaurantId}/request-entrance")
+    public CommonResponse<?> requestEntrance(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId) {
+        waitingService.requestEntrance(restaurantId, userDetails.getUsername());
+        return CommonResponse.success(ResponseStatus.SUCCESS_UPDATE);
+    }
 }
