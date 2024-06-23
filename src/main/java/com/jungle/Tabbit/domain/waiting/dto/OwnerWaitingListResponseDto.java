@@ -8,10 +8,10 @@ import java.util.List;
 @Getter
 @Builder
 public class OwnerWaitingListResponseDto {
-    private List<WaitingResponseDto> calledWaitingList;
-    private List<WaitingResponseDto> waitingList;
+    private List<WaitingUpdateResponseDto> calledWaitingList;
+    private List<WaitingUpdateResponseDto> waitingList;
 
-    public OwnerWaitingListResponseDto(List<WaitingResponseDto> calledWaitingList, List<WaitingResponseDto> waitingList) {
+    public OwnerWaitingListResponseDto(List<WaitingUpdateResponseDto> calledWaitingList, List<WaitingUpdateResponseDto> waitingList) {
         this.calledWaitingList = calledWaitingList;
         this.waitingList = waitingList;
     }

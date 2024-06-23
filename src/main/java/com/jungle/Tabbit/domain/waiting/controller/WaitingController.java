@@ -1,9 +1,6 @@
 package com.jungle.Tabbit.domain.waiting.controller;
 
-import com.jungle.Tabbit.domain.waiting.dto.OwnerWaitingListResponseDto;
-import com.jungle.Tabbit.domain.waiting.dto.WaitingListResponseDto;
-import com.jungle.Tabbit.domain.waiting.dto.WaitingRequestCreateDto;
-import com.jungle.Tabbit.domain.waiting.dto.WaitingResponseDto;
+import com.jungle.Tabbit.domain.waiting.dto.*;
 import com.jungle.Tabbit.domain.waiting.service.WaitingService;
 import com.jungle.Tabbit.global.config.security.CustomUserDetails;
 import com.jungle.Tabbit.global.model.CommonResponse;
@@ -43,20 +40,20 @@ public class WaitingController {
     }
 
     @PutMapping("/{restaurantId}/confirm")
-    public CommonResponse<?> confirmWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId) {
-        waitingService.confirmWaiting(restaurantId, userDetails.getUsername());
+    public CommonResponse<?> confirmWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId, @RequestBody WaitingRequestUpdateDto requestDto) {
+        waitingService.confirmWaiting(restaurantId, userDetails.getUsername(), requestDto.getWaitingNumber());
         return CommonResponse.success(ResponseStatus.SUCCESS_UPDATE);
     }
 
     @PutMapping("/{restaurantId}/call")
-    public CommonResponse<?> callWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId) {
-        waitingService.callWaiting(restaurantId, userDetails.getUsername());
+    public CommonResponse<?> callWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId, @RequestBody WaitingRequestUpdateDto requestDto) {
+        waitingService.callWaiting(restaurantId, userDetails.getUsername(), requestDto.getWaitingNumber());
         return CommonResponse.success(ResponseStatus.SUCCESS_UPDATE);
     }
 
     @PutMapping("/{restaurantId}/no-show")
-    public CommonResponse<?> noShowWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId) {
-        waitingService.noShowWaiting(restaurantId, userDetails.getUsername());
+    public CommonResponse<?> noShowWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId, @RequestBody WaitingRequestUpdateDto requestDto) {
+        waitingService.noShowWaiting(restaurantId, userDetails.getUsername(), requestDto.getWaitingNumber());
         return CommonResponse.success(ResponseStatus.SUCCESS_UPDATE);
     }
 

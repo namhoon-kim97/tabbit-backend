@@ -42,7 +42,8 @@ public class Waiting extends Timestamped {
         this.member = member;
     }
 
-    public void updateStatus(WaitingStatus newStatus) {
+    public void updateStatus(WaitingStatus newStatus, int waitingNumber) {
         this.waitingStatus = newStatus;
+        this.waitingNumber = waitingNumber;
     }
 }
