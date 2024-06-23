@@ -47,9 +47,9 @@ public class WaitingController {
         return CommonResponse.success(ResponseStatus.SUCCESS_UPDATE);
     }
 
-    @PutMapping("/{restaurantId}/request-entrance")
-    public CommonResponse<?> requestEntrance(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId) {
-        waitingService.requestEntrance(restaurantId, userDetails.getUsername());
+    @PutMapping("/{restaurantId}/call")
+    public CommonResponse<?> callWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId) {
+        waitingService.callWaiting(restaurantId, userDetails.getUsername());
         return CommonResponse.success(ResponseStatus.SUCCESS_UPDATE);
     }
 

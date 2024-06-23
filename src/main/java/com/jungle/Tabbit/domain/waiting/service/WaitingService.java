@@ -106,7 +106,7 @@ public class WaitingService {
     }
 
     @Transactional
-    public void requestEntrance(Long restaurantId, String username) {
+    public void callWaiting(Long restaurantId, String username) {
         Member member = getMemberByUsername(username);
         Restaurant restaurant = getRestaurantById(restaurantId);
         Waiting waiting = getWaitingByMemberAndRestaurant(member, restaurant);
