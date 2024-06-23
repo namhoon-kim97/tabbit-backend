@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class RestaurantCreateRequestDto {
     private String placeName;  // 업체명
+    //    private MultipartFile file; // 맛집 이미지 파일
     private String categoryCd;  // 카테고리 코드
     private String addressName; // 지번 주소
     private String roadAddressName; // 도로명 주소

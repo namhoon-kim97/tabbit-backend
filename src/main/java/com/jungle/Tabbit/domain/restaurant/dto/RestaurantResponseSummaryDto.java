@@ -12,6 +12,7 @@ public class RestaurantResponseSummaryDto {
     private String name; // 가게 이름
     private String categoryName; // 카테고리 이름
     private String summaryAddress; // 요약 주소
+    //    private String imageUrl; // 맛집 이미지 경로
     private Boolean earnedStamp; // 스탬프 획득 유무
     private Long currentWaitingNumber; // 현재 대기팀 수
 
@@ -21,6 +22,7 @@ public class RestaurantResponseSummaryDto {
                 .name(restaurant.getName())
                 .categoryName(restaurant.getCategory().getCategoryName())
                 .summaryAddress(restaurant.getAddress().getSido() + " " + restaurant.getAddress().getSigungu() + " " + restaurant.getAddress().getEupmyeondong())
+//                .imageUrl(restaurant.getImageUrl())
                 .earnedStamp(earnedStamp)
                 .currentWaitingNumber(currentWaitingNumber)
                 .build();

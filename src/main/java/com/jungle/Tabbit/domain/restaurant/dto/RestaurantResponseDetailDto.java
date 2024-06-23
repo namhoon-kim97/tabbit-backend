@@ -10,6 +10,7 @@ public class RestaurantResponseDetailDto {
 
     private Long restaurantId;
     private String name; // 가게 이름
+    //    private String imageUrl; // 맛집 이미지 경로
     private String categoryName; // 카테고리 이름
     private String roadAddress; // 도로명 주소
     private String detailAddress; // 상세 주소
@@ -24,6 +25,7 @@ public class RestaurantResponseDetailDto {
         return RestaurantResponseDetailDto.builder()
                 .restaurantId(restaurant.getRestaurantId())
                 .name(restaurant.getName())
+//                .imageUrl(restaurant.getImageUrl())
                 .categoryName(restaurant.getCategory().getCategoryName())
                 .roadAddress(restaurant.getAddress().getRoadAddress())
                 .detailAddress(restaurant.getAddress().getDetailAddress())
