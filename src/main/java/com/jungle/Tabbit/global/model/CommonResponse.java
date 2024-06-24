@@ -41,7 +41,7 @@ public class CommonResponse<T> {
                 .build();
     }
 
-    
+
     public static <T> CommonResponse<T> fail(ResponseStatus responseStatus) {
         return CommonResponse.<T>builder()
                 .success(false)
@@ -60,4 +60,13 @@ public class CommonResponse<T> {
                 .build();
     }
 
+    public static <T> CommonResponse<T> fail(HttpStatus httpStatus, ResponseErrorFormat errorFormat) {
+        assert errorFormat != null;
+        return CommonResponse.<T>builder()
+                .success(false)
+                .data(Optional.ofNullable((T) errorFormat))
+                .message(errorFormat.getMessage())
+                .statusCode(httpStatus)
+                .build();
+    }
 }
