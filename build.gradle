@@ -41,7 +41,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
 	//fcm
-	implementation 'com.google.firebase:firebase-messaging:23.0.5'
+	implementation 'com.google.firebase:firebase-admin:9.2.0'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
 	//swagger
 	implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.2.0'
