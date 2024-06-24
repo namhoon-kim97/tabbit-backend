@@ -32,16 +32,20 @@ public class Member {
     private MemberRole memberRole;
 
     @Column(nullable = false, name = "badge_id")
-    private Long BadgeId;
+    private Long badgeId;
 
     @OneToMany(mappedBy = "member")
     private List<MemberStamp> memberStampList = new ArrayList<>();
 
-    public Member(String nickname, String password, String username, MemberRole memberRole, Long badgeId) {
+    @Column(nullable = false, name = "fcm_token")
+    private String fcmToken;
+
+    public Member(String nickname, String password, String username, MemberRole memberRole, Long badgeId, String fcmToken) {
         this.nickname = nickname;
         this.password = password;
         this.username = username;
         this.memberRole = memberRole;
-        BadgeId = badgeId;
+        this.badgeId = badgeId;
+        this.fcmToken = fcmToken;
     }
 }
