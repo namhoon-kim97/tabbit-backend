@@ -55,6 +55,20 @@ public class RestaurantService {
         return RestaurantResponseListDto.builder().restaurantResponseList(restaurantResponseList).build();
     }
 
+    @Transactional(readOnly = true)
+    public RestaurantResponseListDto getAllOwnerRestaurant(String username) {
+        Member owner = memberRepository.findMemberByUsername(username)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
+
+        List<Restaurant> restaurantList = restaurantRepository.findAllByMember(owner);
+
+        List<RestaurantResponseDto> restaurantResponseList = restaurantList.stream()
+                .map(RestaurantResponseDto::ofWithoutStamp)
+                .collect(Collectors.toList());
+
+        return RestaurantResponseListDto.builder().restaurantResponseList(restaurantResponseList).build();
+    }
+
     public void createRestaurant(RestaurantCreateRequestDto requestDto, String username) {
         Member owner = memberRepository.findMemberByUsername(username)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));

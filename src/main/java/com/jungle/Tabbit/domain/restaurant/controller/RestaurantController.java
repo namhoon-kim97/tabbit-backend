@@ -39,6 +39,16 @@ public class RestaurantController {
         return CommonResponse.success(ResponseStatus.SUCCESS_OK, responseDto);
     }
 
+    @GetMapping("/owner")
+    @Operation(summary = "점주 맛집 조회", description = "점주 소유의 맛집의 정보를 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = RestaurantResponseListDto.class)))
+    })
+    public CommonResponse<?> getOwnerRestaurantAll(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        RestaurantResponseListDto responseDto = restaurantService.getAllOwnerRestaurant(userDetails.getUsername());
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK, responseDto);
+    }
+
     @PostMapping
     @Operation(summary = "맛집 생성", description = "새로운 맛집을 생성합니다.")
     @ApiResponses(value = {

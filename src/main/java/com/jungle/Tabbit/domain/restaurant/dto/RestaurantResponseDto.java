@@ -36,4 +36,11 @@ public class RestaurantResponseDto {
                 .earnedStamp(earnedStamp)
                 .build();
     }
+
+    public static RestaurantResponseDto ofWithoutStamp(Restaurant restaurant) {
+        return RestaurantResponseDto.builder()
+                .restaurantId(restaurant.getRestaurantId())
+                .name(restaurant.getName())
+                .build();
+    }
 }
