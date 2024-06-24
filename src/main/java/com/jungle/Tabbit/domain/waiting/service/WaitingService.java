@@ -4,6 +4,7 @@ import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
 import com.jungle.Tabbit.domain.nfc.entity.Nfc;
 import com.jungle.Tabbit.domain.nfc.repository.NfcRepository;
+import com.jungle.Tabbit.domain.restaurant.dto.RestaurantResponseSummaryDto;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
 import com.jungle.Tabbit.domain.restaurant.repository.RestaurantRepository;
 import com.jungle.Tabbit.domain.stampBadge.entity.MemberStamp;
@@ -146,6 +147,16 @@ public class WaitingService {
 
         return new OwnerWaitingListResponseDto(calledWaitingDtos, waitingDtos);
     }
+
+    @Transactional(readOnly = true)
+    public RestaurantResponseSummaryDto getTagInfo(WaitingNfcRequestDto requestDto) {
+        Nfc nfc = getNfcById(requestDto.getNfcId());
+        Restaurant restaurant = getRestaurantById(nfc.getRestaurant().getRestaurantId());
+        Long currentWaitingNumber = waitingRepository.countByRestaurantAndWaitingStatus(restaurant, WaitingStatus.STATUS_WAITING);
+
+        return RestaurantResponseSummaryDto.of(restaurant, false, currentWaitingNumber, restaurant.getEstimatedTimePerTeam() * currentWaitingNumber);
+    }
+
 
     private Member getMemberByUsername(String username) {
         return memberRepository.findMemberByUsername(username)

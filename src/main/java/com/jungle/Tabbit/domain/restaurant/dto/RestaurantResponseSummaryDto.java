@@ -28,7 +28,10 @@ public class RestaurantResponseSummaryDto {
     @Schema(description = "현재 대기팀 수", example = "5")
     private Long currentWaitingNumber; // 현재 대기팀 수
 
-    public static RestaurantResponseSummaryDto of(Restaurant restaurant, Boolean earnedStamp, Long currentWaitingNumber) {
+    @Schema(description = "예상 대기시간", example = "10")
+    private Long estimatedWaitTime; // 예상 대기시간
+
+    public static RestaurantResponseSummaryDto of(Restaurant restaurant, Boolean earnedStamp, Long currentWaitingNumber, Long estimatedWaitTime) {
         return RestaurantResponseSummaryDto.builder()
                 .restaurantId(restaurant.getRestaurantId())
                 .name(restaurant.getName())
@@ -36,6 +39,7 @@ public class RestaurantResponseSummaryDto {
                 .summaryAddress(restaurant.getAddress().getSido() + " " + restaurant.getAddress().getSigungu() + " " + restaurant.getAddress().getEupmyeondong())
                 .earnedStamp(earnedStamp)
                 .currentWaitingNumber(currentWaitingNumber)
+                .estimatedWaitTime(estimatedWaitTime)
                 .build();
     }
 }
