@@ -1,5 +1,7 @@
 package com.jungle.Tabbit.domain.notification.service;
 
+import com.jungle.Tabbit.domain.fcm.dto.FcmRequestDto;
+import com.jungle.Tabbit.domain.fcm.service.FcmService;
 import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
 import com.jungle.Tabbit.domain.member.service.MemberService;
@@ -14,25 +16,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
-    private final SimpMessagingTemplate messagingTemplate;
+
     private final MemberRepository memberRepository;
     private final NotificationRepository notificationRepository;
+    private final FcmService fcmService;
 
-    public void sendNotification(NotificationRequestCreateDto request,String username) {
-        Member member = getMemberByUsername(username);
+    public void sendNotification(NotificationRequestCreateDto requestDto)  {
+        Member member = getMemberById(requestDto.getMemberId());
 
-        // 비즈니스 로직 수행 및 알림 생성
-        Notification notification = new Notification(request.getTitle(), request.getMessage(), member);
-        notificationRepository.save(notification);
+        FcmRequestDto fcmRequestDto = new FcmRequestDto(member.getFcmToken(), requestDto.getTitle(), requestDto.getMessage());
 
-        // 특정 사용자의 구독 경로로 알림 전송
-        messagingTemplate.convertAndSend("/topic/notifications/" + request.getMemberId(), NotificationResponseDto.of(notification));
+        fcmService.sendMessageTo(fcmRequestDto);
+
+        notificationRepository.save(new Notification(requestDto.getTitle(), requestDto.getMessage(), member));
+
     }
-    private Member getMemberByUsername(String username) {
-        return memberRepository.findMemberByUsername(username)
+
+    private Member getMemberById(Long memberId) {
+        return memberRepository.findMemberByMemberId(memberId)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
     }
 
