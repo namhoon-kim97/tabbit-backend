@@ -1,7 +1,6 @@
 package com.jungle.Tabbit.domain.waiting.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
 import com.jungle.Tabbit.domain.waiting.entity.Waiting;
 import com.jungle.Tabbit.domain.waiting.entity.WaitingStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,7 +14,7 @@ import java.time.LocalDateTime;
 @Schema(description = "웨이팅 응답 DTO")
 public class WaitingResponseDto {
     @Schema(description = "맛집 ID", example = "1")
-    private Restaurant restaurant;
+    private Long restaurantId;
 
     @Schema(description = "웨이팅 ID", example = "1")
     private Long waitingId;
@@ -45,7 +44,7 @@ public class WaitingResponseDto {
 
     public static WaitingResponseDto of(Waiting waiting, Long estimatedWaitTime, int currentWaitingPosition) {
         return WaitingResponseDto.builder()
-                .restaurant(waiting.getRestaurant())
+                .restaurantId(waiting.getRestaurant().getRestaurantId())
                 .waitingId(waiting.getWaitingId())
                 .peopleNumber(waiting.getPeopleNumber())
                 .waitingNumber(waiting.getWaitingNumber())
