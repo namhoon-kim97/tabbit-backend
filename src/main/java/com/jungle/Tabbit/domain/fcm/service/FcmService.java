@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.jungle.Tabbit.domain.fcm.dto.FcmRequestDto;
 import com.jungle.Tabbit.domain.fcm.dto.FcmResponseDto;
+import com.jungle.Tabbit.global.exception.NotFoundException;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
@@ -27,7 +29,7 @@ public class FcmService {
         this.webClient = webClientBuilder.baseUrl("https://fcm.googleapis.com/v1/projects/tabbit-c1857").build();
     }
 
-    public void sendMessageTo(FcmRequestDto fcmRequestDto) throws IOException {
+    public void sendMessageTo(FcmRequestDto fcmRequestDto) {
 
         String message = makeMessage(fcmRequestDto);
 
@@ -48,30 +50,41 @@ public class FcmService {
                 .block();
     }
 
-    private String getAccessToken() throws IOException {
-        String firebaseConfigPath = "firebase/tabbit-c1857-firebase-adminsdk-d0wb2-29074368c4.json";
+    private String getAccessToken() {
+        try {
+            String firebaseConfigPath = "firebase/tabbit-c1857-firebase-adminsdk-d0wb2-29074368c4.json";
 
-        GoogleCredentials googleCredentials = GoogleCredentials
-                .fromStream(new ClassPathResource(firebaseConfigPath).getInputStream())
-                .createScoped(List.of("https://www.googleapis.com/auth/cloud-platform"));
+            GoogleCredentials googleCredentials = GoogleCredentials
+                    .fromStream(new ClassPathResource(firebaseConfigPath).getInputStream())
+                    .createScoped(List.of("https://www.googleapis.com/auth/cloud-platform"));
 
-        googleCredentials.refreshIfExpired();
-        return googleCredentials.getAccessToken().getTokenValue();
+            googleCredentials.refreshIfExpired();
+            return googleCredentials.getAccessToken().getTokenValue();
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        }
+        return null;
     }
 
-    private String makeMessage(FcmRequestDto fcmRequestDto) throws JsonProcessingException {
+    private String makeMessage(FcmRequestDto fcmRequestDto)  {
+        try {ObjectMapper om = new ObjectMapper();
+            FcmResponseDto fcmResponseDto = FcmResponseDto.builder()
+                    .message(FcmResponseDto.Message.builder()
+                            .token(fcmRequestDto.getToken())
+                            .notification(FcmResponseDto.Notification.builder()
+                                    .title(fcmRequestDto.getTitle())
+                                    .body(fcmRequestDto.getBody())
+                                    .image(null)
+                                    .build()
+                            ).build()).validateOnly(false).build();
+            return om.writeValueAsString(fcmResponseDto);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            throw new NotFoundException(HttpResponseStatus.INTERNAL_SERVER_ERROR.toString());
 
-        ObjectMapper om = new ObjectMapper();
-        FcmResponseDto fcmResponseDto = FcmResponseDto.builder()
-                .message(FcmResponseDto.Message.builder()
-                        .token(fcmRequestDto.getToken())
-                        .notification(FcmResponseDto.Notification.builder()
-                                .title(fcmRequestDto.getTitle())
-                                .body(fcmRequestDto.getBody())
-                                .image(null)
-                                .build()
-                        ).build()).validateOnly(false).build();
+        }
 
-        return om.writeValueAsString(fcmResponseDto);
     }
 }
