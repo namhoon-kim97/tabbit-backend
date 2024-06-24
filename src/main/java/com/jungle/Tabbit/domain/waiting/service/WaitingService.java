@@ -151,10 +151,10 @@ public class WaitingService {
     @Transactional(readOnly = true)
     public RestaurantResponseSummaryDto getTagInfo(WaitingNfcRequestDto requestDto) {
         Nfc nfc = getNfcById(requestDto.getNfcId());
-        Restaurant restaurant = getRestaurantById(nfc.getRestaurant().getRestaurantId());
-        Long currentWaitingNumber = waitingRepository.countByRestaurantAndWaitingStatus(restaurant, WaitingStatus.STATUS_WAITING);
+        Restaurant restaurant = nfc.getRestaurant();
+        Long currentWaitingNumber = waitingRepository.countByRestaurantAndWaitingStatus(nfc.getRestaurant(), WaitingStatus.STATUS_WAITING);
 
-        return RestaurantResponseSummaryDto.of(restaurant, false, currentWaitingNumber, restaurant.getEstimatedTimePerTeam() * currentWaitingNumber);
+        return RestaurantResponseSummaryDto.of(restaurant, false, currentWaitingNumber, nfc.getRestaurant().getEstimatedTimePerTeam() * currentWaitingNumber);
     }
 
 
