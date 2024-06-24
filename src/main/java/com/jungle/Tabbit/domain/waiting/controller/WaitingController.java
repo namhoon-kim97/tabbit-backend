@@ -1,5 +1,6 @@
 package com.jungle.Tabbit.domain.waiting.controller;
 
+import com.jungle.Tabbit.domain.restaurant.dto.RestaurantResponseSummaryDto;
 import com.jungle.Tabbit.domain.waiting.dto.*;
 import com.jungle.Tabbit.domain.waiting.service.WaitingService;
 import com.jungle.Tabbit.global.config.security.CustomUserDetails;
@@ -101,6 +102,16 @@ public class WaitingController {
     })
     public CommonResponse<?> getOwnerWaitingList(@PathVariable @Parameter(description = "맛집 ID", required = true) Long restaurantId) {
         OwnerWaitingListResponseDto responseDto = waitingService.getOwnerWaitingList(restaurantId);
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK, responseDto);
+    }
+
+    @PostMapping("/nfc")
+    @Operation(summary = "가게 정보 조회", description = "nfc 태그 시 가게 정보를 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "정보 조회 성공", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = WaitingNfcRequestDto.class)))
+    })
+    public CommonResponse<?> getTagInfo(@RequestBody @Parameter(description = "요청 DTO", required = true) WaitingNfcRequestDto requestDto) {
+        RestaurantResponseSummaryDto responseDto = waitingService.getTagInfo(requestDto);
         return CommonResponse.success(ResponseStatus.SUCCESS_OK, responseDto);
     }
 }

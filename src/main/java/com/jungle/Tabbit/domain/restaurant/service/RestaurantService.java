@@ -120,7 +120,8 @@ public class RestaurantService {
 
         Long currentWaitingNumber = waitingRepository.countByRestaurantAndWaitingStatus(restaurant, WaitingStatus.STATUS_WAITING);
 
-        return RestaurantResponseSummaryDto.of(restaurant, earnedStamp, currentWaitingNumber);
+        return RestaurantResponseSummaryDto.of(restaurant, earnedStamp, currentWaitingNumber,
+                restaurant.getEstimatedTimePerTeam() * currentWaitingNumber);
     }
 
     @Transactional(readOnly = true)
