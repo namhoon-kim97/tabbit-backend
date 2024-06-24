@@ -6,9 +6,9 @@ import com.jungle.Tabbit.domain.nfc.entity.Nfc;
 import com.jungle.Tabbit.domain.nfc.repository.NfcRepository;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
 import com.jungle.Tabbit.domain.restaurant.repository.RestaurantRepository;
-import com.jungle.Tabbit.domain.waiting.dto.WaitingListResponseDto;
-import com.jungle.Tabbit.domain.waiting.dto.WaitingRequestCreateDto;
-import com.jungle.Tabbit.domain.waiting.dto.WaitingResponseDto;
+import com.jungle.Tabbit.domain.stampBadge.entity.MemberStamp;
+import com.jungle.Tabbit.domain.stampBadge.repository.StampRepository;
+import com.jungle.Tabbit.domain.waiting.dto.*;
 import com.jungle.Tabbit.domain.waiting.entity.Waiting;
 import com.jungle.Tabbit.domain.waiting.entity.WaitingStatus;
 import com.jungle.Tabbit.domain.waiting.repository.WaitingRepository;
@@ -33,6 +33,7 @@ public class WaitingService {
     private final NfcRepository nfcRepository;
     private final MemberRepository memberRepository;
     private final RestaurantRepository restaurantRepository;
+    private final StampRepository stampRepository;
     private static final ConcurrentHashMap<Long, AtomicLong> storeQueueNumbers = new ConcurrentHashMap<>();  // 가게별 전역 대기번호 변수
 
     @Transactional
@@ -90,7 +91,60 @@ public class WaitingService {
         Waiting waiting = getWaitingByMemberAndRestaurant(member, restaurant);
 
         waiting.updateStatus(WaitingStatus.STATUS_CANCELLED);
-        waitingRepository.save(waiting);
+    }
+
+    @Transactional
+    public void confirmWaiting(Long restaurantId, String username, int waitingNumber) {
+        Member owner = getMemberByUsername(username);
+        Restaurant restaurant = getRestaurantById(restaurantId);
+
+        validateRestaurantOwner(restaurant, owner);
+
+        Waiting waiting = getWaitingByNumberAndRestaurant(waitingNumber, restaurant, WaitingStatus.STATUS_CALLED);
+
+        waiting.updateStatus(WaitingStatus.STATUS_SEATED);
+        stampRepository.save(new MemberStamp(waiting.getMember(), restaurant));
+    }
+
+    @Transactional
+    public void callWaiting(Long restaurantId, String username, int waitingNumber) {
+        Member owner = getMemberByUsername(username);
+        Restaurant restaurant = getRestaurantById(restaurantId);
+
+        validateRestaurantOwner(restaurant, owner);
+
+        Waiting waiting = getWaitingByNumberAndRestaurant(waitingNumber, restaurant, WaitingStatus.STATUS_WAITING);
+
+        waiting.updateStatus(WaitingStatus.STATUS_CALLED);
+    }
+
+    @Transactional
+    public void noShowWaiting(Long restaurantId, String username, int waitingNumber) {
+        Member owner = getMemberByUsername(username);
+        Restaurant restaurant = getRestaurantById(restaurantId);
+
+        validateRestaurantOwner(restaurant, owner);
+
+        Waiting waiting = getWaitingByNumberAndRestaurant(waitingNumber, restaurant, WaitingStatus.STATUS_WAITING);
+
+        waiting.updateStatus(WaitingStatus.STATUS_NOSHOW);
+    }
+
+    @Transactional(readOnly = true)
+    public OwnerWaitingListResponseDto getOwnerWaitingList(Long restaurantId) {
+        Restaurant restaurant = getRestaurantById(restaurantId);
+        List<Waiting> calledWaitingList = waitingRepository.findByRestaurantAndWaitingStatus(restaurant, WaitingStatus.STATUS_CALLED);
+        List<Waiting> waitingList = waitingRepository.findByRestaurantAndWaitingStatus(restaurant, WaitingStatus.STATUS_WAITING);
+
+        List<WaitingUpdateResponseDto> calledWaitingDtos = calledWaitingList.stream()
+                .map(WaitingUpdateResponseDto::of)
+                .collect(Collectors.toList());
+
+        List<WaitingUpdateResponseDto> waitingDtos = waitingList.stream()
+                .map(WaitingUpdateResponseDto::of)
+                .collect(Collectors.toList());
+
+        return new OwnerWaitingListResponseDto(calledWaitingDtos, waitingDtos);
     }
 
     private Member getMemberByUsername(String username) {
@@ -113,10 +167,21 @@ public class WaitingService {
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_GET_CURRENT_WAIT_POSITION));
     }
 
+    private Waiting getWaitingByNumberAndRestaurant(int waitingNumber, Restaurant restaurant, WaitingStatus waitingStatus) {
+        return waitingRepository.findByRestaurantAndWaitingNumberAndWaitingStatus(restaurant, waitingNumber, waitingStatus)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_GET_CURRENT_WAIT_POSITION));
+    }
+
     private void validateDuplicateWaiting(Member member, Restaurant restaurant) {
         boolean alreadyWaiting = waitingRepository.existsByMemberAndRestaurantAndWaitingStatus(member, restaurant, WaitingStatus.STATUS_WAITING);
         if (alreadyWaiting) {
             throw new DuplicatedException(ResponseStatus.FAIL_MEMBER_WAITING_DUPLICATED);
+        }
+    }
+
+    private void validateRestaurantOwner(Restaurant restaurant, Member owner) {
+        if (!restaurant.getMember().equals(owner)) {
+            throw new BusinessLogicException(ResponseStatus.FAIL_NOT_OWNER);
         }
     }
 
