@@ -29,7 +29,6 @@ public class BadgeResponseDto {
                 .badgeId(badge.getBadgeId())
                 .name(badge.getName())
                 .description(badge.getDescription())
-                .imageUrl(badge.getImageUrl())
                 .earnedBadge(earnedBadge)
                 .build();
     }
