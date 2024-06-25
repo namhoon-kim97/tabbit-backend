@@ -7,19 +7,17 @@ import com.jungle.Tabbit.domain.fcm.dto.FcmRequestDto;
 import com.jungle.Tabbit.domain.fcm.dto.FcmResponseDto;
 import com.jungle.Tabbit.global.exception.NotFoundException;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.*;
-import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+@Slf4j
 @Service
 public class FcmService {
 
@@ -32,22 +30,25 @@ public class FcmService {
     public void sendMessageTo(FcmRequestDto fcmRequestDto) {
 
         String message = makeMessage(fcmRequestDto);
-
+        System.out.printf("------------message : %s", message); // 메시지 내용 로그 출력
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(getAccessToken());
 
         String API_URL = "https://fcm.googleapis.com/v1/projects/tabbit-c1857/messages:send";
-
-        webClient.post()
-                .uri(API_URL)
-                .headers(httpHeaders -> httpHeaders.addAll(headers))
-                .bodyValue(message)
-                .retrieve()
-                .toEntity(String.class)
-                .doOnSuccess(res -> System.out.println(res.getStatusCode()))
-                .doOnError(err -> System.err.println("Error sending FCM message: " + err.getMessage()))
-                .block();
+        try {
+            webClient.post()
+                    .uri(API_URL)
+                    .headers(httpHeaders -> httpHeaders.addAll(headers))
+                    .bodyValue(message)
+                    .retrieve()
+                    .toEntity(String.class)
+                    .doOnSuccess(res -> System.out.println(res.getStatusCode()))
+                    .doOnError(err -> System.err.println("Error sending FCM message: " + err.getMessage()))
+                    .block();
+        } catch (Exception e) {
+            log.error("FCM 메시지 전송 실패: {}", fcmRequestDto, e);
+        }
     }
 
     private String getAccessToken() {
@@ -68,8 +69,9 @@ public class FcmService {
         return null;
     }
 
-    private String makeMessage(FcmRequestDto fcmRequestDto)  {
-        try {ObjectMapper om = new ObjectMapper();
+    private String makeMessage(FcmRequestDto fcmRequestDto) {
+        try {
+            ObjectMapper om = new ObjectMapper();
             FcmResponseDto fcmResponseDto = FcmResponseDto.builder()
                     .message(FcmResponseDto.Message.builder()
                             .token(fcmRequestDto.getToken())
@@ -78,7 +80,12 @@ public class FcmService {
                                     .body(fcmRequestDto.getBody())
                                     .image(null)
                                     .build()
-                            ).build()).validateOnly(false).build();
+                            )
+                            .data(fcmRequestDto.getData())  // 추가된 data 필드 설정
+                            .build())
+                    .validateOnly(false)
+                    .build();
+
             return om.writeValueAsString(fcmResponseDto);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
