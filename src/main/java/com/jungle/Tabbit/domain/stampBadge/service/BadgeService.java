@@ -42,6 +42,9 @@ public class BadgeService {
                         badgedIds.contains(badge.getBadgeId())))
                 .collect(Collectors.toList());
 
-        return BadgeResponseListDto.builder().badgeResponseList(badgeResponseList).build();
+        Long totalBadgeCount = (long) badgeList.size();
+        Long earnedBadgeCount = (long) badgedIds.size();
+
+        return BadgeResponseListDto.of(totalBadgeCount, earnedBadgeCount, badgeResponseList);
     }
 }
