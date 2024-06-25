@@ -3,10 +3,9 @@ package com.jungle.Tabbit.domain.stampBadge.service;
 import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
 import com.jungle.Tabbit.domain.restaurant.dto.RestaurantResponseDto;
-import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
-import com.jungle.Tabbit.domain.restaurant.repository.RestaurantRepository;
 import com.jungle.Tabbit.domain.stampBadge.dto.StampResponseDto;
 import com.jungle.Tabbit.domain.stampBadge.dto.StampResponseListDto;
+import com.jungle.Tabbit.domain.stampBadge.repository.StampRepository;
 import com.jungle.Tabbit.global.exception.NotFoundException;
 import com.jungle.Tabbit.global.model.ResponseStatus;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +13,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -24,41 +25,49 @@ import java.util.stream.Collectors;
 public class StampService {
 
     private final MemberRepository memberRepository;
-    private final RestaurantRepository restaurantRepository;
+    private final StampRepository stampRepository;
 
     @Transactional(readOnly = true)
     public StampResponseListDto getStampAll(String username) {
         Member member = memberRepository.findMemberByUsername(username)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
 
-        List<StampResponseDto> result = new ArrayList<>();
-        List<String> sidos = getSidoList();
+        Long totalCount = 0L;
+        Long earnedCount = 0L;
 
-        Set<Long> stampedRestaurantIds = member.getMemberStampList().stream()
-                .map(stamp -> stamp.getRestaurant().getRestaurantId())
-                .collect(Collectors.toSet());
+        // 시도별 레스토랑 수와 스탬프를 받은 레스토랑 수 조회
+        List<Object[]> restaurantCounts = stampRepository.findSidoRestaurantCount(member.getMemberId());
 
-        // 시/도별로 레스토랑을 그룹화
-        Map<String, List<Restaurant>> restaurantsBySido = restaurantRepository.findAllWithAddress().stream()
-                .collect(Collectors.groupingBy(restaurant -> restaurant.getAddress().getSido()));
+        // 시도별 레스토랑 정보 및 스탬프 여부 조회
+        List<Object[]> restaurantList = stampRepository.findRestaurantList(member.getMemberId());
 
-        // Todo: 추후 로직 개선
-        for (String sido : sidos) {
-            List<RestaurantResponseDto> restaurantResponseList = restaurantsBySido.getOrDefault(sido, Collections.emptyList()).stream()
-                    .map(restaurant -> RestaurantResponseDto.of(restaurant, stampedRestaurantIds.contains(restaurant.getRestaurantId())))
-                    .collect(Collectors.toList());
+        // 시도별 레스토랑 정보를 맵에 저장
+        Map<String, List<RestaurantResponseDto>> restaurantMap = new HashMap<>();
+        for (Object[] row : restaurantList) {
+            String sidoName = (String) row[0];
+            Long restaurantId = (Long) row[1];
+            String restaurantName = (String) row[2];
+            Boolean hasStamp = (Boolean) row[3];
 
-            long earnedCount = restaurantResponseList.stream()
-                    .filter(RestaurantResponseDto::getEarnedStamp)
-                    .count();
-
-            result.add(StampResponseDto.of(sido, (long) restaurantResponseList.size(), earnedCount, restaurantResponseList));
+            RestaurantResponseDto restaurantDto = RestaurantResponseDto.ofRestaurantId(restaurantId, restaurantName, hasStamp);
+            restaurantMap.computeIfAbsent(sidoName, k -> new ArrayList<>()).add(restaurantDto);
         }
 
-        return StampResponseListDto.builder().stampResponseList(result).build();
-    }
+        // 시도별 레스토랑 수와 스탬프 수를 기반으로 최종 리스트 생성
+        List<StampResponseDto> stampResponseDtos = new ArrayList<>();
+        for (Object[] row : restaurantCounts) {
+            String sidoName = (String) row[0];
+            Long totalStampCount = (Long) row[1];
+            Long earnedStampCount = (Long) row[2];
 
-    private List<String> getSidoList() {
-        return Arrays.asList("서울특별시", "부산광역시", "대구광역시", "인천광역시", "광주광역시", "대전광역시", "울산광역시", "세종특별자치시", "경기도", "강원도", "충청북도", "충청남도", "전라북도", "전라남도", "경상북도", "경상남도", "제주특별자치도");
+            totalCount += totalStampCount;
+            earnedCount += earnedStampCount;
+
+            List<RestaurantResponseDto> restaurantDtoList = restaurantMap.getOrDefault(sidoName, new ArrayList<>());
+            StampResponseDto stampDto = StampResponseDto.of(sidoName, totalStampCount, earnedStampCount, restaurantDtoList);
+            stampResponseDtos.add(stampDto);
+        }
+
+        return StampResponseListDto.of(totalCount, earnedCount, stampResponseDtos);
     }
 }
