@@ -69,7 +69,10 @@ public enum ResponseStatus {
     FAIL_NOT_OWNER("해당 기능은 레스토랑의 점주만 접근할 수 있습니다.", HttpStatus.BAD_REQUEST),
 
     // Restaurant
-    FAIL_RESTAURANT_NOT_FOUND("클라이언트가 요청한 맛집을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
+    FAIL_RESTAURANT_NOT_FOUND("클라이언트가 요청한 맛집을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+
+    // Notification
+    FAIL_NOTIFICATION_NOT_FOUND("클라이언트가 요청한 알림을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
 
     private String message;
 
