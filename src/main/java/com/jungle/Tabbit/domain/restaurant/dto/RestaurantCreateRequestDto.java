@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 
 @Getter
 @NoArgsConstructor
-@Schema(description = "맛집 생성 응답DTO")
+@Schema(description = "맛집 생성 요청 DTO")
 public class RestaurantCreateRequestDto {
     @Schema(description = "업체명")
     private String placeName;  // 업체명
