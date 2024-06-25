@@ -4,19 +4,14 @@ import com.jungle.Tabbit.domain.fcm.dto.FcmRequestDto;
 import com.jungle.Tabbit.domain.fcm.service.FcmService;
 import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
-import com.jungle.Tabbit.domain.member.service.MemberService;
+import com.jungle.Tabbit.domain.notification.dto.NotificationListResponseDto;
 import com.jungle.Tabbit.domain.notification.dto.NotificationRequestCreateDto;
-import com.jungle.Tabbit.domain.notification.dto.NotificationResponseDto;
 import com.jungle.Tabbit.domain.notification.entity.Notification;
 import com.jungle.Tabbit.domain.notification.repository.NotificationRepository;
 import com.jungle.Tabbit.global.exception.NotFoundException;
 import com.jungle.Tabbit.global.model.ResponseStatus;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +34,33 @@ public class NotificationService {
         fcmService.sendMessageTo(fcmRequestDto);
 
         notificationRepository.save(new Notification(requestDto.getTitle(), requestDto.getMessage(), member));
+    }
+    public NotificationListResponseDto getNotificationList(Long userId) {
+        Member member = getMemberById(userId);
+        return NotificationListResponseDto.of(userId, notificationRepository.findAllByMember(member));
+    }
 
+
+
+    public void checkNotification(Long notificationId) {
+        Notification notification = notificationRepository.findNotificationByNotificationId(notificationId)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_NOTIFICATION_NOT_FOUND));
+        notification.check();
+    }
+
+
+    public void deleteALLNotification(Long userId) {
+        Member member = getMemberById(userId);
+        notificationRepository.deleteAllByMember(member);
+    }
+
+
+    public void deleteNotification(Long userId, Long notificationId) {
+        Member member = getMemberById(userId);
+        Notification notification = notificationRepository.findNotificationByNotificationIdAndMember(notificationId, member)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_NOTIFICATION_NOT_FOUND));
+
+        notificationRepository.delete(notification);
     }
 
     private Member getMemberById(Long memberId) {
