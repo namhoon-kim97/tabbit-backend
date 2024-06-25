@@ -43,4 +43,12 @@ public class RestaurantResponseDto {
                 .name(restaurant.getName())
                 .build();
     }
+
+    public static RestaurantResponseDto ofRestaurantId(Long restaurantId, String restaurantName, Boolean hasStamp) {
+        return RestaurantResponseDto.builder()
+                .restaurantId(restaurantId)
+                .name(restaurantName)
+                .earnedStamp(hasStamp)
+                .build();
+    }
 }
