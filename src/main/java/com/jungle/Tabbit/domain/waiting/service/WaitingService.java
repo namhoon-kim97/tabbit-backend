@@ -205,7 +205,7 @@ public class WaitingService {
         List<Waiting> waitingList = waitingRepository.findByRestaurantAndWaitingStatusOrderByWaitingNumberAsc(waiting.getRestaurant(), WaitingStatus.STATUS_WAITING);
         for (int i = 0; i < waitingList.size(); i++) {
             if (waitingList.get(i).getWaitingId().equals(waiting.getWaitingId())) {
-                return i;
+                return i + 1;
             }
         }
         throw new BusinessLogicException(ResponseStatus.FAIL_MEMBER_WAITING_DUPLICATED);
