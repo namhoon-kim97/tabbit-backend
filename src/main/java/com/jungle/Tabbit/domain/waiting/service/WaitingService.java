@@ -126,7 +126,7 @@ public class WaitingService {
 
         validateRestaurantOwner(restaurant, owner);
 
-        Waiting waiting = getWaitingByNumberAndRestaurant(waitingNumber, restaurant, WaitingStatus.STATUS_WAITING);
+        Waiting waiting = getWaitingByNumberAndRestaurant(waitingNumber, restaurant, WaitingStatus.STATUS_CALLED);
 
         waiting.updateStatus(WaitingStatus.STATUS_NOSHOW);
     }
