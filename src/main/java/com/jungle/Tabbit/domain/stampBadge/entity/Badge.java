@@ -20,12 +20,8 @@ public class Badge {
     @Column(name = "description", length = 255)
     private String description;
 
-    @Column(name = "image_url", length = 255)
-    private String imageUrl;
-
-    public Badge(String name, String description, String imageUrl) {
+    public Badge(String name, String description) {
         this.name = name;
         this.description = description;
-        this.imageUrl = imageUrl;
     }
 }
