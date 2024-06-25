@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -104,6 +105,12 @@ public class WaitingService {
         Waiting waiting = getWaitingByNumberAndRestaurant(waitingNumber, restaurant, WaitingStatus.STATUS_CALLED);
 
         waiting.updateStatus(WaitingStatus.STATUS_SEATED);
+        Optional<MemberStamp> memberStamp = stampRepository.findByMemberAndRestaurant(waiting.getMember(), restaurant);
+        if (memberStamp.isPresent()) {
+            memberStamp.get().updateVisitCount(memberStamp.get().getVisitCount());
+            stampRepository.save(memberStamp.get());
+            return;
+        }
         stampRepository.save(new MemberStamp(waiting.getMember(), restaurant));
     }
 
