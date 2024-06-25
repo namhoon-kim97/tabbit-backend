@@ -16,5 +16,5 @@ import java.time.LocalDateTime;
 public class EarnedTimestamped {
     @CreatedDate
     @Column(updatable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime earnedAt;
 }
