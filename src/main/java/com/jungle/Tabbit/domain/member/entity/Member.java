@@ -48,4 +48,8 @@ public class Member {
         this.badgeId = badgeId;
         this.fcmToken = fcmToken;
     }
+
+    public void updateFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
+    }
 }
