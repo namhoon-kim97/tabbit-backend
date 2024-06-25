@@ -4,16 +4,13 @@ import lombok.*;
 
 
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@AllArgsConstructor
 public class FcmRequestDto {
     private String token;
     private String title;
     private String body;
+    private FcmData data;
 
-    @Builder
-    public FcmRequestDto(String token, String title, String body) {
-        this.token = token;
-        this.title = title;
-        this.body = body;
-    }
+
 }
