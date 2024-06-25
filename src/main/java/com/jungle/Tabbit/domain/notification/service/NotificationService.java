@@ -29,7 +29,12 @@ public class NotificationService {
     public void sendNotification(NotificationRequestCreateDto requestDto)  {
         Member member = getMemberById(requestDto.getMemberId());
 
-        FcmRequestDto fcmRequestDto = new FcmRequestDto(member.getFcmToken(), requestDto.getTitle(), requestDto.getMessage());
+        FcmRequestDto fcmRequestDto = FcmRequestDto.builder()
+                .token(member.getFcmToken())
+                .title(requestDto.getTitle())
+                .body(requestDto.getMessage())
+                .data(requestDto.getFcmData())
+                .build();
 
         fcmService.sendMessageTo(fcmRequestDto);
 
