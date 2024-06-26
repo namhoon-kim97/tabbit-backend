@@ -17,7 +17,7 @@ public interface StampRepository extends Repository<MemberStamp, Long> {
 
     @Query("SELECT a.sido, COUNT(r.restaurantId) AS totalRestaurants, COUNT(ms.restaurant) AS stampedRestaurants " +
             "FROM address a " +
-            "LEFT JOIN Restaurant r ON a.addressId = r.address.addressId " +
+            "LEFT JOIN restaurant r ON a.addressId = r.address.addressId " +
             "LEFT JOIN memberStamp ms ON r.restaurantId = ms.restaurant.restaurantId AND ms.member.memberId = :memberId " +
             "GROUP BY a.sido")
     List<Object[]> findSidoRestaurantCount(@Param("memberId") Long memberId);
@@ -25,7 +25,7 @@ public interface StampRepository extends Repository<MemberStamp, Long> {
     @Query("SELECT a.sido, r.restaurantId, r.name AS restaurantName, " +
             "CASE WHEN ms.member.memberId IS NOT NULL THEN true ELSE false END AS hasStamp " +
             "FROM address a " +
-            "INNER JOIN Restaurant r ON a.addressId = r.address.addressId " +
+            "INNER JOIN restaurant r ON a.addressId = r.address.addressId " +
             "LEFT JOIN memberStamp ms ON r.restaurantId = ms.restaurant.restaurantId AND ms.member.memberId = :memberId ")
     List<Object[]> findRestaurantList(@Param("memberId") Long memberId);
 
