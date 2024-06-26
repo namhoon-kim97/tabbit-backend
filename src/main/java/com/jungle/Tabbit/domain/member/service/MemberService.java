@@ -4,9 +4,14 @@ import com.jungle.Tabbit.domain.member.dto.MemberJoinRequestDto;
 import com.jungle.Tabbit.domain.member.dto.MemberLoginRequestDto;
 import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
+import com.jungle.Tabbit.domain.stampBadge.entity.Badge;
+import com.jungle.Tabbit.domain.stampBadge.entity.MemberBadge;
+import com.jungle.Tabbit.domain.stampBadge.repository.BadgeRepository;
+import com.jungle.Tabbit.domain.stampBadge.repository.MemberBadgeRepository;
 import com.jungle.Tabbit.global.config.security.jwt.JwtProvider;
 import com.jungle.Tabbit.global.exception.DuplicatedException;
 import com.jungle.Tabbit.global.exception.LoginFailException;
+import com.jungle.Tabbit.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,6 +34,8 @@ public class MemberService {
     private final JwtProvider jwtProvider;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final BadgeRepository badgeRepository;
+    private final MemberBadgeRepository memberBadgeRepository;
 
 
     public void join(MemberJoinRequestDto memberJoinRequestDto) {
@@ -38,8 +45,13 @@ public class MemberService {
             throw new DuplicatedException(FAIL_MEMBER_DUPLICATED);
         }
 
-        Member createMember = memberJoinRequestDto.createMember(passwordEncoder);
+        Badge defaultBadge = badgeRepository.findByBadgeId(1L)
+                .orElseThrow(() -> new NotFoundException(FAIL_BADGE_NOT_FOUND));
+
+        Member createMember = memberJoinRequestDto.createMember(passwordEncoder, defaultBadge);
+
         memberRepository.save(createMember);
+        memberBadgeRepository.save(new MemberBadge(createMember, defaultBadge));
     }
 
 

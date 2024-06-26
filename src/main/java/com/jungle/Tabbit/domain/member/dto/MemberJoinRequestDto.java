@@ -2,6 +2,7 @@ package com.jungle.Tabbit.domain.member.dto;
 
 import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.entity.MemberRole;
+import com.jungle.Tabbit.domain.stampBadge.entity.Badge;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
@@ -21,8 +22,9 @@ public class MemberJoinRequestDto {
     private String password;
     @Schema(description = "멤버 Role")
     private MemberRole memberRole;
-    private  String fcmToken;
-    public Member createMember(PasswordEncoder passwordEncoder) {
-        return new Member(nickname, passwordEncoder.encode(password), username, memberRole, 1L,"");
+    private String fcmToken;
+
+    public Member createMember(PasswordEncoder passwordEncoder, Badge badge) {
+        return new Member(nickname, passwordEncoder.encode(password), username, memberRole, badge, "");
     }
 }

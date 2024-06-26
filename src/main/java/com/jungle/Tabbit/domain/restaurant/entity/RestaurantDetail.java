@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity(name = "Restaurant_detail")
+@Entity(name = "restaurant_detail")
 public class RestaurantDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
