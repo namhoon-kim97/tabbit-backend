@@ -72,7 +72,10 @@ public enum ResponseStatus {
     FAIL_RESTAURANT_NOT_FOUND("클라이언트가 요청한 맛집을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
     // Notification
-    FAIL_NOTIFICATION_NOT_FOUND("클라이언트가 요청한 알림을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
+    FAIL_NOTIFICATION_NOT_FOUND("클라이언트가 요청한 알림을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+
+    // Badge
+    FAIL_BADGE_NOT_FOUND("해당 칭호를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
 
     private String message;
 
