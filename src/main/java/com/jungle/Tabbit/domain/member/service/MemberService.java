@@ -21,7 +21,7 @@ import java.util.Optional;
 import static com.jungle.Tabbit.global.model.ResponseStatus.*;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 @RequiredArgsConstructor
 public class MemberService {
 
@@ -30,7 +30,7 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
-    @Transactional
+
     public void join(MemberJoinRequestDto memberJoinRequestDto) {
         Optional<Member> findMember = memberRepository.findMemberByUsername(memberJoinRequestDto.getUsername());
 
@@ -41,6 +41,7 @@ public class MemberService {
         Member createMember = memberJoinRequestDto.createMember(passwordEncoder);
         memberRepository.save(createMember);
     }
+
 
     public String login(MemberLoginRequestDto memberLoginRequestDto) {
         Authentication authenticate = null;
@@ -56,6 +57,12 @@ public class MemberService {
         }
 
         SecurityContextHolder.getContext().setAuthentication(authenticate);
+
+        // FCM 토큰 업데이트
+        Member member = memberRepository.findMemberByUsername(memberLoginRequestDto.getUsername())
+                .orElseThrow(() -> new LoginFailException(FAIL_LOGIN_NOT_SUCCESS));
+        member.updateFcmToken(memberLoginRequestDto.getFcmToken());
+
         return jwtProvider.generateToken(authenticate.getName());
     }
 }

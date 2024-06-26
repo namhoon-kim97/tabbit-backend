@@ -3,10 +3,8 @@ package com.jungle.Tabbit.domain.notification.entity;
 import com.jungle.Tabbit.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
@@ -25,7 +23,6 @@ public class Notification {
     @Column(nullable = false, name = "message")
     private String message;
 
-    @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -33,6 +30,7 @@ public class Notification {
     private boolean isRead;
 
     @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @JoinColumn(name = "member_id")
     private Member member;
 
     public Notification(String title, String message, Member member) {
@@ -40,8 +38,11 @@ public class Notification {
         this.message = message;
         this.member = member;
         this.isRead = false;
+        this.createdAt = LocalDateTime.now();
     }
 
 
-
+    public void check() {
+        this.isRead = true;
+    }
 }

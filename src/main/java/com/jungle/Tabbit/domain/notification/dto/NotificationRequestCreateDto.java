@@ -1,12 +1,17 @@
 package com.jungle.Tabbit.domain.notification.dto;
 
+import com.jungle.Tabbit.domain.fcm.dto.FcmData;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
+@Builder
 public class NotificationRequestCreateDto {
-    private Long MemberId;
+    private Long memberId;
     private String title;
     private String message;
+
+    private FcmData fcmData;
+
+
 }

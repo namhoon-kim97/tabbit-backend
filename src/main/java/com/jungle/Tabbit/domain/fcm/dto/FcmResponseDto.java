@@ -16,6 +16,7 @@ public class FcmResponseDto {
     public static class Message {
         private FcmResponseDto .Notification notification;
         private String token;
+        private FcmData data;
     }
 
     @Builder

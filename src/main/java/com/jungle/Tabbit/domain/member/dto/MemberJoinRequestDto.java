@@ -21,8 +21,8 @@ public class MemberJoinRequestDto {
     private String password;
     @Schema(description = "멤버 Role")
     private MemberRole memberRole;
-
+    private  String fcmToken;
     public Member createMember(PasswordEncoder passwordEncoder) {
-        return new Member(nickname, passwordEncoder.encode(password), username, memberRole, 1L);
+        return new Member(nickname, passwordEncoder.encode(password), username, memberRole, 1L,"");
     }
 }

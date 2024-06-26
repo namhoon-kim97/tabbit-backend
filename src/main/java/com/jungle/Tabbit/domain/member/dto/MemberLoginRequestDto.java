@@ -10,4 +10,7 @@ public class MemberLoginRequestDto {
     private String username;
     @Schema(description = "멤버 비밀번호")
     private String password;
+
+    @Schema(description = "FCM 토큰")
+    private String fcmToken;
 }
