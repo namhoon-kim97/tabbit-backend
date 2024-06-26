@@ -1,5 +1,6 @@
 package com.jungle.Tabbit.domain.member.entity;
 
+import com.jungle.Tabbit.domain.stampBadge.entity.MemberBadge;
 import com.jungle.Tabbit.domain.stampBadge.entity.MemberStamp;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -36,6 +37,9 @@ public class Member {
 
     @OneToMany(mappedBy = "member")
     private List<MemberStamp> memberStampList = new ArrayList<>();
+  
+    @OneToMany(mappedBy = "member")
+    private List<MemberBadge> memberBadgeList = new ArrayList<>();
 
     @Column(nullable = false, name = "fcm_token")
     private String fcmToken;

@@ -1,7 +1,6 @@
 package com.jungle.Tabbit.domain.stampBadge.entity;
 
 import com.jungle.Tabbit.domain.member.entity.Member;
-import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
 import com.jungle.Tabbit.global.common.EarnedTimestamped;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -10,30 +9,23 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity(name = "memberStamp")
-public class MemberStamp extends EarnedTimestamped {
+@Entity(name = "memberBadge")
+public class MemberBadge extends EarnedTimestamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "stamp_id")
-    private Long stampId;
+    @Column(name = "member_badge_id")
+    private Long memberBadgeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "restaurant_id", nullable = false)
-    private Restaurant restaurant;
+    @JoinColumn(name = "badge_id", nullable = false)
+    private Badge badge;
 
-    @Column(name = "visit_count", nullable = false)
-    private Long visitCount = 1L;
-
-    public MemberStamp(Member member, Restaurant restaurant) {
+    public MemberBadge(Member member, Badge badge) {
         this.member = member;
-        this.restaurant = restaurant;
-    }
-
-    public void updateVisitCount(Long visitCount) {
-        this.visitCount = visitCount + 1;
+        this.badge = badge;
     }
 }
