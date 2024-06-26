@@ -1,5 +1,6 @@
 package com.jungle.Tabbit.domain.member.entity;
 
+import com.jungle.Tabbit.domain.stampBadge.entity.Badge;
 import com.jungle.Tabbit.domain.stampBadge.entity.MemberBadge;
 import com.jungle.Tabbit.domain.stampBadge.entity.MemberStamp;
 import jakarta.persistence.*;
@@ -32,24 +33,26 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberRole memberRole;
 
-    @Column(nullable = false, name = "badge_id")
-    private Long badgeId;
+    @JoinColumn(nullable = false, name = "badge_id")
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Badge badge;
 
     @OneToMany(mappedBy = "member")
     private List<MemberStamp> memberStampList = new ArrayList<>();
-  
+
     @OneToMany(mappedBy = "member")
     private List<MemberBadge> memberBadgeList = new ArrayList<>();
 
     @Column(nullable = false, name = "fcm_token")
     private String fcmToken;
 
-    public Member(String nickname, String password, String username, MemberRole memberRole, Long badgeId, String fcmToken) {
+
+    public Member(String nickname, String password, String username, MemberRole memberRole, Badge badge, String fcmToken) {
         this.nickname = nickname;
         this.password = password;
         this.username = username;
         this.memberRole = memberRole;
-        this.badgeId = badgeId;
+        this.badge = badge;
         this.fcmToken = fcmToken;
     }
 

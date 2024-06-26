@@ -4,6 +4,7 @@ import com.jungle.Tabbit.domain.member.dto.MemberJoinRequestDto;
 import com.jungle.Tabbit.domain.member.dto.MemberLoginRequestDto;
 import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
+import com.jungle.Tabbit.domain.stampBadge.repository.BadgeRepository;
 import com.jungle.Tabbit.global.config.security.jwt.JwtProvider;
 import com.jungle.Tabbit.global.exception.DuplicatedException;
 import com.jungle.Tabbit.global.exception.LoginFailException;
@@ -18,7 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-import static com.jungle.Tabbit.global.model.ResponseStatus.*;
+import static com.jungle.Tabbit.global.model.ResponseStatus.FAIL_LOGIN_NOT_SUCCESS;
+import static com.jungle.Tabbit.global.model.ResponseStatus.FAIL_MEMBER_DUPLICATED;
 
 @Service
 @Transactional
@@ -29,6 +31,7 @@ public class MemberService {
     private final JwtProvider jwtProvider;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final BadgeRepository badgeRepository;
 
 
     public void join(MemberJoinRequestDto memberJoinRequestDto) {
@@ -37,8 +40,7 @@ public class MemberService {
         if (findMember.isPresent()) {
             throw new DuplicatedException(FAIL_MEMBER_DUPLICATED);
         }
-
-        Member createMember = memberJoinRequestDto.createMember(passwordEncoder);
+        Member createMember = memberJoinRequestDto.createMember(passwordEncoder, badgeRepository.findByBadgeId(1L).get());
         memberRepository.save(createMember);
     }
 
