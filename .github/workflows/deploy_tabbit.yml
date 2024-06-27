@@ -2,7 +2,7 @@ name: tabbit-deploy
 run-name: Running
 on:
   push:
-    branches:
+    branches: 
       - master
   pull_request:
     branches:
@@ -16,6 +16,7 @@ jobs:
       contents: write
 
     steps:
+    
       # 액션을 사용하여 저장소 코드를 체크아웃
       - uses: actions/checkout@v4
 
@@ -100,3 +101,4 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             screen -dmS cleanup bash -c 'find /home/ubuntu/tabbit/build/libs/ -name "app_backup.jar" -mtime +1 -exec rm {} \;'
+
