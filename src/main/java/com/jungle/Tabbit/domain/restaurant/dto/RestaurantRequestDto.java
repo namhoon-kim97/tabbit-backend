@@ -8,8 +8,8 @@ import java.math.BigDecimal;
 
 @Getter
 @NoArgsConstructor
-@Schema(description = "맛집 생성 요청 DTO")
-public class RestaurantCreateRequestDto {
+@Schema(description = "맛집 생성/수정 요청 DTO")
+public class RestaurantRequestDto {
     @Schema(description = "업체명")
     private String placeName;  // 업체명
     @Schema(description = "카테고리 코드")
