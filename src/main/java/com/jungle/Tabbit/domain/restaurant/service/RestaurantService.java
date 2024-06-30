@@ -13,6 +13,7 @@ import com.jungle.Tabbit.domain.restaurant.repository.RestaurantRepository;
 import com.jungle.Tabbit.domain.stampBadge.repository.StampRepository;
 import com.jungle.Tabbit.domain.waiting.entity.WaitingStatus;
 import com.jungle.Tabbit.domain.waiting.repository.WaitingRepository;
+import com.jungle.Tabbit.global.exception.BusinessLogicException;
 import com.jungle.Tabbit.global.exception.InvalidRequestException;
 import com.jungle.Tabbit.global.exception.NotFoundException;
 import com.jungle.Tabbit.global.model.ResponseStatus;
@@ -69,7 +70,7 @@ public class RestaurantService {
         return RestaurantResponseListDto.builder().restaurantResponseList(restaurantResponseList).build();
     }
 
-    public void createRestaurant(RestaurantCreateRequestDto requestDto, String username) {
+    public void createRestaurant(RestaurantRequestDto requestDto, String username) {
         Member owner = memberRepository.findMemberByUsername(username)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
         if (!owner.getMemberRole().equals(MemberRole.ROLE_MANAGER)) {
@@ -134,5 +135,35 @@ public class RestaurantService {
         Boolean earnedStamp = stampRepository.findByMemberAndRestaurant(member, restaurant).isPresent();
 
         return RestaurantResponseDetailDto.of(restaurant, earnedStamp);
+    }
+
+    public void updateRestaurantEstimatedTime(Long restaurantId, RestaurantTimeUpdateRequestDto requestDto, String username) {
+        Member member = memberRepository.findMemberByUsername(username)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
+        Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
+        if (!restaurant.getMember().equals(member)) {
+            throw new BusinessLogicException(ResponseStatus.FAIL_NOT_OWNER);
+        }
+
+        restaurant.updateEstimateTime(requestDto.getEstimatedTimePerTeam());
+    }
+
+    public void updateRestaurant(Long restaurantId, RestaurantRequestDto requestDto, String username) {
+        Member member = memberRepository.findMemberByUsername(username)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
+        Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
+        if (!restaurant.getMember().equals(member)) {
+            throw new BusinessLogicException(ResponseStatus.FAIL_NOT_OWNER);
+        }
+
+        restaurant.getAddress().update(requestDto.getSido(), requestDto.getSigungu(), requestDto.getEupmyeondong(),
+                requestDto.getRoadAddressName(), requestDto.getAddressName(), requestDto.getDetailAddress());
+        restaurant.getRestaurantDetail().update(requestDto.getOpeningHours(), requestDto.getBreakTime(),
+                requestDto.getHolidays(), requestDto.getRestaurantNumber(), requestDto.getDescription());
+        restaurant.update(requestDto.getPlaceName(), categoryRepository.findByCategoryCd(requestDto.getCategoryCd())
+                        .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_CATEGORY_NOT_FOUND)),
+                requestDto.getLatitude(), requestDto.getLongitude(), requestDto.getEstimatedTimePerTeam());
     }
 }

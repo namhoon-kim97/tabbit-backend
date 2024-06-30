@@ -1,9 +1,6 @@
 package com.jungle.Tabbit.domain.restaurant.controller;
 
-import com.jungle.Tabbit.domain.restaurant.dto.RestaurantCreateRequestDto;
-import com.jungle.Tabbit.domain.restaurant.dto.RestaurantResponseDetailDto;
-import com.jungle.Tabbit.domain.restaurant.dto.RestaurantResponseListDto;
-import com.jungle.Tabbit.domain.restaurant.dto.RestaurantResponseSummaryDto;
+import com.jungle.Tabbit.domain.restaurant.dto.*;
 import com.jungle.Tabbit.domain.restaurant.service.RestaurantService;
 import com.jungle.Tabbit.global.config.security.CustomUserDetails;
 import com.jungle.Tabbit.global.model.CommonResponse;
@@ -16,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,9 +43,10 @@ public class RestaurantController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @Operation(summary = "맛집 생성", description = "새로운 맛집을 생성합니다.")
     @ApiResponse(responseCode = "201", description = "생성 성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
-    public CommonResponse<?> createRestaurant(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody @Parameter(description = "맛집 생성 요청 DTO", required = true) RestaurantCreateRequestDto requestDto) {
+    public CommonResponse<?> createRestaurant(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody @Parameter(description = "맛집 생성 요청 DTO", required = true) RestaurantRequestDto requestDto) {
         restaurantService.createRestaurant(requestDto, userDetails.getUsername());
         return CommonResponse.success(ResponseStatus.SUCCESS_CREATE);
     }
@@ -66,5 +65,25 @@ public class RestaurantController {
     public CommonResponse<?> getRestaurantDetail(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable @Parameter(description = "맛집 ID", required = true) Long restaurantId) {
         RestaurantResponseDetailDto responseDto = restaurantService.getRestaurantDetailInfo(restaurantId, userDetails.getUsername());
         return CommonResponse.success(ResponseStatus.SUCCESS_OK, responseDto);
+    }
+
+    @PutMapping("time/{restaurantId}")
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    @Operation(summary = "맛집 예상 대기 시간 변경", description = "점주가 맛집의 예상 대기 시간을 변경합니다.")
+    @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
+    public CommonResponse<?> updateRestaurantEstimatedTime(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable @Parameter(description = "맛집 ID", required = true) Long restaurantId,
+                                                           @RequestBody @Parameter(description = "예상 대기 시간 변경 요청 DTO", required = true) RestaurantTimeUpdateRequestDto requestDto) {
+        restaurantService.updateRestaurantEstimatedTime(restaurantId, requestDto, userDetails.getUsername());
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK);
+    }
+
+    @PutMapping("/{restaurantId}")
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    @Operation(summary = "맛집 정보 변경", description = "점주가 맛집 정보를 변경합니다.")
+    @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
+    public CommonResponse<?> updateRestaurant(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable @Parameter(description = "맛집 ID", required = true) Long restaurantId,
+                                              @RequestBody @Parameter(description = "맛집 정보 변경 요청 DTO", required = true) RestaurantRequestDto requestDto) {
+        restaurantService.updateRestaurant(restaurantId, requestDto, userDetails.getUsername());
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK);
     }
 }
