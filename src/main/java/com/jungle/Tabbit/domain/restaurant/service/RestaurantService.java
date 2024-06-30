@@ -40,8 +40,7 @@ public class RestaurantService {
 
     @Transactional(readOnly = true)
     public RestaurantResponseListDto getAllRestaurant(String username) {
-        Member member = memberRepository.findMemberByUsername(username)
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
+        Member member = getMemberByUsername(username);
 
         List<Restaurant> restaurantList = restaurantRepository.findAll();
 
@@ -58,10 +57,9 @@ public class RestaurantService {
 
     @Transactional(readOnly = true)
     public RestaurantResponseListDto getAllOwnerRestaurant(String username) {
-        Member owner = memberRepository.findMemberByUsername(username)
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
+        Member member = getMemberByUsername(username);
 
-        List<Restaurant> restaurantList = restaurantRepository.findAllByMember(owner);
+        List<Restaurant> restaurantList = restaurantRepository.findAllByMember(member);
 
         List<RestaurantResponseDto> restaurantResponseList = restaurantList.stream()
                 .map(RestaurantResponseDto::ofWithoutStamp)
@@ -71,9 +69,8 @@ public class RestaurantService {
     }
 
     public void createRestaurant(RestaurantRequestDto requestDto, String username) {
-        Member owner = memberRepository.findMemberByUsername(username)
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
-        if (!owner.getMemberRole().equals(MemberRole.ROLE_MANAGER)) {
+        Member member = getMemberByUsername(username);
+        if (!member.getMemberRole().equals(MemberRole.ROLE_MANAGER)) {
             throw new InvalidRequestException(ResponseStatus.FAIL_MEMBER_ROLE_INVALID);
         }
 
@@ -99,7 +96,7 @@ public class RestaurantService {
 
         Restaurant restaurant = new Restaurant(
                 restaurantDetail,
-                owner,
+                member,
                 requestDto.getPlaceName(),
                 category,
                 address,
@@ -112,10 +109,8 @@ public class RestaurantService {
 
     @Transactional(readOnly = true)
     public RestaurantResponseSummaryDto getRestaurantSummaryInfo(Long restaurantId, String username) {
-        Member member = memberRepository.findMemberByUsername(username)
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
-        Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId)
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
+        Member member = getMemberByUsername(username);
+        Restaurant restaurant = getRestaurantById(restaurantId);
 
         Boolean earnedStamp = stampRepository.findByMemberAndRestaurant(member, restaurant).isPresent();
 
@@ -127,10 +122,8 @@ public class RestaurantService {
 
     @Transactional(readOnly = true)
     public RestaurantResponseDetailDto getRestaurantDetailInfo(Long restaurantId, String username) {
-        Member member = memberRepository.findMemberByUsername(username)
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
-        Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId)
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
+        Member member = getMemberByUsername(username);
+        Restaurant restaurant = getRestaurantById(restaurantId);
 
         Boolean earnedStamp = stampRepository.findByMemberAndRestaurant(member, restaurant).isPresent();
 
@@ -138,10 +131,8 @@ public class RestaurantService {
     }
 
     public void updateRestaurantEstimatedTime(Long restaurantId, RestaurantTimeUpdateRequestDto requestDto, String username) {
-        Member member = memberRepository.findMemberByUsername(username)
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
-        Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId)
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
+        Member member = getMemberByUsername(username);
+        Restaurant restaurant = getRestaurantById(restaurantId);
         if (!restaurant.getMember().equals(member)) {
             throw new BusinessLogicException(ResponseStatus.FAIL_NOT_OWNER);
         }
@@ -150,10 +141,8 @@ public class RestaurantService {
     }
 
     public void updateRestaurant(Long restaurantId, RestaurantRequestDto requestDto, String username) {
-        Member member = memberRepository.findMemberByUsername(username)
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
-        Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId)
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
+        Member member = getMemberByUsername(username);
+        Restaurant restaurant = getRestaurantById(restaurantId);
         if (!restaurant.getMember().equals(member)) {
             throw new BusinessLogicException(ResponseStatus.FAIL_NOT_OWNER);
         }
@@ -165,5 +154,15 @@ public class RestaurantService {
         restaurant.update(requestDto.getPlaceName(), categoryRepository.findByCategoryCd(requestDto.getCategoryCd())
                         .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_CATEGORY_NOT_FOUND)),
                 requestDto.getLatitude(), requestDto.getLongitude(), requestDto.getEstimatedTimePerTeam());
+    }
+
+    private Member getMemberByUsername(String username) {
+        return memberRepository.findMemberByUsername(username)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
+    }
+
+    private Restaurant getRestaurantById(Long restaurantId) {
+        return restaurantRepository.findByRestaurantId(restaurantId)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
     }
 }
