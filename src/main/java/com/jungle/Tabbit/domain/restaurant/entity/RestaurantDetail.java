@@ -36,4 +36,12 @@ public class RestaurantDetail {
         this.restaurantNumber = restaurantNumber;
         this.description = description;
     }
+
+    public void update(String openingHours, String breakTime, String holidays, String restaurantNumber, String description) {
+        this.openingHours = openingHours;
+        this.breakTime = breakTime;
+        this.holidays = holidays;
+        this.restaurantNumber = restaurantNumber;
+        this.description = description;
+    }
 }
