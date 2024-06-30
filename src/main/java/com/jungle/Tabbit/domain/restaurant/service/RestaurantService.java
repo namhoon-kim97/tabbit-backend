@@ -1,7 +1,6 @@
 package com.jungle.Tabbit.domain.restaurant.service;
 
 import com.jungle.Tabbit.domain.member.entity.Member;
-import com.jungle.Tabbit.domain.member.entity.MemberRole;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
 import com.jungle.Tabbit.domain.restaurant.dto.*;
 import com.jungle.Tabbit.domain.restaurant.entity.Address;
@@ -14,7 +13,6 @@ import com.jungle.Tabbit.domain.stampBadge.repository.StampRepository;
 import com.jungle.Tabbit.domain.waiting.entity.WaitingStatus;
 import com.jungle.Tabbit.domain.waiting.repository.WaitingRepository;
 import com.jungle.Tabbit.global.exception.BusinessLogicException;
-import com.jungle.Tabbit.global.exception.InvalidRequestException;
 import com.jungle.Tabbit.global.exception.NotFoundException;
 import com.jungle.Tabbit.global.model.ResponseStatus;
 import lombok.RequiredArgsConstructor;
@@ -70,9 +68,6 @@ public class RestaurantService {
 
     public void createRestaurant(RestaurantRequestDto requestDto, String username) {
         Member member = getMemberByUsername(username);
-        if (!member.getMemberRole().equals(MemberRole.ROLE_MANAGER)) {
-            throw new InvalidRequestException(ResponseStatus.FAIL_MEMBER_ROLE_INVALID);
-        }
 
         Category category = getCategory(requestDto.getCategoryCd());
 
