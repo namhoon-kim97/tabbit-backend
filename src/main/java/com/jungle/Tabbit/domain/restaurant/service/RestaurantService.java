@@ -74,8 +74,7 @@ public class RestaurantService {
             throw new InvalidRequestException(ResponseStatus.FAIL_MEMBER_ROLE_INVALID);
         }
 
-        Category category = categoryRepository.findByCategoryCd(requestDto.getCategoryCd())
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_CATEGORY_NOT_FOUND));
+        Category category = getCategory(requestDto.getCategoryCd());
 
         Address address = new Address(
                 requestDto.getSido(),
@@ -151,8 +150,7 @@ public class RestaurantService {
                 requestDto.getRoadAddressName(), requestDto.getAddressName(), requestDto.getDetailAddress());
         restaurant.getRestaurantDetail().update(requestDto.getOpeningHours(), requestDto.getBreakTime(),
                 requestDto.getHolidays(), requestDto.getRestaurantNumber(), requestDto.getDescription());
-        restaurant.update(requestDto.getPlaceName(), categoryRepository.findByCategoryCd(requestDto.getCategoryCd())
-                        .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_CATEGORY_NOT_FOUND)),
+        restaurant.update(requestDto.getPlaceName(), getCategory(requestDto.getCategoryCd()),
                 requestDto.getLatitude(), requestDto.getLongitude(), requestDto.getEstimatedTimePerTeam());
     }
 
@@ -164,5 +162,10 @@ public class RestaurantService {
     private Restaurant getRestaurantById(Long restaurantId) {
         return restaurantRepository.findByRestaurantId(restaurantId)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
+    }
+
+    private Category getCategory(String categoryCd) {
+        return categoryRepository.findByCategoryCd(categoryCd)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_CATEGORY_NOT_FOUND));
     }
 }
