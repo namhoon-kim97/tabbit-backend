@@ -8,27 +8,35 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity(name = "badgeTrigger")
+@Entity
 public class BadgeTrigger {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "badge_trigger_id")
     private Long badgeTriggerId;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "badge_id", nullable = false)
     private Badge badge;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_cd")
+    @JoinColumn(name = "category_cd", nullable = false)
     private Category category;
 
-    @Column(name = "required_stamp_cnt")
+    @Column(name = "required_stamp_cnt", nullable = false)
     private Long requiredStampCnt;
 
-    public BadgeTrigger(Badge badge, Category category, Long requiredStampCnt) {
+    @Column(name = "trigger_type", nullable = false)
+    private String triggerType;
+
+    @Column(name = "condition", nullable = false)
+    private String condition;
+
+    public BadgeTrigger(Badge badge, Category category, Long requiredStampCnt, String triggerType, String condition) {
         this.badge = badge;
         this.category = category;
         this.requiredStampCnt = requiredStampCnt;
+        this.triggerType = triggerType;
+        this.condition = condition;
     }
 }
