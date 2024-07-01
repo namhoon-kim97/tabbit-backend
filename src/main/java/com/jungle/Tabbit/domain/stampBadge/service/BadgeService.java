@@ -4,6 +4,8 @@ import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
 import com.jungle.Tabbit.domain.stampBadge.dto.BadgeResponseDto;
 import com.jungle.Tabbit.domain.stampBadge.dto.BadgeResponseListDto;
+import com.jungle.Tabbit.domain.stampBadge.dto.MemberBadgeResponseDto;
+import com.jungle.Tabbit.domain.stampBadge.dto.UserWithBadgeResponseListDto;
 import com.jungle.Tabbit.domain.stampBadge.entity.Badge;
 import com.jungle.Tabbit.domain.stampBadge.entity.MemberBadge;
 import com.jungle.Tabbit.domain.stampBadge.repository.BadgeRepository;
@@ -15,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -49,6 +52,28 @@ public class BadgeService {
         Long earnedBadgeCount = (long) badgedIds.size();
 
         return BadgeResponseListDto.of(totalBadgeCount, earnedBadgeCount, badgeResponseList);
+    }
+
+    @Transactional(readOnly = true)
+    public UserWithBadgeResponseListDto getUsersWithBadge(Long badgeId) {
+        Badge badge = badgeRepository.findByBadgeId(badgeId)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_BADGE_NOT_FOUND));
+        if (badge == null) {
+            return UserWithBadgeResponseListDto.of(badgeId, "", List.of());
+        }
+
+        List<MemberBadge> memberBadges = memberBadgeRepository.findByBadge_BadgeId(badgeId);
+        if (memberBadges == null) {
+            memberBadges = Collections.emptyList();
+        }
+        List<MemberBadgeResponseDto> members = memberBadges.stream()
+                .map(memberBadge -> MemberBadgeResponseDto.of(
+                        memberBadge.getMember().getMemberId(),
+                        memberBadge.getMember().getNickname(),
+                        memberBadge.getBadge().getName()))
+                .collect(Collectors.toList());
+
+        return UserWithBadgeResponseListDto.of(badge.getBadgeId(), badge.getName(), members);
     }
 
     public void awardBadge(Member member, Long badgeId) {

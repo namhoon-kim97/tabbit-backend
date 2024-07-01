@@ -1,6 +1,7 @@
 package com.jungle.Tabbit.domain.stampBadge.controller;
 
 import com.jungle.Tabbit.domain.stampBadge.dto.BadgeResponseListDto;
+import com.jungle.Tabbit.domain.stampBadge.dto.UserWithBadgeResponseListDto;
 import com.jungle.Tabbit.domain.stampBadge.service.BadgeService;
 import com.jungle.Tabbit.global.config.security.CustomUserDetails;
 import com.jungle.Tabbit.global.model.CommonResponse;
@@ -35,7 +36,14 @@ public class BadgeController {
     @GetMapping("/{username}")
     @Operation(summary = "유저의 모든 칭호 조회", description = "특정 유저가 가진 모든 칭호를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "유저의 모든 칭호 조회 성공", content = @Content(schema = @Schema(implementation = BadgeResponseListDto.class)))
-    public CommonResponse<BadgeResponseListDto> getBadgeAllByUser(@PathVariable String username) {
+    public CommonResponse<?> getBadgeAllByUser(@PathVariable String username) {
         return CommonResponse.success(ResponseStatus.SUCCESS_OK, badgeService.getBadgeAll(username));
+    }
+
+    @GetMapping("/users-with-badge/{badgeId}")
+    @Operation(summary = "칭호를 가진 유저 목록 조회", description = "특정 칭호를 가진 모든 유저의 목록을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "칭호를 가진 유저 목록 조회 성공", content = @Content(schema = @Schema(implementation = UserWithBadgeResponseListDto.class)))
+    public CommonResponse<?> getUsersWithBadge(@PathVariable Long badgeId) {
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK, badgeService.getUsersWithBadge(badgeId));
     }
 }
