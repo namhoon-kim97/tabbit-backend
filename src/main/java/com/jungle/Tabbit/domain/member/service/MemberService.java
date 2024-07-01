@@ -1,6 +1,7 @@
 package com.jungle.Tabbit.domain.member.service;
 
 import com.jungle.Tabbit.domain.member.dto.MemberJoinRequestDto;
+import com.jungle.Tabbit.domain.member.dto.MemberLoginDto;
 import com.jungle.Tabbit.domain.member.dto.MemberLoginRequestDto;
 import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
@@ -55,7 +56,7 @@ public class MemberService {
     }
 
 
-    public String login(MemberLoginRequestDto memberLoginRequestDto) {
+    public MemberLoginDto login(MemberLoginRequestDto memberLoginRequestDto) {
         Authentication authenticate = null;
         try {
             authenticate = authenticationManager.authenticate(
@@ -75,6 +76,12 @@ public class MemberService {
                 .orElseThrow(() -> new LoginFailException(FAIL_LOGIN_NOT_SUCCESS));
         member.updateFcmToken(memberLoginRequestDto.getFcmToken());
 
-        return jwtProvider.generateToken(authenticate.getName());
+        String token = jwtProvider.generateToken(authenticate.getName());
+
+        return MemberLoginDto.builder()
+                .nickname(member.getNickname())
+                .memberRole(member.getMemberRole())
+                .token(token)
+                .build();
     }
 }

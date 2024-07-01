@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 @Getter
-@Schema(description = "멤버 로그인 응답DTO")
+@Schema(description = "멤버 로그인 요청DTO")
 public class MemberLoginRequestDto {
     @Schema(description = "멤버 아이디")
     private String username;
