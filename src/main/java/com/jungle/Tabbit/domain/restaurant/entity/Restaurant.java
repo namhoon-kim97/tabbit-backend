@@ -62,8 +62,10 @@ public class Restaurant extends Timestamped {
         this.estimatedTimePerTeam = estimatedTimePerTeam;
     }
 
-    public void update(String name, Category category, BigDecimal latitude, BigDecimal longitude, Long estimatedTimePerTeam) {
+    public void update(String name, String imageUrl, Category category, BigDecimal latitude, BigDecimal longitude,
+                       Long estimatedTimePerTeam) {
         this.name = name;
+        this.imageUrl = imageUrl;
         this.category = category;
         this.latitude = latitude;
         this.longitude = longitude;
