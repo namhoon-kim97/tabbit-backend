@@ -1,6 +1,7 @@
 package com.jungle.Tabbit.domain.restaurant.dto;
 
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
+import com.jungle.Tabbit.domain.restaurant.entity.RestaurantDetail;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -43,18 +44,18 @@ public class RestaurantResponseDetailDto {
     @Schema(description = "스탬프 획득 유무", example = "true")
     private Boolean earnedStamp; // 스탬프 획득 유무
 
-    public static RestaurantResponseDetailDto of(Restaurant restaurant, Boolean earnedStamp) {
+    public static RestaurantResponseDetailDto of(Restaurant restaurant, RestaurantDetail restaurantDetail, Boolean earnedStamp) {
         return RestaurantResponseDetailDto.builder()
                 .restaurantId(restaurant.getRestaurantId())
                 .name(restaurant.getName())
                 .categoryName(restaurant.getCategory().getCategoryName())
                 .roadAddress(restaurant.getAddress().getRoadAddress())
                 .detailAddress(restaurant.getAddress().getDetailAddress())
-                .openingHours(restaurant.getRestaurantDetail().getOpeningHours())
-                .breakTime(restaurant.getRestaurantDetail().getBreakTime())
-                .holidays(restaurant.getRestaurantDetail().getHolidays())
-                .restaurantNumber(restaurant.getRestaurantDetail().getRestaurantNumber())
-                .description(restaurant.getRestaurantDetail().getDescription())
+                .openingHours(restaurantDetail.getOpeningHours())
+                .breakTime(restaurantDetail.getBreakTime())
+                .holidays(restaurantDetail.getHolidays())
+                .restaurantNumber(restaurantDetail.getRestaurantNumber())
+                .description(restaurantDetail.getDescription())
                 .earnedStamp(earnedStamp)
                 .build();
     }
