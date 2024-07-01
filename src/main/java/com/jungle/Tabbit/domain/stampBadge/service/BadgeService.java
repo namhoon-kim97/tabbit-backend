@@ -5,7 +5,9 @@ import com.jungle.Tabbit.domain.member.repository.MemberRepository;
 import com.jungle.Tabbit.domain.stampBadge.dto.BadgeResponseDto;
 import com.jungle.Tabbit.domain.stampBadge.dto.BadgeResponseListDto;
 import com.jungle.Tabbit.domain.stampBadge.entity.Badge;
+import com.jungle.Tabbit.domain.stampBadge.entity.MemberBadge;
 import com.jungle.Tabbit.domain.stampBadge.repository.BadgeRepository;
+import com.jungle.Tabbit.domain.stampBadge.repository.MemberBadgeRepository;
 import com.jungle.Tabbit.global.exception.NotFoundException;
 import com.jungle.Tabbit.global.model.ResponseStatus;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +24,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class BadgeService {
-
     private final MemberRepository memberRepository;
     private final BadgeRepository badgeRepository;
+    private final MemberBadgeRepository memberBadgeRepository;
+
 
     @Transactional(readOnly = true)
     public BadgeResponseListDto getBadgeAll(String username) {
@@ -46,5 +49,15 @@ public class BadgeService {
         Long earnedBadgeCount = (long) badgedIds.size();
 
         return BadgeResponseListDto.of(totalBadgeCount, earnedBadgeCount, badgeResponseList);
+    }
+
+    public void awardBadge(Member member, Long badgeId) {
+        Badge badge = badgeRepository.findByBadgeId(badgeId)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_BADGE_NOT_FOUND));
+
+        if (!memberBadgeRepository.existsByMemberAndBadge(member, badge)) {
+            MemberBadge memberBadge = new MemberBadge(member, badge);
+            memberBadgeRepository.save(memberBadge);
+        }
     }
 }
