@@ -1,6 +1,7 @@
 package com.jungle.Tabbit.domain.restaurant.controller;
 
 import com.jungle.Tabbit.domain.restaurant.dto.*;
+import com.jungle.Tabbit.domain.restaurant.service.ImageService;
 import com.jungle.Tabbit.domain.restaurant.service.RestaurantService;
 import com.jungle.Tabbit.global.config.security.CustomUserDetails;
 import com.jungle.Tabbit.global.model.CommonResponse;
@@ -13,9 +14,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RestController
@@ -25,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 public class RestaurantController {
 
     private final RestaurantService restaurantService;
+    private final ImageService imageService;
 
     @GetMapping
     @Operation(summary = "모든 맛집 조회", description = "모든 맛집 정보를 조회합니다.")
@@ -42,12 +46,14 @@ public class RestaurantController {
         return CommonResponse.success(ResponseStatus.SUCCESS_OK, responseDto);
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ROLE_MANAGER')")
     @Operation(summary = "맛집 생성", description = "새로운 맛집을 생성합니다.")
     @ApiResponse(responseCode = "201", description = "생성 성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
-    public CommonResponse<?> createRestaurant(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody @Parameter(description = "맛집 생성 요청 DTO", required = true) RestaurantRequestDto requestDto) {
-        restaurantService.createRestaurant(requestDto, userDetails.getUsername());
+    public CommonResponse<?> createRestaurant(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestPart @Parameter(description = "맛집 생성 요청 DTO", required = true) RestaurantRequestDto requestDto,
+                                              @RequestPart("multipartFile") @Parameter(description = "multipart/form-data 형식의 맛집 이미지", required = true) MultipartFile file) {
+        String imageFileName = imageService.uploadImage(file);
+        restaurantService.createRestaurant(requestDto, userDetails.getUsername(), imageFileName);
         return CommonResponse.success(ResponseStatus.SUCCESS_CREATE);
     }
 
@@ -77,13 +83,15 @@ public class RestaurantController {
         return CommonResponse.success(ResponseStatus.SUCCESS_OK);
     }
 
-    @PutMapping("/{restaurantId}")
+    @PutMapping(value = "/{restaurantId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ROLE_MANAGER')")
     @Operation(summary = "맛집 정보 변경", description = "점주가 맛집 정보를 변경합니다.")
     @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
     public CommonResponse<?> updateRestaurant(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable @Parameter(description = "맛집 ID", required = true) Long restaurantId,
-                                              @RequestBody @Parameter(description = "맛집 정보 변경 요청 DTO", required = true) RestaurantRequestDto requestDto) {
-        restaurantService.updateRestaurant(restaurantId, requestDto, userDetails.getUsername());
+                                              @RequestPart @Parameter(description = "맛집 정보 변경 요청 DTO", required = true) RestaurantRequestDto requestDto,
+                                              @RequestPart("multipartFile") @Parameter(description = "multipart/form-data 형식의 맛집 이미지", required = true) MultipartFile file) {
+        String imageFileName = imageService.uploadImage(file);
+        restaurantService.updateRestaurant(restaurantId, requestDto, userDetails.getUsername(), imageFileName);
         return CommonResponse.success(ResponseStatus.SUCCESS_OK);
     }
 }

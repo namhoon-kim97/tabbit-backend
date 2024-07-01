@@ -139,7 +139,7 @@ public class RestaurantService {
         restaurant.updateEstimateTime(requestDto.getEstimatedTimePerTeam());
     }
 
-    public void updateRestaurant(Long restaurantId, RestaurantRequestDto requestDto, String username) {
+    public void updateRestaurant(Long restaurantId, RestaurantRequestDto requestDto, String username, String imageFileName) {
         Member member = getMemberByUsername(username);
         Restaurant restaurant = getRestaurantById(restaurantId);
         RestaurantDetail restaurantDetail = getRestaurantDetailByRestaurant(restaurant);
@@ -149,7 +149,7 @@ public class RestaurantService {
 
         restaurant.getAddress().update(requestDto.getSido(), requestDto.getSigungu(), requestDto.getEupmyeondong(),
                 requestDto.getRoadAddressName(), requestDto.getAddressName(), requestDto.getDetailAddress());
-        restaurant.update(requestDto.getPlaceName(), getCategory(requestDto.getCategoryCd()),
+        restaurant.update(requestDto.getPlaceName(), imageFileName, getCategory(requestDto.getCategoryCd()),
                 requestDto.getLatitude(), requestDto.getLongitude(), requestDto.getEstimatedTimePerTeam());
         restaurantDetail.update(requestDto.getOpeningHours(), requestDto.getBreakTime(),
                 requestDto.getHolidays(), requestDto.getRestaurantNumber(), requestDto.getDescription());
