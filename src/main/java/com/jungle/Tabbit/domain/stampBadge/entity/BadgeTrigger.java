@@ -29,7 +29,7 @@ public class BadgeTrigger {
     @Column(name = "trigger_type", nullable = false)
     private String triggerType;
 
-    @Column(name = "condition", nullable = false)
+    @Column(name = "trigger_condition", nullable = false)
     private String condition;
 
     public BadgeTrigger(Badge badge, Category category, Long requiredStampCnt, String triggerType, String condition) {
