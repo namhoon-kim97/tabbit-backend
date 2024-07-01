@@ -19,16 +19,15 @@ public class Restaurant extends Timestamped {
     @Column(name = "restaurant_id")
     private Long restaurantId;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "restaurant_detail_id", nullable = false)
-    private RestaurantDetail restaurantDetail;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @Column(name = "name", nullable = false, length = 255)
     private String name;
+
+    @Column(name = "image_url", length = 255)
+    private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_cd", nullable = false)
@@ -48,10 +47,10 @@ public class Restaurant extends Timestamped {
     @ColumnDefault("10")
     private Long estimatedTimePerTeam = 10L;
 
-    public Restaurant(RestaurantDetail restaurantDetail, Member member, String name, Category category, Address address, BigDecimal latitude, BigDecimal longitude, Long estimatedTimePerTeam) {
-        this.restaurantDetail = restaurantDetail;
+    public Restaurant(Member member, String name, String imageUrl, Category category, Address address, BigDecimal latitude, BigDecimal longitude, Long estimatedTimePerTeam) {
         this.member = member;
         this.name = name;
+        this.imageUrl = imageUrl;
         this.category = category;
         this.address = address;
         this.latitude = latitude;
