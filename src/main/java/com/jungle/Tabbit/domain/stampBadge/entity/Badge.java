@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity(name = "badge")
+@Entity
 public class Badge {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

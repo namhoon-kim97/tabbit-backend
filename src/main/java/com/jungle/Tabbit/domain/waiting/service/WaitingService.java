@@ -12,6 +12,7 @@ import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
 import com.jungle.Tabbit.domain.restaurant.repository.RestaurantRepository;
 import com.jungle.Tabbit.domain.stampBadge.entity.MemberStamp;
 import com.jungle.Tabbit.domain.stampBadge.repository.StampRepository;
+import com.jungle.Tabbit.domain.stampBadge.service.BadgeTriggerService;
 import com.jungle.Tabbit.domain.waiting.dto.*;
 import com.jungle.Tabbit.domain.waiting.entity.Waiting;
 import com.jungle.Tabbit.domain.waiting.entity.WaitingStatus;
@@ -40,6 +41,7 @@ public class WaitingService {
     private final RestaurantRepository restaurantRepository;
     private final StampRepository stampRepository;
     private final NotificationService notificationService;
+    private final BadgeTriggerService badgeTriggerService;
     private static final ConcurrentHashMap<Long, AtomicLong> storeQueueNumbers = new ConcurrentHashMap<>();  // 가게별 전역 대기번호 변수
 
     @Transactional
@@ -112,13 +114,15 @@ public class WaitingService {
         if (memberStamp.isPresent()) {
             memberStamp.get().updateVisitCount(memberStamp.get().getVisitCount());
             stampRepository.save(memberStamp.get());
-            return;
+        } else {
+            stampRepository.save(new MemberStamp(waiting.getMember(), restaurant, restaurant.getCategory()));
         }
-        stampRepository.save(new MemberStamp(waiting.getMember(), restaurant));
+
+        badgeTriggerService.checkAndAwardBadges(waiting.getMember());
 
         sendNotification(waiting.getMember().getMemberId(),
-                "스탬프 획득", restaurant.getName()+" 스탬프를 획득하였습니다.",
-                createFcmData("client","confirm", restaurant, waiting));
+                "스탬프 획득", restaurant.getName() + " 스탬프를 획득하였습니다.",
+                createFcmData("client", "confirm", restaurant, waiting));
     }
 
     @Transactional
@@ -134,7 +138,7 @@ public class WaitingService {
 
         sendNotification(waiting.getMember().getMemberId(),
                 "입장 알림", "입장 차례가 되었습니다. 가게로 입장해 주세요. 5분이내 입장하지 않을 시 자동 취소됩니다.",
-                createFcmData("client","call", restaurant, waiting));
+                createFcmData("client", "call", restaurant, waiting));
 
         notifyImminentEntryToWaiters(restaurant, waiting);
     }
@@ -150,7 +154,7 @@ public class WaitingService {
 
         waiting.updateStatus(WaitingStatus.STATUS_NOSHOW);
 
-        sendNotification(waiting.getMember().getMemberId(), "No-Show 처리 알림", "No-Show로 처리되었습니다.", createFcmData("client","noshow", restaurant, waiting));
+        sendNotification(waiting.getMember().getMemberId(), "No-Show 처리 알림", "No-Show로 처리되었습니다.", createFcmData("client", "noshow", restaurant, waiting));
     }
 
     @Transactional(readOnly = true)
@@ -246,7 +250,7 @@ public class WaitingService {
         notificationService.sendNotification(notificationRequest);
     }
 
-    private FcmData createFcmData(String role,String messageType, Restaurant restaurant, Waiting waiting) {
+    private FcmData createFcmData(String role, String messageType, Restaurant restaurant, Waiting waiting) {
         return FcmData.builder()
                 .target(role)
                 .messageType(messageType)
@@ -257,20 +261,20 @@ public class WaitingService {
     }
 
     private void sendRegistrationNotification(Member member, Restaurant restaurant, Waiting waiting, int currentWaitingPosition, Long estimatedWaitTime, Long queueNumber) {
-        FcmData clientData = createFcmData("client","register", restaurant, waiting);
+        FcmData clientData = createFcmData("client", "register", restaurant, waiting);
         sendNotification(member.getMemberId(), "웨이팅 등록 완료 알림",
                 "웨이팅이 성공적으로 등록되었습니다. 현재 대기 순서는 " + currentWaitingPosition + "번째이며, 예상 대기시간은 " + estimatedWaitTime + "분입니다.", clientData);
 
-        FcmData ownerData = createFcmData("owner","register", restaurant, waiting);
+        FcmData ownerData = createFcmData("owner", "register", restaurant, waiting);
         sendNotification(restaurant.getMember().getMemberId(), "새로운 웨이팅 알림",
                 "새로운 웨이팅이 등록되었습니다. 대기번호는 " + queueNumber + "번입니다.", ownerData);
     }
 
     private void sendCancellationNotification(Member member, Restaurant restaurant, Waiting waiting) {
-        FcmData clientData = createFcmData("client","cancel", restaurant, waiting);
+        FcmData clientData = createFcmData("client", "cancel", restaurant, waiting);
         sendNotification(member.getMemberId(), "웨이팅 취소 알림", "웨이팅이 성공적으로 취소되었습니다.", clientData);
 
-        FcmData ownerData = createFcmData("owner","cancel", restaurant, waiting);
+        FcmData ownerData = createFcmData("owner", "cancel", restaurant, waiting);
         sendNotification(restaurant.getMember().getMemberId(), "웨이팅 취소 알림", "웨이팅이 취소되었습니다.", ownerData);
     }
 
@@ -295,7 +299,7 @@ public class WaitingService {
     private void sendImminentEntryNotification(Member member, int currentWaitingPosition, Restaurant restaurant, Waiting waiting) {
         String message = getImminentEntryMessage(currentWaitingPosition);
         if (!message.isEmpty()) {
-            FcmData data = createFcmData("client","imminent", restaurant, waiting);
+            FcmData data = createFcmData("client", "imminent", restaurant, waiting);
             sendNotification(member.getMemberId(), "입장 임박 알림", message, data);
         }
     }

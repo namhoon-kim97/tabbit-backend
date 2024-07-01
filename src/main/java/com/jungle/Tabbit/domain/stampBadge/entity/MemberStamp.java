@@ -1,6 +1,7 @@
 package com.jungle.Tabbit.domain.stampBadge.entity;
 
 import com.jungle.Tabbit.domain.member.entity.Member;
+import com.jungle.Tabbit.domain.restaurant.entity.Category;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
 import com.jungle.Tabbit.global.common.EarnedTimestamped;
 import jakarta.persistence.*;
@@ -25,12 +26,18 @@ public class MemberStamp extends EarnedTimestamped {
     @JoinColumn(name = "restaurant_id", nullable = false)
     private Restaurant restaurant;
 
-    @Column(name = "visit_count", nullable = false)
-    private Long visitCount = 1L;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_cd", nullable = false)
+    private Category category;
 
-    public MemberStamp(Member member, Restaurant restaurant) {
+    @Column(name = "visit_count", nullable = false)
+    private Long visitCount;
+
+    public MemberStamp(Member member, Restaurant restaurant, Category category) {
         this.member = member;
         this.restaurant = restaurant;
+        this.category = category;
+        this.visitCount = 1L;
     }
 
     public void updateVisitCount(Long visitCount) {
