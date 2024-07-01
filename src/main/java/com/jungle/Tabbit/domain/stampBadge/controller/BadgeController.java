@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,5 +30,12 @@ public class BadgeController {
     @ApiResponse(responseCode = "200", description = "칭호 조회 성공", content = @Content(schema = @Schema(implementation = BadgeResponseListDto.class)))
     public CommonResponse<?> getBadgeAll(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return CommonResponse.success(ResponseStatus.SUCCESS_OK, badgeService.getBadgeAll(userDetails.getUsername()));
+    }
+
+    @GetMapping("/{username}")
+    @Operation(summary = "유저의 모든 칭호 조회", description = "특정 유저가 가진 모든 칭호를 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "유저의 모든 칭호 조회 성공", content = @Content(schema = @Schema(implementation = BadgeResponseListDto.class)))
+    public CommonResponse<BadgeResponseListDto> getBadgeAllByUser(@PathVariable String username) {
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK, badgeService.getBadgeAll(username));
     }
 }
