@@ -4,6 +4,8 @@ import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
 import com.jungle.Tabbit.domain.stampBadge.dto.BadgeResponseDto;
 import com.jungle.Tabbit.domain.stampBadge.dto.BadgeResponseListDto;
+import com.jungle.Tabbit.domain.stampBadge.dto.MemberBadgeResponseDto;
+import com.jungle.Tabbit.domain.stampBadge.dto.UserWithBadgeResponseListDto;
 import com.jungle.Tabbit.domain.stampBadge.entity.Badge;
 import com.jungle.Tabbit.domain.stampBadge.entity.MemberBadge;
 import com.jungle.Tabbit.domain.stampBadge.repository.BadgeRepository;
@@ -49,6 +51,20 @@ public class BadgeService {
         Long earnedBadgeCount = (long) badgedIds.size();
 
         return BadgeResponseListDto.of(totalBadgeCount, earnedBadgeCount, badgeResponseList);
+    }
+
+    @Transactional(readOnly = true)
+    public UserWithBadgeResponseListDto getUsersWithBadge(Long badgeId) {
+        Badge badge = badgeRepository.findByBadgeId(badgeId)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_BADGE_NOT_FOUND));
+
+        List<MemberBadge> memberBadges = memberBadgeRepository.findByBadge_BadgeId(badgeId);
+
+        List<MemberBadgeResponseDto> members = memberBadges.stream()
+                .map(MemberBadgeResponseDto::of)
+                .collect(Collectors.toList());
+
+        return UserWithBadgeResponseListDto.of(badge, members);
     }
 
     public void awardBadge(Member member, Long badgeId) {
