@@ -45,7 +45,7 @@ public class MemberController {
 
     @PutMapping("/update")
     @Operation(summary = "회원 정보 수정", description = "회원 정보를 수정합니다.")
-    @ApiResponse(responseCode = "200", description = "회원 정보 수정 성공",content = @Content(schema = @Schema(implementation = MemberUpdateRequestDto.class)))
+    @ApiResponse(responseCode = "200", description = "회원 정보 수정 성공",content = @Content(schema = @Schema(implementation = CommonResponse.class)))
     public CommonResponse<?> update(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody @Valid MemberUpdateRequestDto requestDto) {
         memberService.updateMember(userDetails.getUsername(),requestDto);
 
