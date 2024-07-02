@@ -61,10 +61,7 @@ public class BadgeService {
         List<MemberBadge> memberBadges = memberBadgeRepository.findByBadge_BadgeId(badgeId);
 
         List<MemberBadgeResponseDto> members = memberBadges.stream()
-                .map(memberBadge -> MemberBadgeResponseDto.of(
-                        memberBadge.getMember().getMemberId(),
-                        memberBadge.getMember().getNickname(),
-                        memberBadge.getBadge().getName()))
+                .map(MemberBadgeResponseDto::of)
                 .collect(Collectors.toList());
 
         return UserWithBadgeResponseListDto.of(badge, members);

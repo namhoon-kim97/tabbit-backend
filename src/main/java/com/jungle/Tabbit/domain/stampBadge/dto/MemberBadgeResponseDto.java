@@ -1,5 +1,6 @@
 package com.jungle.Tabbit.domain.stampBadge.dto;
 
+import com.jungle.Tabbit.domain.stampBadge.entity.MemberBadge;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,11 +18,11 @@ public class MemberBadgeResponseDto {
     @Schema(description = "칭호 이름", example = "Super User")
     private String badgeName;
 
-    public static MemberBadgeResponseDto of(Long memberId, String nickname, String badgeName) {
+    public static MemberBadgeResponseDto of(MemberBadge memberBadge) {
         return MemberBadgeResponseDto.builder()
-                .memberId(memberId)
-                .nickname(nickname)
-                .badgeName(badgeName)
+                .memberId(memberBadge.getMember().getMemberId())
+                .nickname(memberBadge.getMember().getNickname())
+                .badgeName(memberBadge.getBadge().getName())
                 .build();
     }
 }
