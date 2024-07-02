@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -58,14 +57,9 @@ public class BadgeService {
     public UserWithBadgeResponseListDto getUsersWithBadge(Long badgeId) {
         Badge badge = badgeRepository.findByBadgeId(badgeId)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_BADGE_NOT_FOUND));
-        if (badge == null) {
-            return UserWithBadgeResponseListDto.of(badgeId, "", List.of());
-        }
 
         List<MemberBadge> memberBadges = memberBadgeRepository.findByBadge_BadgeId(badgeId);
-        if (memberBadges == null) {
-            memberBadges = Collections.emptyList();
-        }
+
         List<MemberBadgeResponseDto> members = memberBadges.stream()
                 .map(memberBadge -> MemberBadgeResponseDto.of(
                         memberBadge.getMember().getMemberId(),
