@@ -1,6 +1,6 @@
 package com.jungle.Tabbit.domain.image.service;
 
-import com.jungle.Tabbit.global.exception.FileUploadException;
+import com.jungle.Tabbit.global.exception.FileException;
 import com.jungle.Tabbit.global.model.ResponseStatus;
 import io.micrometer.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -41,11 +41,11 @@ public class ImageService {
         String mimeType = file.getContentType();
 
         if (file.getSize() > parseFileSize(MAX_FILE_SIZE)) {
-            throw new FileUploadException(ResponseStatus.FAIL_FILE_SIZE);
+            throw new FileException(ResponseStatus.FAIL_FILE_SIZE);
         }
 
         if (!isImageFile(mimeType)) {
-            throw new FileUploadException(ResponseStatus.FAIL_FILE_MIME);
+            throw new FileException(ResponseStatus.FAIL_FILE_MIME);
         }
 
         createUploadFolderIfNeeded(uploadFolder);
@@ -57,7 +57,7 @@ public class ImageService {
             file.transferTo(filePath.toFile());
         } catch (IOException e) {
             log.error("파일을 저장하는 도중 오류가 발생했습니다. 파일명 : {}", originalFileName, e);
-            throw new FileUploadException(ResponseStatus.FAIL_FILE_UPLOAD);
+            throw new FileException(ResponseStatus.FAIL_FILE_UPLOAD);
         }
 
         return imageFileName;
@@ -73,13 +73,13 @@ public class ImageService {
                     return Files.readAllBytes(imagePath);
                 } catch (IOException e) {
                     log.error("파일을 불러오는 도중 오류가 발생했습니다. 파일명 : {}", imagePath, e);
-                    throw new FileUploadException(ResponseStatus.FAIL_FILE_LOAD);
+                    throw new FileException(ResponseStatus.FAIL_FILE_LOAD);
                 }
             } else {
-                throw new FileUploadException(ResponseStatus.FAIL_FILE_NOT_FOUND);
+                throw new FileException(ResponseStatus.FAIL_FILE_NOT_FOUND);
             }
         } else {
-            throw new FileUploadException(ResponseStatus.FAIL_FILE_PATH);
+            throw new FileException(ResponseStatus.FAIL_FILE_PATH);
         }
     }
 
@@ -110,7 +110,7 @@ public class ImageService {
                 Files.createDirectories(uploadFolderPath);
             } catch (IOException e) {
                 log.error("업로드 폴더를 생성하는 도중 오류가 발생했습니다. 경로 : {}", uploadFolder, e);
-                throw new FileUploadException(ResponseStatus.FAIL_FILE_UPLOAD);
+                throw new FileException(ResponseStatus.FAIL_FILE_UPLOAD);
             }
         }
     }
