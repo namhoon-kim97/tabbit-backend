@@ -3,6 +3,7 @@ package com.jungle.Tabbit.domain.member.service;
 import com.jungle.Tabbit.domain.member.dto.MemberJoinRequestDto;
 import com.jungle.Tabbit.domain.member.dto.MemberLoginDto;
 import com.jungle.Tabbit.domain.member.dto.MemberLoginRequestDto;
+import com.jungle.Tabbit.domain.member.dto.MemberUpdateRequestDto;
 import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
 import com.jungle.Tabbit.domain.stampBadge.entity.Badge;
@@ -83,5 +84,15 @@ public class MemberService {
                 .memberRole(member.getMemberRole())
                 .token(token)
                 .build();
+    }
+
+    public void updateMember(String username, MemberUpdateRequestDto requestDto){
+        Member member = memberRepository.findMemberByUsername(username)
+                .orElseThrow(() -> new NotFoundException(FAIL_MEMBER_NOT_FOUND));
+
+        Badge badge = badgeRepository.findByBadgeId(requestDto.getBadgeId())
+                .orElseThrow(() -> new NotFoundException(FAIL_BADGE_NOT_FOUND));
+
+        member.updateMemberInfo(requestDto.getNickname(), passwordEncoder.encode(requestDto.getPassword()), badge);
     }
 }

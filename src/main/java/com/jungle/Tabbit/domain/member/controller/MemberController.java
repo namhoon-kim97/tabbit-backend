@@ -1,10 +1,8 @@
 package com.jungle.Tabbit.domain.member.controller;
 
-import com.jungle.Tabbit.domain.member.dto.MemberJoinRequestDto;
-import com.jungle.Tabbit.domain.member.dto.MemberLoginDto;
-import com.jungle.Tabbit.domain.member.dto.MemberLoginRequestDto;
-import com.jungle.Tabbit.domain.member.dto.MemberLoginResponseDto;
+import com.jungle.Tabbit.domain.member.dto.*;
 import com.jungle.Tabbit.domain.member.service.MemberService;
+import com.jungle.Tabbit.global.config.security.CustomUserDetails;
 import com.jungle.Tabbit.global.model.CommonResponse;
 import com.jungle.Tabbit.global.model.ResponseStatus;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,10 +12,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/member")
@@ -45,5 +41,14 @@ public class MemberController {
         MemberLoginResponseDto memberLoginResponseDto = memberLoginDto.toResponseDto();
 
         return CommonResponse.success(ResponseStatus.SUCCESS_LOGIN, memberLoginResponseDto);
+    }
+
+    @PutMapping("/update")
+    @Operation(summary = "회원 정보 수정", description = "회원 정보를 수정합니다.")
+    @ApiResponse(responseCode = "200", description = "회원 정보 수정 성공",content = @Content(schema = @Schema(implementation = CommonResponse.class)))
+    public CommonResponse<?> update(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody @Valid MemberUpdateRequestDto requestDto) {
+        memberService.updateMember(userDetails.getUsername(),requestDto);
+
+        return CommonResponse.success(ResponseStatus.SUCCESS_UPDATE);
     }
 }
