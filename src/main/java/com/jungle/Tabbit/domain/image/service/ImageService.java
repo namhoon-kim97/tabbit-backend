@@ -64,14 +64,12 @@ public class ImageService {
     }
 
     public byte[] getImage(String imageUrl) {
-        // 프로필 이미지 경로가 null이 아니고 빈 문자열이 아닌 경우에만 읽어옴
+        // 프로필 이미지 경로가 null이 아니고 빈 문자열이 아닌 경우
         if (!StringUtils.isEmpty(imageUrl)) {
-//            Path imagePath = Paths.get(imageUrl);
             Path imagePath = Paths.get(uploadFolder, imageUrl);
-            // 파일이 존재하는 경우에만 읽어옴
+            // 파일이 존재하는 경우
             if (Files.exists(imagePath)) {
                 try {
-//                    getContentType(imageUrl)
                     return Files.readAllBytes(imagePath);
                 } catch (IOException e) {
                     log.error("파일을 불러오는 도중 오류가 발생했습니다. 파일명 : {}", imagePath, e);
