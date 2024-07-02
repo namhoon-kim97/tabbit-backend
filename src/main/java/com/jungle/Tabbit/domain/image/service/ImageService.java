@@ -1,7 +1,8 @@
-package com.jungle.Tabbit.domain.restaurant.service;
+package com.jungle.Tabbit.domain.image.service;
 
 import com.jungle.Tabbit.global.exception.FileUploadException;
 import com.jungle.Tabbit.global.model.ResponseStatus;
+import io.micrometer.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,17 +16,19 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static com.google.common.io.Files.getFileExtension;
+
 @Slf4j
 @Service
 public class ImageService {
 
-    @Value("${spring.file.upload}")
+    @Value("${spring.file.upload.restaurant}")
     private String uploadFolder;
 
     @Value("${spring.servlet.multipart.max-file-size}")
     private String MAX_FILE_SIZE;
-    
-    private static final List<String> IMAGE_MIME_TYPES = Arrays.asList(
+
+    private static final List<String> imageMimeTypesList = Arrays.asList(
             "image/jpeg",
             "image/png",
             "image/gif",
@@ -53,15 +56,47 @@ public class ImageService {
         try {
             file.transferTo(filePath.toFile());
         } catch (IOException e) {
-            log.error("파일을 업로드하는 도중 오류가 발생했습니다. 파일명 : {}", originalFileName, e);
+            log.error("파일을 저장하는 도중 오류가 발생했습니다. 파일명 : {}", originalFileName, e);
             throw new FileUploadException(ResponseStatus.FAIL_FILE_UPLOAD);
         }
 
         return imageFileName;
     }
 
+    public byte[] getImage(String imageUrl) {
+        // 프로필 이미지 경로가 null이 아니고 빈 문자열이 아닌 경우에만 읽어옴
+        if (!StringUtils.isEmpty(imageUrl)) {
+//            Path imagePath = Paths.get(imageUrl);
+            Path imagePath = Paths.get(uploadFolder, imageUrl);
+            // 파일이 존재하는 경우에만 읽어옴
+            if (Files.exists(imagePath)) {
+                try {
+//                    getContentType(imageUrl)
+                    return Files.readAllBytes(imagePath);
+                } catch (IOException e) {
+                    log.error("파일을 불러오는 도중 오류가 발생했습니다. 파일명 : {}", imagePath, e);
+                    throw new FileUploadException(ResponseStatus.FAIL_FILE_LOAD);
+                }
+            } else {
+                throw new FileUploadException(ResponseStatus.FAIL_FILE_NOT_FOUND);
+            }
+        } else {
+            throw new FileUploadException(ResponseStatus.FAIL_FILE_PATH);
+        }
+    }
+
+    public String getContentType(String imageUrl) {
+        String extension = getFileExtension(imageUrl).toLowerCase();
+        for (String mimeType : imageMimeTypesList) {
+            if (mimeType.endsWith(extension)) {
+                return mimeType;
+            }
+        }
+        return null;
+    }
+
     private Boolean isImageFile(String mimeType) {
-        return IMAGE_MIME_TYPES.contains(mimeType);
+        return imageMimeTypesList.contains(mimeType);
     }
 
     private String getUniqueFileName(String originalFileName) {
