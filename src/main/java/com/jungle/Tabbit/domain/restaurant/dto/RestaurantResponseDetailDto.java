@@ -17,6 +17,9 @@ public class RestaurantResponseDetailDto {
     @Schema(description = "가게 이름", example = "맛있는 식당")
     private String name; // 가게 이름
 
+    @Schema(description = "맛집 이미지 경로", example = "image.png")
+    private String imageUrl; // 맛집 이미지 경로
+
     @Schema(description = "카테고리 이름", example = "한식")
     private String categoryName; // 카테고리 이름
 
@@ -48,6 +51,7 @@ public class RestaurantResponseDetailDto {
         return RestaurantResponseDetailDto.builder()
                 .restaurantId(restaurant.getRestaurantId())
                 .name(restaurant.getName())
+                .imageUrl(restaurant.getImageUrl())
                 .categoryName(restaurant.getCategory().getCategoryName())
                 .roadAddress(restaurant.getAddress().getRoadAddress())
                 .detailAddress(restaurant.getAddress().getDetailAddress())
