@@ -78,10 +78,14 @@ public enum ResponseStatus {
     // Badge
     FAIL_BADGE_NOT_FOUND("해당 칭호를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
-    // File Upload
-    FAIL_FILE_SIZE("10MB 이하 파일만 업로드 할 수 있습니다.", HttpStatus.PAYLOAD_TOO_LARGE),
+    // File
+    FAIL_FILE_SIZE("5MB 이하 파일만 업로드 할 수 있습니다.", HttpStatus.PAYLOAD_TOO_LARGE),
     FAIL_FILE_MIME("이미지 파일만 업로드할 수 있습니다.", HttpStatus.BAD_REQUEST),
-    FAIL_FILE_UPLOAD("파일을 업로드하는 도중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+    FAIL_FILE_UPLOAD("파일을 저장하는 도중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    FAIL_FILE_LOAD("파일을 불러오는 도중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    FAIL_FILE_NOT_FOUND("해당 파일을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    FAIL_FILE_PATH("해당 파일 경로가 비어 있습니다.", HttpStatus.BAD_REQUEST);
+
 
     private String message;
 
