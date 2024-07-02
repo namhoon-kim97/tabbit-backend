@@ -17,6 +17,9 @@ public class UserWithBadgeResponseListDto {
     @Schema(description = "칭호 이름", example = "Super User")
     private String badgeName;
 
+    @Schema(description = "칭호 트리거", example = "총 도장 30개를 모은 경우")
+    private String badgeDescription;
+
     @Schema(description = "칭호를 가진 유저 리스트")
     private List<MemberBadgeResponseDto> members;
 
@@ -24,6 +27,7 @@ public class UserWithBadgeResponseListDto {
         return UserWithBadgeResponseListDto.builder()
                 .badgeId(badge.getBadgeId())
                 .badgeName(badge.getName())
+                .badgeDescription(badge.getDescription())
                 .members(members)
                 .build();
     }
