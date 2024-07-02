@@ -51,6 +51,7 @@ public class Restaurant extends Timestamped {
         this.member = member;
         this.name = name;
         this.imageUrl = imageUrl;
+        this.imageUrl = imageUrl;
         this.category = category;
         this.address = address;
         this.latitude = latitude;

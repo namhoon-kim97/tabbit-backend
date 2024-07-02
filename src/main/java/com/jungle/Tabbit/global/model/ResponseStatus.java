@@ -70,6 +70,10 @@ public enum ResponseStatus {
 
     // Restaurant
     FAIL_RESTAURANT_NOT_FOUND("클라이언트가 요청한 맛집을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+
+    // File
+    FAIL_FILE_NOT_SAVE("파일 업로드에 실패하였습니다.", HttpStatus.BAD_REQUEST),
+    FAIL_RESTAURANT_NOT_FOUND("클라이언트가 요청한 맛집을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     FAIL_RESTAURANT_DETAIL_NOT_FOUND("클라이언트가 요청한 맛집 상세정보를을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
     // Notification

@@ -8,7 +8,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-@Schema(description = "맛집 디테일 응답DTO")
+@Schema(description = "맛집 디테일 응답 DTO")
 public class RestaurantResponseDetailDto {
 
     @Schema(description = "맛집 id", example = "1")
