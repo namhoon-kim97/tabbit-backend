@@ -1,5 +1,6 @@
 package com.jungle.Tabbit.domain.stampBadge.dto;
 
+import com.jungle.Tabbit.domain.stampBadge.entity.Badge;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,10 +20,10 @@ public class UserWithBadgeResponseListDto {
     @Schema(description = "칭호를 가진 유저 리스트")
     private List<MemberBadgeResponseDto> members;
 
-    public static UserWithBadgeResponseListDto of(Long badgeId, String badgeName, List<MemberBadgeResponseDto> members) {
+    public static UserWithBadgeResponseListDto of(Badge badge, List<MemberBadgeResponseDto> members) {
         return UserWithBadgeResponseListDto.builder()
-                .badgeId(badgeId)
-                .badgeName(badgeName)
+                .badgeId(badge.getBadgeId())
+                .badgeName(badge.getName())
                 .members(members)
                 .build();
     }

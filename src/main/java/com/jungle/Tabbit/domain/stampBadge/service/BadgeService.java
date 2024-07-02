@@ -67,7 +67,7 @@ public class BadgeService {
                         memberBadge.getBadge().getName()))
                 .collect(Collectors.toList());
 
-        return UserWithBadgeResponseListDto.of(badge.getBadgeId(), badge.getName(), members);
+        return UserWithBadgeResponseListDto.of(badge, members);
     }
 
     public void awardBadge(Member member, Long badgeId) {
