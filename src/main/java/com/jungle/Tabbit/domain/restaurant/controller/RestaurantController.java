@@ -89,7 +89,7 @@ public class RestaurantController {
     @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
     public CommonResponse<?> updateRestaurant(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable @Parameter(description = "맛집 ID", required = true) Long restaurantId,
                                               @RequestPart @Parameter(description = "맛집 정보 변경 요청 DTO", required = true) RestaurantRequestDto requestDto,
-                                              @RequestPart("multipartFile") @Parameter(description = "multipart/form-data 형식의 맛집 이미지", required = true) MultipartFile file) {
+                                              @RequestPart("multipartFile") @Parameter(description = "multipart/form-data 형식의 맛집 이미지\n기본이미지 사용 시 filename: DEFAULT", required = true) MultipartFile file) {
         String imageFileName = imageService.uploadImage(file);
         restaurantService.updateRestaurant(restaurantId, requestDto, userDetails.getUsername(), imageFileName);
         return CommonResponse.success(ResponseStatus.SUCCESS_OK);
