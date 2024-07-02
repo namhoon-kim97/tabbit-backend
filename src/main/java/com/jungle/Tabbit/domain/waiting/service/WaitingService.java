@@ -229,7 +229,6 @@ public class WaitingService {
     }
 
     private int getCurrentWaitingPosition(Waiting waiting, List<WaitingStatus> statuses) {
-        //List<Waiting> waitingList = waitingRepository.findByRestaurantAndWaitingStatusOrderByWaitingNumberAsc(waiting.getRestaurant(), WaitingStatus.STATUS_WAITING);
         List<Waiting> waitingList = waitingRepository.findByRestaurantAndWaitingStatusInOrderByWaitingNumberAsc(waiting.getRestaurant(), statuses);
         for (int i = 0; i < waitingList.size(); i++) {
             if (waitingList.get(i).getWaitingId().equals(waiting.getWaitingId())) {
