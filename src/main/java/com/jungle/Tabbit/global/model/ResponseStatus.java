@@ -70,12 +70,22 @@ public enum ResponseStatus {
 
     // Restaurant
     FAIL_RESTAURANT_NOT_FOUND("클라이언트가 요청한 맛집을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    FAIL_RESTAURANT_DETAIL_NOT_FOUND("클라이언트가 요청한 맛집 상세정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
     // Notification
     FAIL_NOTIFICATION_NOT_FOUND("클라이언트가 요청한 알림을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
     // Badge
-    FAIL_BADGE_NOT_FOUND("해당 칭호를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
+    FAIL_BADGE_NOT_FOUND("해당 칭호를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+
+    // File
+    FAIL_FILE_SIZE("5MB 이하 파일만 업로드 할 수 있습니다.", HttpStatus.PAYLOAD_TOO_LARGE),
+    FAIL_FILE_MIME("이미지 파일만 업로드할 수 있습니다.", HttpStatus.BAD_REQUEST),
+    FAIL_FILE_UPLOAD("파일을 저장하는 도중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    FAIL_FILE_LOAD("파일을 불러오는 도중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    FAIL_FILE_NOT_FOUND("해당 파일을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    FAIL_FILE_PATH("해당 파일 경로가 비어 있습니다.", HttpStatus.BAD_REQUEST);
+
 
     private String message;
 

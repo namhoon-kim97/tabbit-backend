@@ -8,6 +8,7 @@ import com.jungle.Tabbit.domain.restaurant.entity.Category;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
 import com.jungle.Tabbit.domain.restaurant.entity.RestaurantDetail;
 import com.jungle.Tabbit.domain.restaurant.repository.CategoryRepository;
+import com.jungle.Tabbit.domain.restaurant.repository.RestaurantDetailRepository;
 import com.jungle.Tabbit.domain.restaurant.repository.RestaurantRepository;
 import com.jungle.Tabbit.domain.stampBadge.repository.StampRepository;
 import com.jungle.Tabbit.domain.waiting.entity.WaitingStatus;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
+    private final RestaurantDetailRepository restaurantDetailRepository;
     private final MemberRepository memberRepository;
     private final StampRepository stampRepository;
     private final CategoryRepository categoryRepository;
@@ -66,9 +68,8 @@ public class RestaurantService {
         return RestaurantResponseListDto.builder().restaurantResponseList(restaurantResponseList).build();
     }
 
-    public void createRestaurant(RestaurantRequestDto requestDto, String username) {
+    public void createRestaurant(RestaurantRequestDto requestDto, String username, String imageFileName) {
         Member member = getMemberByUsername(username);
-
         Category category = getCategory(requestDto.getCategoryCd());
 
         Address address = new Address(
@@ -80,7 +81,19 @@ public class RestaurantService {
                 requestDto.getDetailAddress()
         );
 
+        Restaurant restaurant = new Restaurant(
+                member,
+                requestDto.getPlaceName(),
+                imageFileName,
+                category,
+                address,
+                requestDto.getLatitude(),
+                requestDto.getLongitude(),
+                requestDto.getEstimatedTimePerTeam()
+        );
+
         RestaurantDetail restaurantDetail = new RestaurantDetail(
+                restaurant,
                 requestDto.getOpeningHours(),
                 requestDto.getBreakTime(),
                 requestDto.getHolidays(),
@@ -88,17 +101,8 @@ public class RestaurantService {
                 requestDto.getDescription()
         );
 
-        Restaurant restaurant = new Restaurant(
-                restaurantDetail,
-                member,
-                requestDto.getPlaceName(),
-                category,
-                address,
-                requestDto.getLatitude(),
-                requestDto.getLongitude(),
-                requestDto.getEstimatedTimePerTeam()
-        );
         restaurantRepository.save(restaurant);
+        restaurantDetailRepository.save(restaurantDetail);
     }
 
     @Transactional(readOnly = true)
@@ -118,10 +122,11 @@ public class RestaurantService {
     public RestaurantResponseDetailDto getRestaurantDetailInfo(Long restaurantId, String username) {
         Member member = getMemberByUsername(username);
         Restaurant restaurant = getRestaurantById(restaurantId);
+        RestaurantDetail restaurantDetail = getRestaurantDetailByRestaurant(restaurant);
 
         Boolean earnedStamp = stampRepository.findByMemberAndRestaurant(member, restaurant).isPresent();
 
-        return RestaurantResponseDetailDto.of(restaurant, earnedStamp);
+        return RestaurantResponseDetailDto.of(restaurant, restaurantDetail, earnedStamp);
     }
 
     public void updateRestaurantEstimatedTime(Long restaurantId, RestaurantTimeUpdateRequestDto requestDto, String username) {
@@ -134,19 +139,20 @@ public class RestaurantService {
         restaurant.updateEstimateTime(requestDto.getEstimatedTimePerTeam());
     }
 
-    public void updateRestaurant(Long restaurantId, RestaurantRequestDto requestDto, String username) {
+    public void updateRestaurant(Long restaurantId, RestaurantRequestDto requestDto, String username, String imageFileName) {
         Member member = getMemberByUsername(username);
         Restaurant restaurant = getRestaurantById(restaurantId);
+        RestaurantDetail restaurantDetail = getRestaurantDetailByRestaurant(restaurant);
         if (!restaurant.getMember().equals(member)) {
             throw new BusinessLogicException(ResponseStatus.FAIL_NOT_OWNER);
         }
 
         restaurant.getAddress().update(requestDto.getSido(), requestDto.getSigungu(), requestDto.getEupmyeondong(),
                 requestDto.getRoadAddressName(), requestDto.getAddressName(), requestDto.getDetailAddress());
-        restaurant.getRestaurantDetail().update(requestDto.getOpeningHours(), requestDto.getBreakTime(),
-                requestDto.getHolidays(), requestDto.getRestaurantNumber(), requestDto.getDescription());
-        restaurant.update(requestDto.getPlaceName(), getCategory(requestDto.getCategoryCd()),
+        restaurant.update(requestDto.getPlaceName(), imageFileName, getCategory(requestDto.getCategoryCd()),
                 requestDto.getLatitude(), requestDto.getLongitude(), requestDto.getEstimatedTimePerTeam());
+        restaurantDetail.update(requestDto.getOpeningHours(), requestDto.getBreakTime(),
+                requestDto.getHolidays(), requestDto.getRestaurantNumber(), requestDto.getDescription());
     }
 
     private Member getMemberByUsername(String username) {
@@ -157,6 +163,11 @@ public class RestaurantService {
     private Restaurant getRestaurantById(Long restaurantId) {
         return restaurantRepository.findByRestaurantId(restaurantId)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
+    }
+
+    private RestaurantDetail getRestaurantDetailByRestaurant(Restaurant restaurant) {
+        return restaurantDetailRepository.findByRestaurant(restaurant)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_DETAIL_NOT_FOUND));
     }
 
     private Category getCategory(String categoryCd) {

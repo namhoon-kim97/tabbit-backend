@@ -13,8 +13,11 @@ public class RestaurantResponseSummaryDto {
     @Schema(description = "맛집 id", example = "1")
     private Long restaurantId;
 
-    @Schema(description = "가게 이름", example = "맛있는 식당")
-    private String name; // 가게 이름
+    @Schema(description = "맛집 이름", example = "맛있는 식당")
+    private String name; // 맛집 이름
+
+    @Schema(description = "맛집 이미지 경로", example = "image.png")
+    private String imageUrl; // 맛집 이미지 경로
 
     @Schema(description = "카테고리 이름", example = "한식")
     private String categoryName; // 카테고리 이름
@@ -35,6 +38,7 @@ public class RestaurantResponseSummaryDto {
         return RestaurantResponseSummaryDto.builder()
                 .restaurantId(restaurant.getRestaurantId())
                 .name(restaurant.getName())
+                .imageUrl(restaurant.getImageUrl())
                 .categoryName(restaurant.getCategory().getCategoryName())
                 .summaryAddress(restaurant.getAddress().getSido() + " " + restaurant.getAddress().getSigungu() + " " + restaurant.getAddress().getEupmyeondong())
                 .earnedStamp(earnedStamp)
