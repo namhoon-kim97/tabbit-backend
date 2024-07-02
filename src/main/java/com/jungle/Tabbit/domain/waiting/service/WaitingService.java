@@ -26,6 +26,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,7 +57,7 @@ public class WaitingService {
         Waiting waiting = new Waiting(requestDto.getPeopleNumber(), queueNumber.intValue(), restaurant, WaitingStatus.STATUS_WAITING, member);
         waitingRepository.save(waiting);
 
-        int currentWaitingPosition = getCurrentWaitingPosition(waiting);
+        int currentWaitingPosition = getCurrentWaitingPosition(waiting, Arrays.asList(WaitingStatus.STATUS_WAITING, WaitingStatus.STATUS_CALLED));
         Long estimatedWaitTime = calculateEstimatedWaitTime(currentWaitingPosition, restaurant.getEstimatedTimePerTeam());
 
         sendRegistrationNotification(member, restaurant, waiting, currentWaitingPosition, estimatedWaitTime, queueNumber);
@@ -72,11 +73,12 @@ public class WaitingService {
     @Transactional(readOnly = true)
     public WaitingListResponseDto getUserWaitingList(String username) {
         Member member = getMemberByUsername(username);
-        List<Waiting> waitingList = waitingRepository.findByMemberAndWaitingStatus(member, WaitingStatus.STATUS_WAITING);
+        List<Waiting> waitingList = waitingRepository.findByMemberAndWaitingStatusIn(
+                member, Arrays.asList(WaitingStatus.STATUS_WAITING, WaitingStatus.STATUS_CALLED));
 
         List<WaitingResponseDto> waitingResponseDtos = waitingList.stream()
                 .map(waiting -> {
-                    int currentWaitingPosition = getCurrentWaitingPosition(waiting);
+                    int currentWaitingPosition = getCurrentWaitingPosition(waiting, Arrays.asList(WaitingStatus.STATUS_WAITING, WaitingStatus.STATUS_CALLED));
                     Long estimatedWaitTime = calculateEstimatedWaitTime(currentWaitingPosition, waiting.getRestaurant().getEstimatedTimePerTeam());
                     return WaitingResponseDto.of(waiting, estimatedWaitTime, currentWaitingPosition);
                 })
@@ -226,8 +228,8 @@ public class WaitingService {
         return storeQueueNumbers.get(storeId).incrementAndGet();
     }
 
-    private int getCurrentWaitingPosition(Waiting waiting) {
-        List<Waiting> waitingList = waitingRepository.findByRestaurantAndWaitingStatusOrderByWaitingNumberAsc(waiting.getRestaurant(), WaitingStatus.STATUS_WAITING);
+    private int getCurrentWaitingPosition(Waiting waiting, List<WaitingStatus> statuses) {
+        List<Waiting> waitingList = waitingRepository.findByRestaurantAndWaitingStatusInOrderByWaitingNumberAsc(waiting.getRestaurant(), statuses);
         for (int i = 0; i < waitingList.size(); i++) {
             if (waitingList.get(i).getWaitingId().equals(waiting.getWaitingId())) {
                 return i + 1;
@@ -290,7 +292,7 @@ public class WaitingService {
         Member member = getMemberByUsername(username);
         Waiting userWaiting = getWaitingByMemberAndRestaurant(member, restaurant);
 
-        int currentWaitingPosition = getCurrentWaitingPosition(userWaiting);
+        int currentWaitingPosition = getCurrentWaitingPosition(userWaiting, Arrays.asList(WaitingStatus.STATUS_WAITING, WaitingStatus.STATUS_CALLED));
         Long estimatedWaitTime = calculateEstimatedWaitTime(currentWaitingPosition, restaurant.getEstimatedTimePerTeam());
 
         return WaitingResponseDto.of(userWaiting, estimatedWaitTime, currentWaitingPosition);

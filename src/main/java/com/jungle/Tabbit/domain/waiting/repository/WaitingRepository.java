@@ -25,4 +25,8 @@ public interface WaitingRepository extends Repository<Waiting, Long> {
     List<Waiting> findByRestaurantAndWaitingStatus(Restaurant restaurant, WaitingStatus waitingStatus);
 
     Optional<Waiting> findByRestaurantAndWaitingNumberAndWaitingStatus(Restaurant restaurant, int waitingNumber, WaitingStatus waitingStatus);
+
+    List<Waiting> findByMemberAndWaitingStatusIn(Member member, List<WaitingStatus> waitingStatuses);
+
+    List<Waiting> findByRestaurantAndWaitingStatusInOrderByWaitingNumberAsc(Restaurant restaurant, List<WaitingStatus> waitingStatuses);
 }

@@ -3,7 +3,7 @@ package com.jungle.Tabbit.domain.stampBadge.entity;
 import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.restaurant.entity.Category;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
-import com.jungle.Tabbit.global.common.EarnedTimestamped;
+import com.jungle.Tabbit.global.common.Timestamped;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity(name = "memberStamp")
-public class MemberStamp extends EarnedTimestamped {
+public class MemberStamp extends Timestamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "stamp_id")
