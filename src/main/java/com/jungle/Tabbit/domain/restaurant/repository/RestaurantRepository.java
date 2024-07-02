@@ -13,7 +13,7 @@ public interface RestaurantRepository extends Repository<Restaurant, Long> {
 
     void save(Restaurant restaurant);
 
-    @EntityGraph(attributePaths = {"category", "address", "restaurantDetail"})
+    @EntityGraph(attributePaths = {"category", "address"})
     Optional<Restaurant> findByRestaurantId(Long id);
 
     List<Restaurant> findAllByMember(Member member);
