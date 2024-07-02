@@ -55,6 +55,11 @@ public class Member {
         this.badge = badge;
         this.fcmToken = fcmToken;
     }
+    public void updateMemberInfo(String nickname, String password, Badge badge) {
+        this.nickname = nickname;
+        this.password = password;
+        this.badge = badge;
+    }
 
     public void updateFcmToken(String fcmToken) {
         this.fcmToken = fcmToken;
