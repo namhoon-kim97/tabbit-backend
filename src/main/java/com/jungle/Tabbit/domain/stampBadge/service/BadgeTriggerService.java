@@ -46,8 +46,8 @@ public class BadgeTriggerService {
         // 트리거를 처리합니다.
         manipulateTrigger(member, triggers);
 
-        // TOTAL_STAMPS 및 DIVERSITY 트리거를 별도로 처리합니다.
-        List<BadgeTrigger> specialTriggers = badgeTriggerRepository.findTotalStampsAndDiversityTriggers();
+        // TOTAL_STAMPS 및 DIVERSITY, LOCATION 트리거를 별도로 처리합니다.
+        List<BadgeTrigger> specialTriggers = badgeTriggerRepository.findByTriggerTypeIn(List.of("TOTAL_STAMPS", "DIVERSITY", "LOCATION"));
         manipulateTrigger(member, specialTriggers);
     }
 

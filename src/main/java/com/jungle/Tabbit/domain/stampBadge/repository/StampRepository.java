@@ -29,4 +29,5 @@ public interface StampRepository extends Repository<MemberStamp, Long> {
             "LEFT JOIN memberStamp ms ON r.restaurantId = ms.restaurant.restaurantId AND ms.member.memberId = :memberId ")
     List<Object[]> findRestaurantList(@Param("memberId") Long memberId);
 
+    List<MemberStamp> findByMember(Member member);
 }

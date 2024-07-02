@@ -14,4 +14,6 @@ public interface BadgeTriggerRepository extends Repository<BadgeTrigger, Long> {
 
     @Query("SELECT bt FROM BadgeTrigger bt WHERE bt.triggerType = 'TOTAL_STAMPS' OR bt.triggerType = 'DIVERSITY'")
     List<BadgeTrigger> findTotalStampsAndDiversityTriggers();
+
+    List<BadgeTrigger> findByTriggerTypeIn(List<String> triggerTypes);
 }
