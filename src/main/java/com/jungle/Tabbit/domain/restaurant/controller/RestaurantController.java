@@ -1,7 +1,7 @@
 package com.jungle.Tabbit.domain.restaurant.controller;
 
+import com.jungle.Tabbit.domain.image.service.ImageService;
 import com.jungle.Tabbit.domain.restaurant.dto.*;
-import com.jungle.Tabbit.domain.restaurant.service.ImageService;
 import com.jungle.Tabbit.domain.restaurant.service.RestaurantService;
 import com.jungle.Tabbit.global.config.security.CustomUserDetails;
 import com.jungle.Tabbit.global.model.CommonResponse;
