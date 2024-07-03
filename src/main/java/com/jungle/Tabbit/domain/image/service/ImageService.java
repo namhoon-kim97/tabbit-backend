@@ -22,7 +22,7 @@ import static com.google.common.io.Files.getFileExtension;
 @Service
 public class ImageService {
 
-    @Value("${spring.file.upload.restaurant}")
+    @Value("${spring.file.upload}")
     private String uploadFolder;
 
     @Value("${spring.servlet.multipart.max-file-size}")
@@ -41,7 +41,7 @@ public class ImageService {
         if (file == null) {
             return "DEFAULT";
         }
-        
+
         String originalFileName = file.getOriginalFilename();
         String mimeType = file.getContentType();
 
