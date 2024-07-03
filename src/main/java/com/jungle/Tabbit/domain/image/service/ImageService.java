@@ -88,6 +88,30 @@ public class ImageService {
         }
     }
 
+    public void deleteImage(String imageUrl) {
+        if (!StringUtils.isEmpty(imageUrl)) {
+            Path imagePath = Paths.get(uploadFolder, imageUrl);
+            if (Files.exists(imagePath)) {
+                try {
+                    Files.delete(imagePath);
+                } catch (IOException e) {
+                    log.error("파일을 삭제하는 도중 오류가 발생했습니다. 파일명 : {}", imagePath, e);
+                    throw new FileException(ResponseStatus.FAIL_FILE_DELETE);
+                }
+            }
+        }
+    }
+
+    public Boolean isExistImage(String imageUrl) {
+        if (!StringUtils.isEmpty(imageUrl)) {
+            Path imagePath = Paths.get(uploadFolder, imageUrl);
+            if (Files.exists(imagePath)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public String getContentType(String imageUrl) {
         String extension = getFileExtension(imageUrl).toLowerCase();
         for (String mimeType : imageMimeTypesList) {
