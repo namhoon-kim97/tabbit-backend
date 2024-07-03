@@ -14,11 +14,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -37,5 +35,16 @@ public class GuestbookController {
                                              @Parameter(description = "방명록 생성 요청 DTO / 이미지 파일 없을 시 DEFAULT", required = true) GuestbookRequestDto requestDto) {
         guestbookService.createGuestbook(userDetails.getUsername(), restaurantId, requestDto);
         return CommonResponse.success(ResponseStatus.SUCCESS_CREATE);
+    }
+
+    @DeleteMapping("/{restaurantId}/{guestbookId}")
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    @Operation(summary = "방명록 삭제", description = "해당 맛집의 방명록을 삭제합니다.")
+    @ApiResponse(responseCode = "200", description = "삭제 성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
+    public CommonResponse<?> createGuestbook(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                             @PathVariable @Parameter(description = "맛집 ID", required = true) Long restaurantId,
+                                             @PathVariable @Parameter(description = "방명록 ID", required = true) Long guestbookId) {
+        guestbookService.deleteGuestbook(userDetails.getUsername(), restaurantId, guestbookId);
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK);
     }
 }

@@ -86,8 +86,10 @@ public enum ResponseStatus {
     FAIL_FILE_LOAD("파일을 불러오는 도중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     FAIL_FILE_NOT_FOUND("해당 파일을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     FAIL_FILE_PATH("해당 파일 경로가 비어 있습니다.", HttpStatus.BAD_REQUEST),
-    FAIL_FILE_DELETE("파일을 삭제하는 도중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+    FAIL_FILE_DELETE("파일을 삭제하는 도중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
 
+    // Guestbook
+    FAIL_GUESTBOOK_NOT_FOUND("해당 방명록을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
 
     private String message;
 

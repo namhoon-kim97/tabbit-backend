@@ -8,6 +8,7 @@ import com.jungle.Tabbit.domain.restaurant.entity.Guestbook;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
 import com.jungle.Tabbit.domain.restaurant.repository.GuestbookRepository;
 import com.jungle.Tabbit.domain.restaurant.repository.RestaurantRepository;
+import com.jungle.Tabbit.global.exception.BusinessLogicException;
 import com.jungle.Tabbit.global.exception.NotFoundException;
 import com.jungle.Tabbit.global.model.ResponseStatus;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +42,22 @@ public class GuestbookService {
         guestbookRepository.save(guestbook);
     }
 
+    public void deleteGuestbook(String username, Long restaurantId, Long guestbookId) {
+        Member member = getMemberByUsername(username);
+        Restaurant restaurant = getRestaurantById(restaurantId);
+        if (!restaurant.getMember().equals(member)) {
+            throw new BusinessLogicException(ResponseStatus.FAIL_NOT_OWNER);
+        }
+
+        Guestbook guestbook = getGuestbookById(guestbookId);
+
+        if (imageService.isExistImage(guestbook.getImageUrl())) {
+            imageService.deleteImage(guestbook.getImageUrl());
+        }
+
+        guestbookRepository.delete(guestbook);
+    }
+
     private Member getMemberByUsername(String username) {
         return memberRepository.findMemberByUsername(username)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
@@ -49,5 +66,10 @@ public class GuestbookService {
     private Restaurant getRestaurantById(Long restaurantId) {
         return restaurantRepository.findByRestaurantId(restaurantId)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
+    }
+
+    private Guestbook getGuestbookById(Long guestbookId) {
+        return guestbookRepository.findByGuestbookId(guestbookId)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_GUESTBOOK_NOT_FOUND));
     }
 }
