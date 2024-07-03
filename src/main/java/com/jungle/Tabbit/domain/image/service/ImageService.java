@@ -38,6 +38,10 @@ public class ImageService {
     );
 
     public String uploadImage(MultipartFile file) {
+        if (file == null) {
+            return "DEFAULT";
+        }
+        
         String originalFileName = file.getOriginalFilename();
         String mimeType = file.getContentType();
 

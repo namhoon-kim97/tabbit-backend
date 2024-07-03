@@ -24,7 +24,7 @@ public class Guestbook extends EarnedTimestamped {
     @JoinColumn(name = "restaurant_id", nullable = false)
     private Restaurant restaurant;
 
-    @Column(name = "content", nullable = false, length = 255)
+    @Column(name = "content", length = 255)
     private String content;
 
     @Column(name = "image_url", length = 255)

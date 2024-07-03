@@ -1,5 +1,6 @@
 package com.jungle.Tabbit.domain.restaurant.service;
 
+import com.jungle.Tabbit.domain.image.service.ImageService;
 import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
 import com.jungle.Tabbit.domain.restaurant.dto.guestbook.GuestbookRequestDto;
@@ -23,16 +24,19 @@ public class GuestbookService {
     private final MemberRepository memberRepository;
     private final RestaurantRepository restaurantRepository;
     private final GuestbookRepository guestbookRepository;
+    private final ImageService imageService;
 
     public void createGuestbook(String username, Long restaurantId, GuestbookRequestDto requestDto) {
         Member member = getMemberByUsername(username);
         Restaurant restaurant = getRestaurantById(restaurantId);
 
+        String imageFileName = imageService.uploadImage(requestDto.getMultipartFile());
+
         Guestbook guestbook = new Guestbook(
                 member,
                 restaurant,
                 requestDto.getContent(),
-                "DEFAULT"
+                imageFileName
         );
         guestbookRepository.save(guestbook);
     }
