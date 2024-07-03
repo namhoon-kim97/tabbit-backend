@@ -1,9 +1,6 @@
 package com.jungle.Tabbit.domain.member.service;
 
-import com.jungle.Tabbit.domain.member.dto.MemberJoinRequestDto;
-import com.jungle.Tabbit.domain.member.dto.MemberLoginDto;
-import com.jungle.Tabbit.domain.member.dto.MemberLoginRequestDto;
-import com.jungle.Tabbit.domain.member.dto.MemberUpdateRequestDto;
+import com.jungle.Tabbit.domain.member.dto.*;
 import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
 import com.jungle.Tabbit.domain.stampBadge.entity.Badge;
@@ -12,6 +9,7 @@ import com.jungle.Tabbit.domain.stampBadge.repository.BadgeRepository;
 import com.jungle.Tabbit.domain.stampBadge.repository.MemberBadgeRepository;
 import com.jungle.Tabbit.global.config.security.jwt.JwtProvider;
 import com.jungle.Tabbit.global.exception.DuplicatedException;
+import com.jungle.Tabbit.global.exception.InvalidRequestException;
 import com.jungle.Tabbit.global.exception.LoginFailException;
 import com.jungle.Tabbit.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -86,13 +84,24 @@ public class MemberService {
                 .token(token)
                 .build();
     }
-    public void updateMember(String username, MemberUpdateRequestDto requestDto){
+    public void updateMemberInfo(String username, MemberUpdateRequestDto requestDto){
         Member member = memberRepository.findMemberByUsername(username)
                 .orElseThrow(() -> new NotFoundException(FAIL_MEMBER_NOT_FOUND));
 
-        Badge badge = badgeRepository.findByBadgeId(requestDto.getBadgeId())
+        Badge updateBadge = badgeRepository.findByBadgeId(requestDto.getBadgeId())
                 .orElseThrow(() -> new NotFoundException(FAIL_BADGE_NOT_FOUND));
 
-        member.updateMemberInfo(requestDto.getNickname(), passwordEncoder.encode(requestDto.getPassword()), badge);
+        if(!memberBadgeRepository.existsByMemberAndBadge(member, updateBadge)){
+            throw new InvalidRequestException(FAIL_BADGE_NOT_EARNED);
+        }
+
+        member.updateMemberInfo(requestDto.getNickname(), updateBadge);
+    }
+
+    public void updateMemberPassword(String username, MemberPasswordUpdateDto memberPasswordUpdateDto) {
+        Member member = memberRepository.findMemberByUsername(username)
+                .orElseThrow(() -> new NotFoundException(FAIL_MEMBER_NOT_FOUND));
+
+        member.updateMemberPassword(passwordEncoder.encode(memberPasswordUpdateDto.getPassword()));
     }
 }

@@ -77,6 +77,7 @@ public enum ResponseStatus {
 
     // Badge
     FAIL_BADGE_NOT_FOUND("해당 칭호를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    FAIL_BADGE_NOT_EARNED("획득하지 않은 칭호입니다.", HttpStatus.BAD_REQUEST),
 
     // File
     FAIL_FILE_SIZE("5MB 이하 파일만 업로드 할 수 있습니다.", HttpStatus.PAYLOAD_TOO_LARGE),
