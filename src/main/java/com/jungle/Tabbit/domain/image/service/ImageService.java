@@ -30,6 +30,7 @@ public class ImageService {
 
     private static final List<String> imageMimeTypesList = Arrays.asList(
             "image/jpeg",
+            "image/jpg",
             "image/png",
             "image/gif",
             "image/bmp",
