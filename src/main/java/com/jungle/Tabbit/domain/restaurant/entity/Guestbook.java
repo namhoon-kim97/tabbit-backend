@@ -1,18 +1,16 @@
 package com.jungle.Tabbit.domain.restaurant.entity;
 
 import com.jungle.Tabbit.domain.member.entity.Member;
+import com.jungle.Tabbit.global.common.EarnedTimestamped;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-
-import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity(name = "guestbook")
-public class Guestbook {
+public class Guestbook extends EarnedTimestamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "guestbook_id")
@@ -31,10 +29,6 @@ public class Guestbook {
 
     @Column(name = "image_url", length = 255)
     private String imageUrl;
-
-    @CreatedDate
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
 
     public Guestbook(Member member, Restaurant restaurant, String content, String imageUrl) {
         this.member = member;
