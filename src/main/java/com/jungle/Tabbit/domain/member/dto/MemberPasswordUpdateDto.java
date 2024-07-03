@@ -8,5 +8,7 @@ import lombok.Getter;
 @Schema(description = "멤버 패스워드 수정 요청 DTO")
 public class MemberPasswordUpdateDto {
     @Pattern(regexp = "^[a-zA-Z0-9!@#$%^&*()]{8,15}$", message = "Password must be between 8 and 15 characters long and contain only letters and digits.")
-    private String password;
+    private String originPassword;
+    @Pattern(regexp = "^[a-zA-Z0-9!@#$%^&*()]{8,15}$", message = "Password must be between 8 and 15 characters long and contain only letters and digits.")
+    private String newPassword;
 }
