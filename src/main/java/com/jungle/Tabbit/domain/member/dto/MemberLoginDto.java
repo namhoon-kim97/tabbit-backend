@@ -9,12 +9,12 @@ public class MemberLoginDto extends MemberLoginResponseDto{
     private String token;
 
     @Builder
-    public MemberLoginDto(String nickname, MemberRole memberRole, String token) {
-        super(nickname, memberRole);
+    public MemberLoginDto(String nickname, MemberRole memberRole, Long badgeId, String token) {
+        super(nickname, memberRole, badgeId);
         this.token = token;
     }
 
     public MemberLoginResponseDto toResponseDto() {
-        return new MemberLoginResponseDto(getNickname(), getMemberRole());
+        return new MemberLoginResponseDto(getNickname(), getMemberRole(), getBadgeId());
     }
 }

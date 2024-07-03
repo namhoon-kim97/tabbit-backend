@@ -82,10 +82,10 @@ public class MemberService {
         return MemberLoginDto.builder()
                 .nickname(member.getNickname())
                 .memberRole(member.getMemberRole())
+                .badgeId(member.getBadge().getBadgeId())
                 .token(token)
                 .build();
     }
-
     public void updateMember(String username, MemberUpdateRequestDto requestDto){
         Member member = memberRepository.findMemberByUsername(username)
                 .orElseThrow(() -> new NotFoundException(FAIL_MEMBER_NOT_FOUND));

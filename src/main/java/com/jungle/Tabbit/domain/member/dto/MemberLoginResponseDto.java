@@ -13,4 +13,6 @@ public class MemberLoginResponseDto {
     private String nickname;
     @Schema(description = "멤버 Role")
     private MemberRole memberRole;
+    @Schema(description = "멤버 대표칭호ID")
+    private Long badgeId;
 }
