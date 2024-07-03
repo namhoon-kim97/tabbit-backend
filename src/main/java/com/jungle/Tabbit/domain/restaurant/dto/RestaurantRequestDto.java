@@ -45,6 +45,6 @@ public class RestaurantRequestDto {
     private String restaurantNumber; // 전화번호
     @Schema(description = "매장소개")
     private String description; // 매장소개
-
+    @Schema(description = "이미지 파일")
     private MultipartFile multipartFile;
 }

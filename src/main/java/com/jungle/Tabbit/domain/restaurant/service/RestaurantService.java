@@ -1,5 +1,6 @@
 package com.jungle.Tabbit.domain.restaurant.service;
 
+import com.jungle.Tabbit.domain.image.service.ImageService;
 import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
 import com.jungle.Tabbit.domain.restaurant.dto.*;
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Set;
@@ -37,6 +39,7 @@ public class RestaurantService {
     private final StampRepository stampRepository;
     private final CategoryRepository categoryRepository;
     private final WaitingRepository waitingRepository;
+    private final ImageService imageService;
 
     @Transactional(readOnly = true)
     public RestaurantResponseListDto getAllRestaurant(String username) {
@@ -68,9 +71,11 @@ public class RestaurantService {
         return RestaurantResponseListDto.builder().restaurantResponseList(restaurantResponseList).build();
     }
 
-    public void createRestaurant(RestaurantRequestDto requestDto, String username, String imageFileName) {
+    public void createRestaurant(RestaurantRequestDto requestDto, String username) {
         Member member = getMemberByUsername(username);
         Category category = getCategory(requestDto.getCategoryCd());
+
+        String imageFileName = imageService.uploadImage(requestDto.getMultipartFile());
 
         Address address = new Address(
                 requestDto.getSido(),
@@ -139,13 +144,20 @@ public class RestaurantService {
         restaurant.updateEstimateTime(requestDto.getEstimatedTimePerTeam());
     }
 
-    public void updateRestaurant(Long restaurantId, RestaurantRequestDto requestDto, String username, String imageFileName) {
+    public void updateRestaurant(Long restaurantId, RestaurantRequestDto requestDto, String username) {
         Member member = getMemberByUsername(username);
         Restaurant restaurant = getRestaurantById(restaurantId);
         RestaurantDetail restaurantDetail = getRestaurantDetailByRestaurant(restaurant);
         if (!restaurant.getMember().equals(member)) {
             throw new BusinessLogicException(ResponseStatus.FAIL_NOT_OWNER);
         }
+
+        MultipartFile file = requestDto.getMultipartFile();
+        if (imageService.isExistImage(file.getOriginalFilename())) {
+            imageService.deleteImage(file.getOriginalFilename());
+        }
+
+        String imageFileName = imageService.uploadImage(file);
 
         restaurant.getAddress().update(requestDto.getSido(), requestDto.getSigungu(), requestDto.getEupmyeondong(),
                 requestDto.getRoadAddressName(), requestDto.getAddressName(), requestDto.getDetailAddress());
