@@ -3,11 +3,14 @@ package com.jungle.Tabbit.domain.restaurant.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 
 @Getter
 @NoArgsConstructor
+@Setter
 @Schema(description = "맛집 생성/수정 요청 DTO")
 public class RestaurantRequestDto {
     @Schema(description = "업체명")
@@ -42,4 +45,6 @@ public class RestaurantRequestDto {
     private String restaurantNumber; // 전화번호
     @Schema(description = "매장소개")
     private String description; // 매장소개
+
+    private MultipartFile multipartFile;
 }

@@ -50,9 +50,8 @@ public class RestaurantController {
     @PreAuthorize("hasRole('ROLE_MANAGER')")
     @Operation(summary = "맛집 생성", description = "새로운 맛집을 생성합니다.")
     @ApiResponse(responseCode = "201", description = "생성 성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
-    public CommonResponse<?> createRestaurant(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestPart @Parameter(description = "맛집 생성 요청 DTO", required = true) RestaurantRequestDto requestDto,
-                                              @RequestPart("multipartFile") @Parameter(description = "multipart/form-data 형식의 이미지\n기본이미지 사용 시 filename: DEFAULT", required = true) MultipartFile file) {
-        String imageFileName = imageService.uploadImage(file);
+    public CommonResponse<?> createRestaurant(@AuthenticationPrincipal CustomUserDetails userDetails, @Parameter(description = "맛집 생성 요청 DTO", required = true) RestaurantRequestDto requestDto) {
+        String imageFileName = imageService.uploadImage(requestDto.getMultipartFile());
         restaurantService.createRestaurant(requestDto, userDetails.getUsername(), imageFileName);
         return CommonResponse.success(ResponseStatus.SUCCESS_CREATE);
     }
