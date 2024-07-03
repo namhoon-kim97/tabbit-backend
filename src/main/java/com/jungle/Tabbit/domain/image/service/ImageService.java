@@ -22,7 +22,7 @@ import static com.google.common.io.Files.getFileExtension;
 @Service
 public class ImageService {
 
-    @Value("${spring.file.upload.restaurant}")
+    @Value("${spring.file.upload}")
     private String uploadFolder;
 
     @Value("${spring.servlet.multipart.max-file-size}")
@@ -38,6 +38,10 @@ public class ImageService {
     );
 
     public String uploadImage(MultipartFile file) {
+        if (file == null) {
+            return "DEFAULT";
+        }
+
         String originalFileName = file.getOriginalFilename();
         String mimeType = file.getContentType();
 
@@ -86,6 +90,30 @@ public class ImageService {
         } else {
             throw new FileException(ResponseStatus.FAIL_FILE_PATH);
         }
+    }
+
+    public void deleteImage(String imageUrl) {
+        if (!StringUtils.isEmpty(imageUrl)) {
+            Path imagePath = Paths.get(uploadFolder, imageUrl);
+            if (Files.exists(imagePath)) {
+                try {
+                    Files.delete(imagePath);
+                } catch (IOException e) {
+                    log.error("파일을 삭제하는 도중 오류가 발생했습니다. 파일명 : {}", imagePath, e);
+                    throw new FileException(ResponseStatus.FAIL_FILE_DELETE);
+                }
+            }
+        }
+    }
+
+    public Boolean isExistImage(String imageUrl) {
+        if (!StringUtils.isEmpty(imageUrl)) {
+            Path imagePath = Paths.get(uploadFolder, imageUrl);
+            if (Files.exists(imagePath)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public String getContentType(String imageUrl) {

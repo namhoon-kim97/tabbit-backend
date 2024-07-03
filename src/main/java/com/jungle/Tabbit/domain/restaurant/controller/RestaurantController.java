@@ -18,7 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RestController
@@ -50,9 +49,9 @@ public class RestaurantController {
     @PreAuthorize("hasRole('ROLE_MANAGER')")
     @Operation(summary = "맛집 생성", description = "새로운 맛집을 생성합니다.")
     @ApiResponse(responseCode = "201", description = "생성 성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
-    public CommonResponse<?> createRestaurant(@AuthenticationPrincipal CustomUserDetails userDetails, @Parameter(description = "맛집 생성 요청 DTO", required = true) RestaurantRequestDto requestDto) {
-        String imageFileName = imageService.uploadImage(requestDto.getMultipartFile());
-        restaurantService.createRestaurant(requestDto, userDetails.getUsername(), imageFileName);
+    public CommonResponse<?> createRestaurant(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                              @Parameter(description = "맛집 생성 요청 DTO / 이미지 파일 없을 시 DEFAULT", required = true) RestaurantRequestDto requestDto) {
+        restaurantService.createRestaurant(requestDto, userDetails.getUsername());
         return CommonResponse.success(ResponseStatus.SUCCESS_CREATE);
     }
 
@@ -87,10 +86,8 @@ public class RestaurantController {
     @Operation(summary = "맛집 정보 변경", description = "점주가 맛집 정보를 변경합니다.")
     @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
     public CommonResponse<?> updateRestaurant(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable @Parameter(description = "맛집 ID", required = true) Long restaurantId,
-                                              @RequestPart @Parameter(description = "맛집 정보 변경 요청 DTO", required = true) RestaurantRequestDto requestDto,
-                                              @RequestPart("multipartFile") @Parameter(description = "multipart/form-data 형식의 맛집 이미지\n기본이미지 사용 시 filename: DEFAULT", required = true) MultipartFile file) {
-        String imageFileName = imageService.uploadImage(file);
-        restaurantService.updateRestaurant(restaurantId, requestDto, userDetails.getUsername(), imageFileName);
+                                              @Parameter(description = "맛집 정보 변경 요청 DTO", required = true) RestaurantRequestDto requestDto) {
+        restaurantService.updateRestaurant(restaurantId, requestDto, userDetails.getUsername());
         return CommonResponse.success(ResponseStatus.SUCCESS_OK);
     }
 }
