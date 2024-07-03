@@ -43,11 +43,18 @@ public class MemberController {
         return CommonResponse.success(ResponseStatus.SUCCESS_LOGIN, memberLoginResponseDto);
     }
 
-    @PutMapping("/update")
+    @PutMapping("/info")
     @Operation(summary = "회원 정보 수정", description = "회원 정보를 수정합니다.")
-    @ApiResponse(responseCode = "200", description = "회원 정보 수정 성공",content = @Content(schema = @Schema(implementation = CommonResponse.class)))
+    @ApiResponse(responseCode = "200", description = "회원 정보 수정 성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
     public CommonResponse<?> update(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody @Valid MemberUpdateRequestDto requestDto) {
-        memberService.updateMember(userDetails.getUsername(),requestDto);
+        memberService.updateMemberInfo(userDetails.getUsername(), requestDto);
+
+        return CommonResponse.success(ResponseStatus.SUCCESS_UPDATE);
+    }
+
+    @PutMapping("/password")
+    public CommonResponse<?> updatePassword(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody @Valid MemberPasswordUpdateDto memberPasswordUpdateDto) {
+        memberService.updateMemberPassword(userDetails.getUsername(), memberPasswordUpdateDto);
 
         return CommonResponse.success(ResponseStatus.SUCCESS_UPDATE);
     }
