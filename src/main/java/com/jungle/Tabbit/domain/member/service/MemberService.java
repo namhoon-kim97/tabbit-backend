@@ -8,10 +8,7 @@ import com.jungle.Tabbit.domain.stampBadge.entity.MemberBadge;
 import com.jungle.Tabbit.domain.stampBadge.repository.BadgeRepository;
 import com.jungle.Tabbit.domain.stampBadge.repository.MemberBadgeRepository;
 import com.jungle.Tabbit.global.config.security.jwt.JwtProvider;
-import com.jungle.Tabbit.global.exception.DuplicatedException;
-import com.jungle.Tabbit.global.exception.InvalidRequestException;
-import com.jungle.Tabbit.global.exception.LoginFailException;
-import com.jungle.Tabbit.global.exception.NotFoundException;
+import com.jungle.Tabbit.global.exception.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -102,6 +99,10 @@ public class MemberService {
         Member member = memberRepository.findMemberByUsername(username)
                 .orElseThrow(() -> new NotFoundException(FAIL_MEMBER_NOT_FOUND));
 
-        member.updateMemberPassword(passwordEncoder.encode(memberPasswordUpdateDto.getPassword()));
+        if (!passwordEncoder.matches(memberPasswordUpdateDto.getOriginPassword(), member.getPassword())) {
+            throw new PasswordNotMatchException(FAIL_PASSWORD_NOT_MATCH);
+        }
+
+        member.updateMemberPassword(passwordEncoder.encode(memberPasswordUpdateDto.getNewPassword()));
     }
 }
