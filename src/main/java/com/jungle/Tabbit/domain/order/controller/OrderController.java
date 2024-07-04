@@ -1,4 +1,4 @@
 package com.jungle.Tabbit.domain.order.controller;
 
-public class orderController {
+public class OrderController {
 }
