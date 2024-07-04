@@ -23,24 +23,31 @@ public class Notification {
     @Column(nullable = false, name = "message")
     private String message;
 
+    @Column(nullable = false, name = "target")
+    private String target;
+
+    @Column(nullable = false, name = "messageType")
+    private String messageType;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(nullable = false, name = "is_read")
     private boolean isRead;
 
-    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
-    public Notification(String title, String message, Member member) {
+    public Notification(String title, String message, String target, String messageType, Member member) {
         this.title = title;
         this.message = message;
-        this.member = member;
-        this.isRead = false;
+        this.target = target;
+        this.messageType = messageType;
         this.createdAt = LocalDateTime.now();
+        this.isRead = false;
+        this.member = member;
     }
-
 
     public void check() {
         this.isRead = true;
