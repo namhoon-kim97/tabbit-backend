@@ -1,11 +1,8 @@
 package com.jungle.Tabbit.domain.restaurant.service;
 
-import com.jungle.Tabbit.domain.image.service.ImageService;
 import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
 import com.jungle.Tabbit.domain.restaurant.dto.guestbook.GuestbookRequestDto;
-import com.jungle.Tabbit.domain.restaurant.dto.guestbook.GuestbookResponseDto;
-import com.jungle.Tabbit.domain.restaurant.dto.guestbook.GuestbookResponseListDto;
 import com.jungle.Tabbit.domain.restaurant.entity.Guestbook;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
 import com.jungle.Tabbit.domain.restaurant.repository.GuestbookRepository;

@@ -43,7 +43,7 @@ public class RestaurantController {
         return CommonResponse.success(ResponseStatus.SUCCESS_OK, responseDto);
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE})
     @PreAuthorize("hasRole('ROLE_MANAGER')")
     @Operation(summary = "맛집 생성", description = "새로운 맛집을 생성합니다.")
     @ApiResponse(responseCode = "201", description = "생성 성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
