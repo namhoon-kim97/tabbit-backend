@@ -9,6 +9,7 @@ import com.jungle.Tabbit.domain.stampBadge.entity.BadgeTrigger;
 import com.jungle.Tabbit.domain.stampBadge.repository.BadgeRepository;
 import com.jungle.Tabbit.domain.stampBadge.repository.BadgeTriggerRepository;
 import com.jungle.Tabbit.domain.stampBadge.repository.MemberBadgeRepository;
+import com.jungle.Tabbit.domain.stampBadge.service.condition.TriggerCondition;
 import com.jungle.Tabbit.global.exception.NotFoundException;
 import com.jungle.Tabbit.global.model.ResponseStatus;
 import lombok.RequiredArgsConstructor;
