@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity(name = "category")
+@Entity(name = "menu_category")
 public class MenuCategory {
     @Id
     @Column(name = "category_cd", length = 255, nullable = false)
