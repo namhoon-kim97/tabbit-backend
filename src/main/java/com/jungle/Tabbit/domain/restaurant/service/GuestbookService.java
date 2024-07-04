@@ -45,7 +45,9 @@ public class GuestbookService {
                 .map(GuestbookResponseDto::of)
                 .collect(Collectors.toList());
 
-        Boolean isWritable = stampRepository.findByMemberAndRestaurant(member, restaurant).map(MemberStamp::isRecent).orElse(false);
+        Boolean isWritable = stampRepository.findByMemberAndRestaurant(member, restaurant)
+                .map(MemberStamp::isRecent)
+                .orElse(false);
 
         return GuestbookResponseListDto.of(guestbookResponseList, isWritable);
     }
