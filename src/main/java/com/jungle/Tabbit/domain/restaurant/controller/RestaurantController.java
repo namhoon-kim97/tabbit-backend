@@ -1,6 +1,5 @@
 package com.jungle.Tabbit.domain.restaurant.controller;
 
-import com.jungle.Tabbit.domain.image.service.ImageService;
 import com.jungle.Tabbit.domain.restaurant.dto.*;
 import com.jungle.Tabbit.domain.restaurant.service.RestaurantService;
 import com.jungle.Tabbit.global.config.security.CustomUserDetails;
@@ -27,7 +26,6 @@ import org.springframework.web.bind.annotation.*;
 public class RestaurantController {
 
     private final RestaurantService restaurantService;
-    private final ImageService imageService;
 
     @GetMapping
     @Operation(summary = "모든 맛집 조회", description = "모든 맛집 정보를 조회합니다.")
