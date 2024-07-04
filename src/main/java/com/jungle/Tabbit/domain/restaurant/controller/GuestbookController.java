@@ -1,6 +1,7 @@
 package com.jungle.Tabbit.domain.restaurant.controller;
 
 import com.jungle.Tabbit.domain.restaurant.dto.guestbook.GuestbookRequestDto;
+import com.jungle.Tabbit.domain.restaurant.dto.guestbook.GuestbookResponseListDto;
 import com.jungle.Tabbit.domain.restaurant.service.GuestbookService;
 import com.jungle.Tabbit.global.config.security.CustomUserDetails;
 import com.jungle.Tabbit.global.model.CommonResponse;
