@@ -4,10 +4,14 @@ import com.jungle.Tabbit.domain.image.service.ImageService;
 import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
 import com.jungle.Tabbit.domain.restaurant.dto.guestbook.GuestbookRequestDto;
+import com.jungle.Tabbit.domain.restaurant.dto.guestbook.GuestbookResponseDto;
+import com.jungle.Tabbit.domain.restaurant.dto.guestbook.GuestbookResponseListDto;
 import com.jungle.Tabbit.domain.restaurant.entity.Guestbook;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
 import com.jungle.Tabbit.domain.restaurant.repository.GuestbookRepository;
 import com.jungle.Tabbit.domain.restaurant.repository.RestaurantRepository;
+import com.jungle.Tabbit.domain.stampBadge.entity.MemberStamp;
+import com.jungle.Tabbit.domain.stampBadge.repository.StampRepository;
 import com.jungle.Tabbit.global.exception.BusinessLogicException;
 import com.jungle.Tabbit.global.exception.NotFoundException;
 import com.jungle.Tabbit.global.model.ResponseStatus;
@@ -15,6 +19,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -25,7 +32,23 @@ public class GuestbookService {
     private final MemberRepository memberRepository;
     private final RestaurantRepository restaurantRepository;
     private final GuestbookRepository guestbookRepository;
+    private final StampRepository stampRepository;
     private final ImageService imageService;
+
+    @Transactional(readOnly = true)
+    public GuestbookResponseListDto getAllGuestbook(String username, Long restaurantId) {
+        Member member = getMemberByUsername(username);
+        Restaurant restaurant = getRestaurantById(restaurantId);
+
+        List<Guestbook> guestbookList = restaurant.getGuestbookList();
+        List<GuestbookResponseDto> guestbookResponseList = guestbookList.stream()
+                .map(GuestbookResponseDto::of)
+                .collect(Collectors.toList());
+
+        Boolean isWritable = stampRepository.findByMemberAndRestaurant(member, restaurant).map(MemberStamp::isRecent).orElse(false);
+
+        return GuestbookResponseListDto.of(guestbookResponseList, isWritable);
+    }
 
     public void createGuestbook(String username, Long restaurantId, GuestbookRequestDto requestDto) {
         Member member = getMemberByUsername(username);

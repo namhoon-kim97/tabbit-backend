@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -46,6 +48,9 @@ public class Restaurant extends Timestamped {
     @Column(name = "estimated_time_per_team", nullable = false)
     @ColumnDefault("10")
     private Long estimatedTimePerTeam = 10L;
+
+    @OneToMany(mappedBy = "restaurant")
+    private List<Guestbook> guestbookList = new ArrayList<>();
 
     public Restaurant(Member member, String name, String imageUrl, Category category, Address address, BigDecimal latitude, BigDecimal longitude, Long estimatedTimePerTeam) {
         this.member = member;
