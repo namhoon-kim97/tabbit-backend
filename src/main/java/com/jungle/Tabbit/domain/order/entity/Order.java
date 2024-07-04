@@ -26,12 +26,12 @@ public class Order {
     @JoinColumn(name = "restaurant_id", nullable = false)
     private Restaurant restaurant;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderMenu> orderItems;
+    @OneToMany(mappedBy = "order")
+    private List<OrderMenu> orderMenus;
 
-    public Order(Member member, Restaurant restaurant, List<OrderMenu> orderItems) {
+    public Order(Member member, Restaurant restaurant, List<OrderMenu> orderMenus) {
         this.member = member;
         this.restaurant = restaurant;
-        this.orderItems = orderItems;
+        this.orderMenus = orderMenus;
     }
 }
