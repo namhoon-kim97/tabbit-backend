@@ -24,6 +24,7 @@ import com.jungle.Tabbit.global.model.ResponseStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
@@ -45,7 +46,7 @@ public class WaitingService {
     private final BadgeTriggerService badgeTriggerService;
     private static final ConcurrentHashMap<Long, AtomicLong> storeQueueNumbers = new ConcurrentHashMap<>();  // 가게별 전역 대기번호 변수
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public WaitingResponseDto registerWaiting(WaitingRequestCreateDto requestDto, String username) {
         Member member = getMemberByUsername(username);
         Nfc nfc = getNfcById(requestDto.getNfcId());
