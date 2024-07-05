@@ -174,7 +174,7 @@ public class WaitingService {
                 .map(WaitingUpdateResponseDto::of)
                 .collect(Collectors.toList());
 
-        return new OwnerWaitingListResponseDto(calledWaitingDtos, waitingDtos);
+        return new OwnerWaitingListResponseDto(restaurant.getEstimatedTimePerTeam(), calledWaitingDtos, waitingDtos);
     }
 
     @Transactional(readOnly = true)
