@@ -201,7 +201,7 @@ public class WaitingService {
     }
 
     private Waiting getWaitingByMemberAndRestaurant(Member member, Restaurant restaurant) {
-        return waitingRepository.findByRestaurantAndMemberAndWaitingStatus(restaurant, member, WaitingStatus.STATUS_WAITING)
+        return waitingRepository.findByRestaurantAndMemberAndWaitingStatusIn(restaurant, member, Arrays.asList(WaitingStatus.STATUS_WAITING, WaitingStatus.STATUS_CALLED))
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_GET_CURRENT_WAIT_POSITION));
     }
 
@@ -211,7 +211,7 @@ public class WaitingService {
     }
 
     private void validateDuplicateWaiting(Member member, Restaurant restaurant) {
-        boolean alreadyWaiting = waitingRepository.existsByMemberAndRestaurantAndWaitingStatus(member, restaurant, WaitingStatus.STATUS_WAITING);
+        boolean alreadyWaiting = waitingRepository.existsByMemberAndRestaurantAndWaitingStatusIn(member, restaurant, Arrays.asList(WaitingStatus.STATUS_WAITING, WaitingStatus.STATUS_CALLED));
         if (alreadyWaiting) {
             throw new DuplicatedException(ResponseStatus.FAIL_MEMBER_WAITING_DUPLICATED);
         }
