@@ -1,8 +1,7 @@
 package com.jungle.Tabbit.domain.order.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,14 +11,19 @@ import lombok.NoArgsConstructor;
 @Entity(name = "menu_category")
 public class MenuCategory {
     @Id
-    @Column(name = "category_cd", length = 255, nullable = false)
-    private String categoryCd;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "category_id")
+    private Long categoryId;
 
     @Column(name = "category_name", length = 255, nullable = false)
     private String categoryName;
 
-    public MenuCategory(String CategoryCd, String name) {
-        this.categoryCd = CategoryCd;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "restaurant_id", nullable = false)
+    private Restaurant restaurant;
+
+    public MenuCategory(String name, Restaurant restaurant) {
         this.categoryName = name;
+        this.restaurant = restaurant;
     }
 }
