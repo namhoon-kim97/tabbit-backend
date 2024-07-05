@@ -11,7 +11,8 @@ import lombok.NoArgsConstructor;
 public class OrderMenu {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "order_menu_id")
+    private Long orderMenuId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
