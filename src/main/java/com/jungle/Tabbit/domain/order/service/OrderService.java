@@ -2,13 +2,15 @@ package com.jungle.Tabbit.domain.order.service;
 
 import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
-import com.jungle.Tabbit.domain.order.dto.MenuQuantityDto;
-import com.jungle.Tabbit.domain.order.dto.OrderRequestDto;
-import com.jungle.Tabbit.domain.order.dto.OrderResponseDto;
+import com.jungle.Tabbit.domain.order.dto.order.MenuQuantityDto;
+import com.jungle.Tabbit.domain.order.dto.order.OrderRequestDto;
+import com.jungle.Tabbit.domain.order.dto.order.OrderResponseDto;
 import com.jungle.Tabbit.domain.order.entity.Menu;
 import com.jungle.Tabbit.domain.order.entity.Order;
 import com.jungle.Tabbit.domain.order.entity.OrderMenu;
+import com.jungle.Tabbit.domain.order.entity.OrderStatus;
 import com.jungle.Tabbit.domain.order.repository.MenuRepository;
+import com.jungle.Tabbit.domain.order.repository.OrderMenuRepository;
 import com.jungle.Tabbit.domain.order.repository.OrderRepository;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
 import com.jungle.Tabbit.domain.restaurant.repository.RestaurantRepository;
@@ -25,24 +27,33 @@ public class OrderService {
     private final MemberRepository memberRepository;
     private final RestaurantRepository restaurantRepository;
     private final MenuRepository menuRepository;
+    private final OrderMenuRepository orderMenuRepository;
 
     @Transactional
-    public OrderResponseDto createOrder(String username, OrderRequestDto requestDto) {
+    public void createOrder(String username, OrderRequestDto requestDto) {
         Member member = getMemberByUsername(username);
         Restaurant restaurant = getRestaurantById(requestDto.getRestaurantId());
 
         Order order = new Order(member, restaurant);
-
+        orderRepository.save(order);
         for (MenuQuantityDto menuQuantity : requestDto.getMenuQuantities()) {
             Menu menu = menuRepository.findByMenuId(menuQuantity.getMenuId())
                     .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MENU_NOT_FOUND));
             OrderMenu orderMenu = new OrderMenu(order, menu, menuQuantity.getQuantity());
-            order.getOrderMenus().add(orderMenu);
+            orderMenuRepository.save(orderMenu);
         }
+    }
 
-        orderRepository.save(order);
+    @Transactional(readOnly = true)
+    public OrderResponseDto getAllOrders(String username, Long restaurantId) {
+        Member member = getMemberByUsername(username);
+        Restaurant restaurant = getRestaurantById(restaurantId);
+
+        Order order = orderRepository.findByMemberAndRestaurantAndStatus(member, restaurant, OrderStatus.ORDERED)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_ORDER_NOT_FOUND));
         return OrderResponseDto.of(order);
     }
+
 
     private Member getMemberByUsername(String username) {
         return memberRepository.findMemberByUsername(username)

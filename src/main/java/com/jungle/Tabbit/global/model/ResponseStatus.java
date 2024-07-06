@@ -93,7 +93,10 @@ public enum ResponseStatus {
     FAIL_GUESTBOOK_NOT_FOUND("해당 방명록을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
     // Menu
-    FAIL_MENU_NOT_FOUND("해당 메뉴를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
+    FAIL_MENU_NOT_FOUND("해당 메뉴를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+
+    // Order
+    FAIL_ORDER_NOT_FOUND("주문 항목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
 
     private String message;
 

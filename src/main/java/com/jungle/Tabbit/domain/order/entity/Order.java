@@ -38,7 +38,7 @@ public class Order {
     public Order(Member member, Restaurant restaurant) {
         this.member = member;
         this.restaurant = restaurant;
-        this.status = OrderStatus.ORDERING;
+        this.status = OrderStatus.ORDERED;
     }
 
     public void updateStatus(OrderStatus status) {

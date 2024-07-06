@@ -7,10 +7,7 @@ import com.jungle.Tabbit.global.model.CommonResponse;
 import com.jungle.Tabbit.global.model.ResponseStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,6 +17,12 @@ public class OrderController {
 
     @PostMapping
     public CommonResponse<?> createOrder(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody OrderRequestDto requestDto) {
-        return CommonResponse.success(ResponseStatus.SUCCESS_OK, orderService.createOrder(userDetails.getUsername(), requestDto));
+        orderService.createOrder(userDetails.getUsername(), requestDto);
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK);
+    }
+
+    @GetMapping("/{restaurantId}")
+    public CommonResponse<?> getAllOrders(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId) {
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK, orderService.getAllOrders(userDetails.getUsername(), restaurantId));
     }
 }
