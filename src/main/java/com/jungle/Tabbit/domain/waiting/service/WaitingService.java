@@ -7,6 +7,7 @@ import com.jungle.Tabbit.domain.nfc.entity.Nfc;
 import com.jungle.Tabbit.domain.nfc.repository.NfcRepository;
 import com.jungle.Tabbit.domain.notification.dto.NotificationRequestCreateDto;
 import com.jungle.Tabbit.domain.notification.service.NotificationService;
+import com.jungle.Tabbit.domain.order.service.OrderService;
 import com.jungle.Tabbit.domain.restaurant.dto.RestaurantResponseSummaryDto;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
 import com.jungle.Tabbit.domain.restaurant.repository.RestaurantRepository;
@@ -44,6 +45,7 @@ public class WaitingService {
     private final StampRepository stampRepository;
     private final NotificationService notificationService;
     private final BadgeTriggerService badgeTriggerService;
+    private final OrderService orderService;
     private static final ConcurrentHashMap<Long, AtomicLong> storeQueueNumbers = new ConcurrentHashMap<>();  // 가게별 전역 대기번호 변수
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -144,6 +146,7 @@ public class WaitingService {
                 createFcmData("client", "call", restaurant, waiting));
 
         notifyImminentEntryToWaiters(restaurant, waiting);
+        orderService.updateOrderStatusToConfirmed(waiting.getMember().getUsername(), restaurantId);
     }
 
     @Transactional

@@ -54,6 +54,16 @@ public class OrderService {
         return OrderResponseDto.of(order);
     }
 
+    @Transactional
+    public void updateOrderStatusToConfirmed(String username, Long restaurantId) {
+        Member member = getMemberByUsername(username);
+        Restaurant restaurant = getRestaurantById(restaurantId);
+
+        Order order = orderRepository.findByMemberAndRestaurantAndStatus(member, restaurant, OrderStatus.ORDERED)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_ORDER_NOT_FOUND));
+        order.updateStatus(OrderStatus.CONFIRMED);
+    }
+
 
     private Member getMemberByUsername(String username) {
         return memberRepository.findMemberByUsername(username)
