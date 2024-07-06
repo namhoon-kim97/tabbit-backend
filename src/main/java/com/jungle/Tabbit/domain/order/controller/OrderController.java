@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +32,7 @@ public class OrderController {
     }
 
     @GetMapping("/{restaurantId}")
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @Operation(summary = "유저 주문 조회", description = "특정 유저의 주문을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = OrderResponseDto.class)))
     public CommonResponse<?> getUserOrders(@RequestParam String username, @PathVariable Long restaurantId) {
