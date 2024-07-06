@@ -22,7 +22,7 @@ public class OrderController {
     }
 
     @GetMapping("/{restaurantId}")
-    public CommonResponse<?> getAllOrders(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long restaurantId) {
-        return CommonResponse.success(ResponseStatus.SUCCESS_OK, orderService.getAllOrders(userDetails.getUsername(), restaurantId));
+    public CommonResponse<?> getUserOrders(@RequestParam String username, @PathVariable Long restaurantId) {
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK, orderService.getUserOrders(username, restaurantId));
     }
 }

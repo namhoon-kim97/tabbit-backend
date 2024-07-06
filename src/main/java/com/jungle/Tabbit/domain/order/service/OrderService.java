@@ -45,7 +45,7 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public OrderResponseDto getAllOrders(String username, Long restaurantId) {
+    public OrderResponseDto getUserOrders(String username, Long restaurantId) {
         Member member = getMemberByUsername(username);
         Restaurant restaurant = getRestaurantById(restaurantId);
 
