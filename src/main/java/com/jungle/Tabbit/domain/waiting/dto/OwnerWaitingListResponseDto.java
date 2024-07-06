@@ -1,6 +1,5 @@
 package com.jungle.Tabbit.domain.waiting.dto;
 
-import com.jungle.Tabbit.domain.order.dto.order.OrderResponseDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,20 +15,16 @@ public class OwnerWaitingListResponseDto {
     private Long estimatedWaitTime;
 
     @Schema(description = "호출된 웨이팅 목록")
-    private List<WaitingUpdateResponseDto> calledWaitingList;
+    private List<WaitingWithOrderDto> calledWaitingList;
 
     @Schema(description = "대기 중인 웨이팅 목록")
-    private List<WaitingUpdateResponseDto> waitingList;
-
-    @Schema(description = "주문 목록")
-    private List<OrderResponseDto> orderList;
+    private List<WaitingWithOrderDto> waitingList;
 
     public OwnerWaitingListResponseDto(Long estimatedWaitTime,
-                                       List<WaitingUpdateResponseDto> calledWaitingList,
-                                       List<WaitingUpdateResponseDto> waitingList, List<OrderResponseDto> orderList) {
+                                       List<WaitingWithOrderDto> calledWaitingList,
+                                       List<WaitingWithOrderDto> waitingList) {
         this.estimatedWaitTime = estimatedWaitTime;
         this.calledWaitingList = calledWaitingList;
         this.waitingList = waitingList;
-        this.orderList = orderList;
     }
 }

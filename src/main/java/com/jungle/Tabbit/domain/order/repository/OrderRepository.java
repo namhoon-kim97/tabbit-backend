@@ -4,6 +4,7 @@ import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.order.entity.Order;
 import com.jungle.Tabbit.domain.order.entity.OrderStatus;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
+import com.jungle.Tabbit.domain.waiting.entity.Waiting;
 import org.springframework.data.repository.Repository;
 
 import java.util.List;
@@ -17,6 +18,6 @@ public interface OrderRepository extends Repository<Order, Long> {
     Optional<Order> findByWaiting_WaitingId(Long waitingId);
 
     void delete(Order order);
-
-    List<Order> findByRestaurantAndStatus(Restaurant restaurant, OrderStatus orderStatus);
+    
+    List<Order> findByWaiting(Waiting waiting);
 }

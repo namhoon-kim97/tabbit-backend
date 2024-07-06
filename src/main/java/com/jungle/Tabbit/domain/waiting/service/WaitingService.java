@@ -8,8 +8,6 @@ import com.jungle.Tabbit.domain.nfc.repository.NfcRepository;
 import com.jungle.Tabbit.domain.notification.dto.NotificationRequestCreateDto;
 import com.jungle.Tabbit.domain.notification.service.NotificationService;
 import com.jungle.Tabbit.domain.order.dto.order.OrderResponseDto;
-import com.jungle.Tabbit.domain.order.entity.Order;
-import com.jungle.Tabbit.domain.order.entity.OrderStatus;
 import com.jungle.Tabbit.domain.order.repository.OrderRepository;
 import com.jungle.Tabbit.domain.order.service.OrderService;
 import com.jungle.Tabbit.domain.restaurant.dto.RestaurantResponseSummaryDto;
@@ -177,25 +175,32 @@ public class WaitingService {
         List<Waiting> calledWaitingList = waitingRepository.findByRestaurantAndWaitingStatus(restaurant, WaitingStatus.STATUS_CALLED);
         List<Waiting> waitingList = waitingRepository.findByRestaurantAndWaitingStatus(restaurant, WaitingStatus.STATUS_WAITING);
 
-        List<WaitingUpdateResponseDto> calledWaitingDtos = calledWaitingList.stream()
-                .map(WaitingUpdateResponseDto::of)
-                .collect(Collectors.toList());
-
-        List<WaitingUpdateResponseDto> waitingDtos = waitingList.stream()
-                .map(WaitingUpdateResponseDto::of)
-                .collect(Collectors.toList());
-
-        List<Order> orders = orderRepository.findByRestaurantAndStatus(restaurant, OrderStatus.ORDERED);
-        List<OrderResponseDto> orderDtos = orders.stream()
-                .map(OrderResponseDto::of)
-                .collect(Collectors.toList());
+        List<WaitingWithOrderDto> calledWaitingDtos = mapWaitingsToDtos(calledWaitingList);
+        List<WaitingWithOrderDto> waitingDtos = mapWaitingsToDtos(waitingList);
 
         return OwnerWaitingListResponseDto.builder()
                 .estimatedWaitTime(restaurant.getEstimatedTimePerTeam())
                 .calledWaitingList(calledWaitingDtos)
                 .waitingList(waitingDtos)
-                .orderList(orderDtos)
                 .build();
+    }
+
+    private List<WaitingWithOrderDto> mapWaitingsToDtos(List<Waiting> waitings) {
+        return waitings.stream()
+                .map(waiting -> {
+                    List<OrderResponseDto> orderDtos = getOrderDtosForWaiting(waiting);
+                    return WaitingWithOrderDto.builder()
+                            .waiting(WaitingUpdateResponseDto.of(waiting))
+                            .orders(orderDtos)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    private List<OrderResponseDto> getOrderDtosForWaiting(Waiting waiting) {
+        return orderRepository.findByWaiting(waiting).stream()
+                .map(OrderResponseDto::of)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
