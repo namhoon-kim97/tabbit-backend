@@ -1,6 +1,6 @@
 package com.jungle.Tabbit.domain.order.controller;
 
-import com.jungle.Tabbit.domain.order.dto.OrderRequestDto;
+import com.jungle.Tabbit.domain.order.dto.order.OrderRequestDto;
 import com.jungle.Tabbit.domain.order.service.OrderService;
 import com.jungle.Tabbit.global.config.security.CustomUserDetails;
 import com.jungle.Tabbit.global.model.CommonResponse;

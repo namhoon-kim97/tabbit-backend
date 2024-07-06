@@ -1,4 +1,4 @@
-package com.jungle.Tabbit.domain.order.dto;
+package com.jungle.Tabbit.domain.order.dto.order;
 
 import lombok.Builder;
 import lombok.Getter;
