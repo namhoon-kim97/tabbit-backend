@@ -17,12 +17,12 @@ public class OrderResponseDto {
     private Long memberId;
     private Long restaurantId;
     private OrderStatus status;
-    private List<MenuItemDto> menuItems;
+    private List<OrderMenuResponseDto> menuItems;
 
     public static OrderResponseDto of(Order order) {
-        List<MenuItemDto> menuItems = order.getOrderMenus() != null ?
+        List<OrderMenuResponseDto> menuItems = order.getOrderMenus() != null ?
                 order.getOrderMenus().stream()
-                        .map(orderItem -> MenuItemDto.builder()
+                        .map(orderItem -> OrderMenuResponseDto.builder()
                                 .menuId(orderItem.getMenu().getMenuId())
                                 .menuName(orderItem.getMenu().getName())
                                 .quantity(orderItem.getQuantity())
