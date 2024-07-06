@@ -14,6 +14,9 @@ import com.jungle.Tabbit.domain.order.repository.OrderMenuRepository;
 import com.jungle.Tabbit.domain.order.repository.OrderRepository;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
 import com.jungle.Tabbit.domain.restaurant.repository.RestaurantRepository;
+import com.jungle.Tabbit.domain.waiting.entity.Waiting;
+import com.jungle.Tabbit.domain.waiting.entity.WaitingStatus;
+import com.jungle.Tabbit.domain.waiting.repository.WaitingRepository;
 import com.jungle.Tabbit.global.exception.NotFoundException;
 import com.jungle.Tabbit.global.model.ResponseStatus;
 import lombok.RequiredArgsConstructor;
@@ -28,13 +31,16 @@ public class OrderService {
     private final RestaurantRepository restaurantRepository;
     private final MenuRepository menuRepository;
     private final OrderMenuRepository orderMenuRepository;
+    private final WaitingRepository waitingRepository;
 
     @Transactional
     public void createOrder(String username, OrderRequestDto requestDto) {
         Member member = getMemberByUsername(username);
         Restaurant restaurant = getRestaurantById(requestDto.getRestaurantId());
+        Waiting waiting = waitingRepository.findByRestaurantAndWaitingNumberAndWaitingStatus(restaurant, requestDto.getWaitingNumber(), WaitingStatus.STATUS_WAITING)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_GET_CURRENT_WAIT_POSITION));
 
-        Order order = new Order(member, restaurant);
+        Order order = new Order(member, restaurant, waiting);
         orderRepository.save(order);
         for (MenuQuantityDto menuQuantity : requestDto.getMenuQuantities()) {
             Menu menu = menuRepository.findByMenuId(menuQuantity.getMenuId())
@@ -54,6 +60,17 @@ public class OrderService {
         return OrderResponseDto.of(order);
     }
 
+    @Transactional
+    public void updateOrderStatusToConfirmed(Member member, Restaurant restaurant) {
+        orderRepository.findByMemberAndRestaurantAndStatus(member, restaurant, OrderStatus.ORDERED)
+                .ifPresent(order -> order.updateStatus(OrderStatus.CONFIRMED));
+    }
+
+    @Transactional
+    public void deleteOrderIfExists(Long waitingId) {
+        orderRepository.findByWaiting_WaitingId(waitingId)
+                .ifPresent(orderRepository::delete);
+    }
 
     private Member getMemberByUsername(String username) {
         return memberRepository.findMemberByUsername(username)
