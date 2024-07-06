@@ -7,8 +7,8 @@ import com.jungle.Tabbit.domain.nfc.entity.Nfc;
 import com.jungle.Tabbit.domain.nfc.repository.NfcRepository;
 import com.jungle.Tabbit.domain.notification.dto.NotificationRequestCreateDto;
 import com.jungle.Tabbit.domain.notification.service.NotificationService;
-import com.jungle.Tabbit.domain.order.dto.order.OrderResponseDto;
-import com.jungle.Tabbit.domain.order.repository.OrderRepository;
+import com.jungle.Tabbit.domain.order.dto.order.OrderMenuResponseDto;
+import com.jungle.Tabbit.domain.order.repository.OrderMenuRepository;
 import com.jungle.Tabbit.domain.order.service.OrderService;
 import com.jungle.Tabbit.domain.restaurant.dto.RestaurantResponseSummaryDto;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
@@ -48,7 +48,7 @@ public class WaitingService {
     private final NotificationService notificationService;
     private final BadgeTriggerService badgeTriggerService;
     private final OrderService orderService;
-    private final OrderRepository orderRepository;
+    private final OrderMenuRepository orderMenuRepository;
     private static final ConcurrentHashMap<Long, AtomicLong> storeQueueNumbers = new ConcurrentHashMap<>();  // 가게별 전역 대기번호 변수
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -188,18 +188,23 @@ public class WaitingService {
     private List<WaitingWithOrderDto> mapWaitingsToDtos(List<Waiting> waitings) {
         return waitings.stream()
                 .map(waiting -> {
-                    List<OrderResponseDto> orderDtos = getOrderDtosForWaiting(waiting);
+                    List<OrderMenuResponseDto> menuItems = getOrderMenuDtosForWaiting(waiting);
                     return WaitingWithOrderDto.builder()
                             .waiting(WaitingUpdateResponseDto.of(waiting))
-                            .orders(orderDtos)
+                            .menuItems(menuItems)
                             .build();
                 })
                 .collect(Collectors.toList());
     }
 
-    private List<OrderResponseDto> getOrderDtosForWaiting(Waiting waiting) {
-        return orderRepository.findByWaiting(waiting).stream()
-                .map(OrderResponseDto::of)
+    private List<OrderMenuResponseDto> getOrderMenuDtosForWaiting(Waiting waiting) {
+        return orderMenuRepository.findByOrder_Waiting(waiting).stream()
+                .map(orderMenu -> OrderMenuResponseDto.builder()
+                        .menuId(orderMenu.getMenu().getMenuId())
+                        .menuName(orderMenu.getMenu().getName())
+                        .quantity(orderMenu.getQuantity())
+                        .price(orderMenu.getMenu().getPrice())
+                        .build())
                 .collect(Collectors.toList());
     }
 
