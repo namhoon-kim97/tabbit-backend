@@ -31,11 +31,11 @@ public class OrderController {
         return CommonResponse.success(ResponseStatus.SUCCESS_OK);
     }
 
-    @GetMapping("/{restaurantId}")
+    @GetMapping("/{waitingId}")
     @PreAuthorize("hasRole('ROLE_MANAGER')")
     @Operation(summary = "유저 주문 조회", description = "특정 유저의 주문을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = OrderResponseDto.class)))
-    public CommonResponse<?> getUserOrders(@RequestParam String username, @PathVariable Long restaurantId) {
-        return CommonResponse.success(ResponseStatus.SUCCESS_OK, orderService.getUserOrders(username, restaurantId));
+    public CommonResponse<?> getUserOrders(@PathVariable Long waitingId) {
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK, orderService.getUserOrders(waitingId));
     }
 }
