@@ -99,6 +99,7 @@ public class WaitingService {
         Waiting waiting = getWaitingByMemberAndRestaurant(member, restaurant);
 
         waiting.updateStatus(WaitingStatus.STATUS_CANCELLED);
+        orderService.deleteOrderIfExists(waiting.getWaitingId());
 
         sendCancellationNotification(member, restaurant, waiting);
 

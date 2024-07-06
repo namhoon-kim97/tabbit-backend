@@ -8,6 +8,8 @@ import java.util.List;
 @Getter
 @Schema(description = "주문 요청 DTO")
 public class OrderRequestDto {
+    @Schema(description = "웨이팅 번호", example = "5")
+    private int waitingNumber;
     @Schema(description = "가게 ID")
     private Long restaurantId;
     @Schema(description = "메뉴 리스트")

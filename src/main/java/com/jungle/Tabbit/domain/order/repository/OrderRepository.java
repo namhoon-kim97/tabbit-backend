@@ -12,4 +12,8 @@ public interface OrderRepository extends Repository<Order, Long> {
     void save(Order order);
 
     Optional<Order> findByMemberAndRestaurantAndStatus(Member member, Restaurant restaurant, OrderStatus orderStatus);
+
+    Optional<Order> findByWaiting_WaitingId(Long waitingId);
+
+    void delete(Order order);
 }
