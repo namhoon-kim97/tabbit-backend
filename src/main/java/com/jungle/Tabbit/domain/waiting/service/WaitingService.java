@@ -7,6 +7,10 @@ import com.jungle.Tabbit.domain.nfc.entity.Nfc;
 import com.jungle.Tabbit.domain.nfc.repository.NfcRepository;
 import com.jungle.Tabbit.domain.notification.dto.NotificationRequestCreateDto;
 import com.jungle.Tabbit.domain.notification.service.NotificationService;
+import com.jungle.Tabbit.domain.order.dto.order.OrderResponseDto;
+import com.jungle.Tabbit.domain.order.entity.Order;
+import com.jungle.Tabbit.domain.order.entity.OrderStatus;
+import com.jungle.Tabbit.domain.order.repository.OrderRepository;
 import com.jungle.Tabbit.domain.order.service.OrderService;
 import com.jungle.Tabbit.domain.restaurant.dto.RestaurantResponseSummaryDto;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
@@ -46,6 +50,7 @@ public class WaitingService {
     private final NotificationService notificationService;
     private final BadgeTriggerService badgeTriggerService;
     private final OrderService orderService;
+    private final OrderRepository orderRepository;
     private static final ConcurrentHashMap<Long, AtomicLong> storeQueueNumbers = new ConcurrentHashMap<>();  // 가게별 전역 대기번호 변수
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -180,7 +185,17 @@ public class WaitingService {
                 .map(WaitingUpdateResponseDto::of)
                 .collect(Collectors.toList());
 
-        return new OwnerWaitingListResponseDto(restaurant.getEstimatedTimePerTeam(), calledWaitingDtos, waitingDtos);
+        List<Order> orders = orderRepository.findByRestaurantAndStatus(restaurant, OrderStatus.ORDERED);
+        List<OrderResponseDto> orderDtos = orders.stream()
+                .map(OrderResponseDto::of)
+                .collect(Collectors.toList());
+
+        return OwnerWaitingListResponseDto.builder()
+                .estimatedWaitTime(restaurant.getEstimatedTimePerTeam())
+                .calledWaitingList(calledWaitingDtos)
+                .waitingList(waitingDtos)
+                .orderList(orderDtos)
+                .build();
     }
 
     @Transactional(readOnly = true)
