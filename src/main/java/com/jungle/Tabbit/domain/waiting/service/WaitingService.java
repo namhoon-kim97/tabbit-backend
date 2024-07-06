@@ -147,7 +147,7 @@ public class WaitingService {
                 createFcmData("client", "call", restaurant, waiting));
 
         notifyImminentEntryToWaiters(restaurant, waiting);
-        orderService.updateOrderStatusToConfirmed(waiting.getMember().getUsername(), restaurantId);
+        orderService.updateOrderStatusToConfirmed(waiting.getMember(), restaurant);
     }
 
     @Transactional

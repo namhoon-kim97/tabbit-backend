@@ -61,10 +61,7 @@ public class OrderService {
     }
 
     @Transactional
-    public void updateOrderStatusToConfirmed(String username, Long restaurantId) {
-        Member member = getMemberByUsername(username);
-        Restaurant restaurant = getRestaurantById(restaurantId);
-
+    public void updateOrderStatusToConfirmed(Member member, Restaurant restaurant) {
         orderRepository.findByMemberAndRestaurantAndStatus(member, restaurant, OrderStatus.ORDERED)
                 .ifPresent(order -> order.updateStatus(OrderStatus.CONFIRMED));
     }
