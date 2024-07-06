@@ -31,7 +31,7 @@ public class Menu {
     private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_cd", nullable = false)
+    @JoinColumn(name = "category_id", nullable = false)
     private MenuCategory category;
 
     public Menu(Restaurant restaurant, String name, Long price, String description, String imageUrl, MenuCategory category) {
