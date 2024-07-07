@@ -112,13 +112,12 @@ public class WaitingService {
     }
 
     @Transactional
-    public void confirmWaiting(Long waitingId, String username, int waitingNumber) {
+    public void confirmWaiting(Long waitingId, String username) {
         Waiting waiting = getWaitingById(waitingId);
         Member owner = getMemberByUsername(username);
         Restaurant restaurant = waiting.getRestaurant();
 
         validateRestaurantOwner(restaurant, owner);
-        validateWaitingNumber(waiting, waitingNumber);
 
         waiting.updateStatus(WaitingStatus.STATUS_SEATED);
         Optional<MemberStamp> memberStamp = stampRepository.findByMemberAndRestaurant(waiting.getMember(), restaurant);
@@ -137,13 +136,12 @@ public class WaitingService {
     }
 
     @Transactional
-    public void callWaiting(Long waitingId, String username, int waitingNumber) {
+    public void callWaiting(Long waitingId, String username) {
         Waiting waiting = getWaitingById(waitingId);
         Member owner = getMemberByUsername(username);
         Restaurant restaurant = waiting.getRestaurant();
 
         validateRestaurantOwner(restaurant, owner);
-        validateWaitingNumber(waiting, waitingNumber);
 
         waiting.updateStatus(WaitingStatus.STATUS_CALLED);
 
@@ -156,13 +154,12 @@ public class WaitingService {
     }
 
     @Transactional
-    public void noShowWaiting(Long waitingId, String username, int waitingNumber) {
+    public void noShowWaiting(Long waitingId, String username) {
         Waiting waiting = getWaitingById(waitingId);
         Member owner = getMemberByUsername(username);
         Restaurant restaurant = waiting.getRestaurant();
 
         validateRestaurantOwner(restaurant, owner);
-        validateWaitingNumber(waiting, waitingNumber);
 
         waiting.updateStatus(WaitingStatus.STATUS_NOSHOW);
 
@@ -247,12 +244,6 @@ public class WaitingService {
     private void validateRestaurantOwner(Restaurant restaurant, Member owner) {
         if (!restaurant.getMember().equals(owner)) {
             throw new BusinessLogicException(ResponseStatus.FAIL_NOT_OWNER);
-        }
-    }
-
-    private void validateWaitingNumber(Waiting waiting, int waitingNumber) {
-        if (waiting.getWaitingNumber() != waitingNumber) {
-            throw new BusinessLogicException(ResponseStatus.FAIL_GET_CURRENT_WAIT_POSITION);
         }
     }
 
