@@ -10,4 +10,6 @@ public interface OrderMenuRepository extends Repository<OrderMenu, Long> {
     void save(OrderMenu orderMenu);
 
     List<OrderMenu> findByOrder_Waiting(Waiting waiting);
+
+    void delete(OrderMenu orderMenu);
 }
