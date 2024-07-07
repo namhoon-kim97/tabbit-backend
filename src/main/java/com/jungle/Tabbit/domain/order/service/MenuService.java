@@ -132,12 +132,21 @@ public class MenuService {
             throw new BusinessLogicException(ResponseStatus.FAIL_NOT_OWNER);
         }
 
+        String imageFileName = "DEFAULT";
         MultipartFile file = requestDto.getMultipartFile();
-        if (imageService.isExistImage(file.getOriginalFilename())) {
-            imageService.deleteImage(file.getOriginalFilename());
-        }
+        String currentImageUrl = menu.getImageUrl();
 
-        String imageFileName = imageService.uploadImage(file);
+        if (file != null) {
+            imageFileName = file.getOriginalFilename();
+            if (!imageFileName.equals(currentImageUrl)) {
+                if (imageService.isExistImage(currentImageUrl)) {
+                    imageService.deleteImage(currentImageUrl);
+                }
+                imageFileName = imageService.uploadImage(file);
+            }
+        } else if (imageService.isExistImage(currentImageUrl)) {
+            imageService.deleteImage(currentImageUrl);
+        }
 
         menu.update(requestDto.getName(), requestDto.getPrice(), requestDto.getDescription(), imageFileName, category);
     }
