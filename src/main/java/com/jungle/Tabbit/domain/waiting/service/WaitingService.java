@@ -124,11 +124,11 @@ public class WaitingService {
         if (memberStamp.isPresent()) {
             memberStamp.get().updateVisitCount(memberStamp.get().getVisitCount());
             stampRepository.save(memberStamp.get());
+        } else {
+            stampRepository.save(new MemberStamp(waiting.getMember(), restaurant, restaurant.getCategory()));
             sendNotification(waiting.getMember().getMemberId(),
                     "스탬프 획득", restaurant.getName() + " 스탬프를 획득하였습니다.",
                     createFcmData("client", "confirm", restaurant, waiting));
-        } else {
-            stampRepository.save(new MemberStamp(waiting.getMember(), restaurant, restaurant.getCategory()));
         }
 
         badgeTriggerService.checkAndAwardBadges(waiting.getMember());
