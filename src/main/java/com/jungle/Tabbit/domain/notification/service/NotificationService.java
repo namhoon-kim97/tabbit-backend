@@ -5,7 +5,6 @@ import com.jungle.Tabbit.domain.fcm.dto.FcmRequestDto;
 import com.jungle.Tabbit.domain.fcm.service.FcmService;
 import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
-import com.jungle.Tabbit.domain.notification.dto.NotificationListResponseDto;
 import com.jungle.Tabbit.domain.notification.dto.NotificationRequestCreateDto;
 import com.jungle.Tabbit.domain.notification.dto.NotificationResponseDto;
 import com.jungle.Tabbit.domain.notification.entity.Notification;
@@ -27,7 +26,7 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final FcmService fcmService;
 
-    public void sendNotification(NotificationRequestCreateDto requestDto)  {
+    public void sendNotification(NotificationRequestCreateDto requestDto, boolean flag) {
         Member member = getMemberById(requestDto.getMemberId());
         FcmData fcmData = requestDto.getFcmData();
 
@@ -38,10 +37,11 @@ public class NotificationService {
                 .data(fcmData)
                 .build();
 
-        fcmService.sendMessageTo(fcmRequestDto);
+        fcmService.sendMessageTo(fcmRequestDto, flag);
 
         notificationRepository.save(new Notification(requestDto.getTitle(), requestDto.getMessage(), fcmData.getTarget(), fcmData.getMessageType(), member));
     }
+
     @Transactional(readOnly = true)
     public List<NotificationResponseDto> getNotificationList(Long userId) {
         Member member = getMemberById(userId);

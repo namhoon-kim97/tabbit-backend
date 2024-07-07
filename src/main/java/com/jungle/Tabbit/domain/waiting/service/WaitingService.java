@@ -124,15 +124,17 @@ public class WaitingService {
         if (memberStamp.isPresent()) {
             memberStamp.get().updateVisitCount(memberStamp.get().getVisitCount());
             stampRepository.save(memberStamp.get());
+            sendNotification(waiting.getMember().getMemberId(),
+                    "스탬프 획득", restaurant.getName() + " 스탬프를 획득하였습니다.",
+                    createFcmData("client", "confirm", restaurant, waiting));
         } else {
             stampRepository.save(new MemberStamp(waiting.getMember(), restaurant, restaurant.getCategory()));
         }
 
         badgeTriggerService.checkAndAwardBadges(waiting.getMember());
-
         sendNotification(waiting.getMember().getMemberId(),
-                "스탬프 획득", restaurant.getName() + " 스탬프를 획득하였습니다.",
-                createFcmData("client", "confirm", restaurant, waiting));
+                "입장 완료", restaurant.getName() + " 입장완료 하였습니다.",
+                createFcmData("client", "confirm", restaurant, waiting), true);
     }
 
     @Transactional
@@ -266,14 +268,18 @@ public class WaitingService {
         return position * estimatedTimePerTeam;
     }
 
-    private void sendNotification(Long memberId, String title, String message, FcmData data) {
+    private void sendNotification(Long memberId, String title, String message, FcmData data, boolean flag) {
         NotificationRequestCreateDto notificationRequest = NotificationRequestCreateDto.builder()
                 .memberId(memberId)
                 .title(title)
                 .message(message)
                 .fcmData(data)
                 .build();
-        notificationService.sendNotification(notificationRequest);
+        notificationService.sendNotification(notificationRequest, flag);
+    }
+
+    private void sendNotification(Long memberId, String title, String message, FcmData data) {
+        sendNotification(memberId, title, message, data, false);
     }
 
     private FcmData createFcmData(String role, String messageType, Restaurant restaurant, Waiting waiting) {

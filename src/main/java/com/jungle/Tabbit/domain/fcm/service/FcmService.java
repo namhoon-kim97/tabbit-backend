@@ -27,9 +27,8 @@ public class FcmService {
         this.webClient = webClientBuilder.baseUrl("https://fcm.googleapis.com/v1/projects/tabbit-c1857").build();
     }
 
-    public void sendMessageTo(FcmRequestDto fcmRequestDto) {
-
-        String message = makeMessage(fcmRequestDto);
+    public void sendMessageTo(FcmRequestDto fcmRequestDto, boolean flag) {
+        String message = flag ? makeMessageDataOnly(fcmRequestDto) : makeMessage(fcmRequestDto);
         System.out.printf("------------message : %s", message); // 메시지 내용 로그 출력
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -93,5 +92,24 @@ public class FcmService {
 
         }
 
+    }
+
+    private String makeMessageDataOnly(FcmRequestDto fcmRequestDto) {
+        try {
+            ObjectMapper om = new ObjectMapper();
+            FcmResponseDto fcmResponseDto = FcmResponseDto.builder()
+                    .message(FcmResponseDto.Message.builder()
+                            .token(fcmRequestDto.getToken())
+                            .data(fcmRequestDto.getData())  // 추가된 data 필드 설정
+                            .build())
+                    .validateOnly(false)
+                    .build();
+
+            return om.writeValueAsString(fcmResponseDto);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            throw new NotFoundException(HttpResponseStatus.INTERNAL_SERVER_ERROR.toString());
+
+        }
     }
 }
