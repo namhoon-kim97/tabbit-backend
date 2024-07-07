@@ -88,4 +88,12 @@ public class RestaurantController {
         restaurantService.updateRestaurant(restaurantId, requestDto, userDetails.getUsername());
         return CommonResponse.success(ResponseStatus.SUCCESS_OK);
     }
+
+    @GetMapping("/updateInfo/{restaurantId}")
+    @Operation(summary = "맛집 수정 조회", description = "맛집 수정 시 필요한 정보를 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = RestaurantResponseUpdateInfoDto.class)))
+    public CommonResponse<?> getRestaurantUpdateInfo(@PathVariable @Parameter(description = "맛집 ID", required = true) Long restaurantId) {
+        RestaurantResponseUpdateInfoDto responseDto = restaurantService.getRestaurantUpdateInfo(restaurantId);
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK, responseDto);
+    }
 }
