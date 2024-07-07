@@ -12,7 +12,7 @@ public interface MenuRepository extends Repository<Menu, Long> {
     Optional<Menu> findByMenuId(Long menuId);
 
     @EntityGraph(attributePaths = {"category"})
-    List<Menu> findAllByRestaurant(Restaurant restaurant);
+    List<Menu> findAllByRestaurantAndDelYn(Restaurant restaurant, String delYn);
 
     void save(Menu menu);
 }

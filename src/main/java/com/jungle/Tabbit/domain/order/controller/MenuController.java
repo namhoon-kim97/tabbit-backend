@@ -40,13 +40,34 @@ public class MenuController {
 
     @PostMapping("/category/{restaurantId}")
     @PreAuthorize("hasRole('ROLE_MANAGER')")
-    @Operation(summary = "카테고리 생성", description = "새로운 카테고리를 생성합니다.")
+    @Operation(summary = "카테고리 생성", description = "해당 맛집의 새로운 카테고리를 생성합니다.")
     @ApiResponse(responseCode = "201", description = "생성 성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
     public CommonResponse<?> createMenuCategory(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                 @PathVariable @Parameter(description = "맛집 ID", required = true) Long restaurantId,
                                                 @RequestBody @Parameter(description = "카테고리 생성 요청 DTO", required = true) MenuCategoryRequestDto requestDto) {
         menuService.createMenuCategory(userDetails.getUsername(), restaurantId, requestDto);
         return CommonResponse.success(ResponseStatus.SUCCESS_CREATE);
+    }
+
+    @PutMapping("/category/{menuCategoryId}")
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    @Operation(summary = "카테고리 수정", description = "해당 카테고리를 수정합니다.")
+    @ApiResponse(responseCode = "200", description = "수정 성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
+    public CommonResponse<?> updateMenuCategory(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                @PathVariable @Parameter(description = "카테고리 ID", required = true) Long menuCategoryId,
+                                                @RequestBody @Parameter(description = "카테고리 수정 요청 DTO", required = true) MenuCategoryRequestDto requestDto) {
+        menuService.updateMenuCategory(userDetails.getUsername(), menuCategoryId, requestDto);
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK);
+    }
+
+    @DeleteMapping("/category/{menuCategoryId}")
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    @Operation(summary = "카테고리 삭제", description = "해당 카테고리를 삭제합니다.")
+    @ApiResponse(responseCode = "200", description = "삭제 성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
+    public CommonResponse<?> deleteMenuCategory(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                @PathVariable @Parameter(description = "카테고리 ID", required = true) Long menuCategoryId) {
+        menuService.deleteMenuCategory(userDetails.getUsername(), menuCategoryId);
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK);
     }
 
     @GetMapping("/{restaurantId}")
@@ -66,5 +87,26 @@ public class MenuController {
                                         @Parameter(description = "메뉴 생성 요청 DTO", required = true) MenuRequestDto requestDto) {
         menuService.createMenu(userDetails.getUsername(), restaurantId, requestDto);
         return CommonResponse.success(ResponseStatus.SUCCESS_CREATE);
+    }
+
+    @PutMapping("/{menuId}")
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    @Operation(summary = "메뉴 수정", description = "해당 메뉴를 수정합니다.")
+    @ApiResponse(responseCode = "200", description = "수정 성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
+    public CommonResponse<?> updateMenu(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                        @PathVariable @Parameter(description = "메뉴 ID", required = true) Long menuId,
+                                        @RequestBody @Parameter(description = "메뉴 수정 요청 DTO", required = true) MenuRequestDto requestDto) {
+        menuService.updateMenu(userDetails.getUsername(), menuId, requestDto);
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK);
+    }
+
+    @DeleteMapping("/{menuId}")
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    @Operation(summary = "메뉴 삭제", description = "해당 메뉴를 삭제합니다.")
+    @ApiResponse(responseCode = "200", description = "삭제 성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
+    public CommonResponse<?> deleteMenu(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                        @PathVariable @Parameter(description = "메뉴 ID", required = true) Long menuId) {
+        menuService.deleteMenu(userDetails.getUsername(), menuId);
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK);
     }
 }

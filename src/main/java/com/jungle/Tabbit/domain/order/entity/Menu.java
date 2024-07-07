@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -34,6 +35,10 @@ public class Menu {
     @JoinColumn(name = "category_id", nullable = false)
     private MenuCategory category;
 
+    @Column(name = "del_yn", length = 1)
+    @ColumnDefault("'N'")
+    private String delYn = "N";
+
     public Menu(Restaurant restaurant, String name, Long price, String description, String imageUrl, MenuCategory category) {
         this.restaurant = restaurant;
         this.name = name;
@@ -49,5 +54,9 @@ public class Menu {
         this.description = description;
         this.imageUrl = imageUrl;
         this.category = category;
+    }
+
+    public void delete() {
+        this.delYn = "Y";
     }
 }
