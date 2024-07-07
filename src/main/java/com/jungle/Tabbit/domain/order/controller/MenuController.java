@@ -89,13 +89,13 @@ public class MenuController {
         return CommonResponse.success(ResponseStatus.SUCCESS_CREATE);
     }
 
-    @PutMapping("/{menuId}")
+    @PutMapping(value = "/{menuId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ROLE_MANAGER')")
     @Operation(summary = "메뉴 수정", description = "해당 메뉴를 수정합니다.")
     @ApiResponse(responseCode = "200", description = "수정 성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
     public CommonResponse<?> updateMenu(@AuthenticationPrincipal CustomUserDetails userDetails,
                                         @PathVariable @Parameter(description = "메뉴 ID", required = true) Long menuId,
-                                        @RequestBody @Parameter(description = "메뉴 수정 요청 DTO", required = true) MenuRequestDto requestDto) {
+                                        @Parameter(description = "메뉴 수정 요청 DTO", required = true) MenuRequestDto requestDto) {
         menuService.updateMenu(userDetails.getUsername(), menuId, requestDto);
         return CommonResponse.success(ResponseStatus.SUCCESS_OK);
     }
