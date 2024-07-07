@@ -7,6 +7,8 @@ import com.jungle.Tabbit.domain.nfc.entity.Nfc;
 import com.jungle.Tabbit.domain.nfc.repository.NfcRepository;
 import com.jungle.Tabbit.domain.notification.dto.NotificationRequestCreateDto;
 import com.jungle.Tabbit.domain.notification.service.NotificationService;
+import com.jungle.Tabbit.domain.order.dto.order.OrderMenuResponseDto;
+import com.jungle.Tabbit.domain.order.repository.OrderMenuRepository;
 import com.jungle.Tabbit.domain.order.service.OrderService;
 import com.jungle.Tabbit.domain.restaurant.dto.RestaurantResponseSummaryDto;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
@@ -46,6 +48,7 @@ public class WaitingService {
     private final NotificationService notificationService;
     private final BadgeTriggerService badgeTriggerService;
     private final OrderService orderService;
+    private final OrderMenuRepository orderMenuRepository;
     private static final ConcurrentHashMap<Long, AtomicLong> storeQueueNumbers = new ConcurrentHashMap<>();  // 가게별 전역 대기번호 변수
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -69,8 +72,11 @@ public class WaitingService {
     }
 
     @Transactional(readOnly = true)
-    public WaitingResponseDto getWaitingOverview(Long restaurantId, String username) {
-        return getWaitingResponseDto(username, getRestaurantById(restaurantId));
+    public WaitingResponseDto getWaitingOverview(Long waitingId) {
+        Waiting waiting = getWaitingById(waitingId);
+        int currentWaitingPosition = getCurrentWaitingPosition(waiting, Arrays.asList(WaitingStatus.STATUS_WAITING, WaitingStatus.STATUS_CALLED));
+        Long estimatedWaitTime = calculateEstimatedWaitTime(currentWaitingPosition, waiting.getRestaurant().getEstimatedTimePerTeam());
+        return WaitingResponseDto.of(waiting, estimatedWaitTime, currentWaitingPosition);
     }
 
     @Transactional(readOnly = true)
@@ -93,27 +99,25 @@ public class WaitingService {
     }
 
     @Transactional
-    public void cancelWaiting(Long restaurantId, String username) {
+    public void cancelWaiting(Long waitingId, String username) {
+        Waiting waiting = getWaitingById(waitingId);
         Member member = getMemberByUsername(username);
-        Restaurant restaurant = getRestaurantById(restaurantId);
-        Waiting waiting = getWaitingByMemberAndRestaurant(member, restaurant);
 
         waiting.updateStatus(WaitingStatus.STATUS_CANCELLED);
         orderService.deleteOrderIfExists(waiting.getWaitingId());
 
-        sendCancellationNotification(member, restaurant, waiting);
+        sendCancellationNotification(member, waiting.getRestaurant(), waiting);
 
-        notifyImminentEntryToWaiters(restaurant, waiting);
+        notifyImminentEntryToWaiters(waiting.getRestaurant(), waiting);
     }
 
     @Transactional
-    public void confirmWaiting(Long restaurantId, String username, int waitingNumber) {
+    public void confirmWaiting(Long waitingId, String username) {
+        Waiting waiting = getWaitingById(waitingId);
         Member owner = getMemberByUsername(username);
-        Restaurant restaurant = getRestaurantById(restaurantId);
+        Restaurant restaurant = waiting.getRestaurant();
 
         validateRestaurantOwner(restaurant, owner);
-
-        Waiting waiting = getWaitingByNumberAndRestaurant(waitingNumber, restaurant, WaitingStatus.STATUS_CALLED);
 
         waiting.updateStatus(WaitingStatus.STATUS_SEATED);
         Optional<MemberStamp> memberStamp = stampRepository.findByMemberAndRestaurant(waiting.getMember(), restaurant);
@@ -132,13 +136,12 @@ public class WaitingService {
     }
 
     @Transactional
-    public void callWaiting(Long restaurantId, String username, int waitingNumber) {
+    public void callWaiting(Long waitingId, String username) {
+        Waiting waiting = getWaitingById(waitingId);
         Member owner = getMemberByUsername(username);
-        Restaurant restaurant = getRestaurantById(restaurantId);
+        Restaurant restaurant = waiting.getRestaurant();
 
         validateRestaurantOwner(restaurant, owner);
-
-        Waiting waiting = getWaitingByNumberAndRestaurant(waitingNumber, restaurant, WaitingStatus.STATUS_WAITING);
 
         waiting.updateStatus(WaitingStatus.STATUS_CALLED);
 
@@ -151,13 +154,12 @@ public class WaitingService {
     }
 
     @Transactional
-    public void noShowWaiting(Long restaurantId, String username, int waitingNumber) {
+    public void noShowWaiting(Long waitingId, String username) {
+        Waiting waiting = getWaitingById(waitingId);
         Member owner = getMemberByUsername(username);
-        Restaurant restaurant = getRestaurantById(restaurantId);
+        Restaurant restaurant = waiting.getRestaurant();
 
         validateRestaurantOwner(restaurant, owner);
-
-        Waiting waiting = getWaitingByNumberAndRestaurant(waitingNumber, restaurant, WaitingStatus.STATUS_CALLED);
 
         waiting.updateStatus(WaitingStatus.STATUS_NOSHOW);
 
@@ -170,15 +172,37 @@ public class WaitingService {
         List<Waiting> calledWaitingList = waitingRepository.findByRestaurantAndWaitingStatus(restaurant, WaitingStatus.STATUS_CALLED);
         List<Waiting> waitingList = waitingRepository.findByRestaurantAndWaitingStatus(restaurant, WaitingStatus.STATUS_WAITING);
 
-        List<WaitingUpdateResponseDto> calledWaitingDtos = calledWaitingList.stream()
-                .map(WaitingUpdateResponseDto::of)
-                .collect(Collectors.toList());
+        List<WaitingWithOrderDto> calledWaitingDtos = mapWaitingsToDtos(calledWaitingList);
+        List<WaitingWithOrderDto> waitingDtos = mapWaitingsToDtos(waitingList);
 
-        List<WaitingUpdateResponseDto> waitingDtos = waitingList.stream()
-                .map(WaitingUpdateResponseDto::of)
-                .collect(Collectors.toList());
+        return OwnerWaitingListResponseDto.builder()
+                .estimatedWaitTime(restaurant.getEstimatedTimePerTeam())
+                .calledWaitingList(calledWaitingDtos)
+                .waitingList(waitingDtos)
+                .build();
+    }
 
-        return new OwnerWaitingListResponseDto(restaurant.getEstimatedTimePerTeam(), calledWaitingDtos, waitingDtos);
+    private List<WaitingWithOrderDto> mapWaitingsToDtos(List<Waiting> waitings) {
+        return waitings.stream()
+                .map(waiting -> {
+                    List<OrderMenuResponseDto> menuItems = getOrderMenuDtosForWaiting(waiting);
+                    return WaitingWithOrderDto.builder()
+                            .waiting(WaitingUpdateResponseDto.of(waiting))
+                            .menuItems(menuItems)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    private List<OrderMenuResponseDto> getOrderMenuDtosForWaiting(Waiting waiting) {
+        return orderMenuRepository.findByOrder_Waiting(waiting).stream()
+                .map(orderMenu -> OrderMenuResponseDto.builder()
+                        .menuId(orderMenu.getMenu().getMenuId())
+                        .menuName(orderMenu.getMenu().getName())
+                        .quantity(orderMenu.getQuantity())
+                        .price(orderMenu.getMenu().getPrice())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -188,6 +212,11 @@ public class WaitingService {
         Long currentWaitingNumber = waitingRepository.countByRestaurantAndWaitingStatus(restaurant, WaitingStatus.STATUS_WAITING);
 
         return RestaurantResponseSummaryDto.of(restaurant, false, currentWaitingNumber, restaurant.getEstimatedTimePerTeam() * currentWaitingNumber);
+    }
+
+    private Waiting getWaitingById(Long waitingId) {
+        return waitingRepository.findByWaitingId(waitingId)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_GET_CURRENT_WAIT_POSITION));
     }
 
     private Member getMemberByUsername(String username) {
@@ -203,16 +232,6 @@ public class WaitingService {
     private Restaurant getRestaurantById(Long restaurantId) {
         return restaurantRepository.findByRestaurantId(restaurantId)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
-    }
-
-    private Waiting getWaitingByMemberAndRestaurant(Member member, Restaurant restaurant) {
-        return waitingRepository.findByRestaurantAndMemberAndWaitingStatusIn(restaurant, member, Arrays.asList(WaitingStatus.STATUS_WAITING, WaitingStatus.STATUS_CALLED))
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_GET_CURRENT_WAIT_POSITION));
-    }
-
-    private Waiting getWaitingByNumberAndRestaurant(int waitingNumber, Restaurant restaurant, WaitingStatus waitingStatus) {
-        return waitingRepository.findByRestaurantAndWaitingNumberAndWaitingStatus(restaurant, waitingNumber, waitingStatus)
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_GET_CURRENT_WAIT_POSITION));
     }
 
     private void validateDuplicateWaiting(Member member, Restaurant restaurant) {
@@ -291,16 +310,6 @@ public class WaitingService {
             Waiting nextWaiting = waitingList.get(i);
             sendImminentEntryNotification(nextWaiting.getMember(), i, restaurant, waiting);
         }
-    }
-
-    private WaitingResponseDto getWaitingResponseDto(String username, Restaurant restaurant) {
-        Member member = getMemberByUsername(username);
-        Waiting userWaiting = getWaitingByMemberAndRestaurant(member, restaurant);
-
-        int currentWaitingPosition = getCurrentWaitingPosition(userWaiting, Arrays.asList(WaitingStatus.STATUS_WAITING, WaitingStatus.STATUS_CALLED));
-        Long estimatedWaitTime = calculateEstimatedWaitTime(currentWaitingPosition, restaurant.getEstimatedTimePerTeam());
-
-        return WaitingResponseDto.of(userWaiting, estimatedWaitTime, currentWaitingPosition);
     }
 
     private void sendImminentEntryNotification(Member member, int currentWaitingPosition, Restaurant restaurant, Waiting waiting) {

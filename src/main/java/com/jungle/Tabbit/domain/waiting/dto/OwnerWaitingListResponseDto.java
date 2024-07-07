@@ -15,14 +15,14 @@ public class OwnerWaitingListResponseDto {
     private Long estimatedWaitTime;
 
     @Schema(description = "호출된 웨이팅 목록")
-    private List<WaitingUpdateResponseDto> calledWaitingList;
+    private List<WaitingWithOrderDto> calledWaitingList;
 
     @Schema(description = "대기 중인 웨이팅 목록")
-    private List<WaitingUpdateResponseDto> waitingList;
+    private List<WaitingWithOrderDto> waitingList;
 
     public OwnerWaitingListResponseDto(Long estimatedWaitTime,
-                                       List<WaitingUpdateResponseDto> calledWaitingList,
-                                       List<WaitingUpdateResponseDto> waitingList) {
+                                       List<WaitingWithOrderDto> calledWaitingList,
+                                       List<WaitingWithOrderDto> waitingList) {
         this.estimatedWaitTime = estimatedWaitTime;
         this.calledWaitingList = calledWaitingList;
         this.waitingList = waitingList;

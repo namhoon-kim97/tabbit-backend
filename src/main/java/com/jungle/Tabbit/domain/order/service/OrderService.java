@@ -51,11 +51,8 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public OrderResponseDto getUserOrders(String username, Long restaurantId) {
-        Member member = getMemberByUsername(username);
-        Restaurant restaurant = getRestaurantById(restaurantId);
-
-        Order order = orderRepository.findByMemberAndRestaurantAndStatus(member, restaurant, OrderStatus.ORDERED)
+    public OrderResponseDto getUserOrders(Long waitingId) {
+        Order order = orderRepository.findByWaiting_WaitingId(waitingId)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_ORDER_NOT_FOUND));
         return OrderResponseDto.of(order);
     }
