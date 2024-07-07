@@ -152,12 +152,21 @@ public class RestaurantService {
             throw new BusinessLogicException(ResponseStatus.FAIL_NOT_OWNER);
         }
 
+        String imageFileName = "DEFAULT";
         MultipartFile file = requestDto.getMultipartFile();
-        if (imageService.isExistImage(file.getOriginalFilename())) {
-            imageService.deleteImage(file.getOriginalFilename());
-        }
+        String currentImageUrl = restaurant.getImageUrl();
 
-        String imageFileName = imageService.uploadImage(file);
+        if (file != null) {
+            imageFileName = file.getOriginalFilename();
+            if (!imageFileName.equals(currentImageUrl)) {
+                if (imageService.isExistImage(currentImageUrl)) {
+                    imageService.deleteImage(currentImageUrl);
+                }
+                imageFileName = imageService.uploadImage(file);
+            }
+        } else if (imageService.isExistImage(currentImageUrl)) {
+            imageService.deleteImage(currentImageUrl);
+        }
 
         restaurant.getAddress().update(requestDto.getSido(), requestDto.getSigungu(), requestDto.getEupmyeondong(),
                 requestDto.getRoadAddressName(), requestDto.getAddressName(), requestDto.getDetailAddress());
