@@ -2,6 +2,7 @@ package com.jungle.Tabbit.domain.order.controller;
 
 import com.jungle.Tabbit.domain.order.dto.order.OrderRequestDto;
 import com.jungle.Tabbit.domain.order.dto.order.OrderResponseDto;
+import com.jungle.Tabbit.domain.order.dto.order.OrderUpdateRequestDto;
 import com.jungle.Tabbit.domain.order.service.OrderService;
 import com.jungle.Tabbit.global.config.security.CustomUserDetails;
 import com.jungle.Tabbit.global.model.CommonResponse;
@@ -28,6 +29,14 @@ public class OrderController {
     @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
     public CommonResponse<?> createOrder(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody OrderRequestDto requestDto) {
         orderService.createOrder(userDetails.getUsername(), requestDto);
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK);
+    }
+
+    @PutMapping("/{orderId}")
+    @Operation(summary = "주문 수정", description = "해당 주문을 수정합니다.")
+    @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
+    public CommonResponse<?> updateOrder(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long orderId, @RequestBody OrderUpdateRequestDto requestDto) {
+        orderService.updateOrder(userDetails.getUsername(), requestDto, orderId);
         return CommonResponse.success(ResponseStatus.SUCCESS_OK);
     }
 
