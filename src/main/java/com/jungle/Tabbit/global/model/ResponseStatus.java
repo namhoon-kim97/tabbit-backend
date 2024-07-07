@@ -94,6 +94,8 @@ public enum ResponseStatus {
 
     // Menu
     FAIL_MENU_NOT_FOUND("해당 메뉴를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    FAIL_CATEGORY_DELETE("해당 카테고리 메뉴가 존재합니다. 삭제할 수 없습니다.", HttpStatus.BAD_REQUEST),
+    FAIL_CATEGORY_CREATE("해당 카테고리가 존재합니다.", HttpStatus.BAD_REQUEST),
 
     // Order
     FAIL_ORDER_NOT_FOUND("주문 항목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
