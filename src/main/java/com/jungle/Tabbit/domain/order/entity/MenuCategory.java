@@ -6,6 +6,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity(name = "menu_category")
@@ -22,8 +25,15 @@ public class MenuCategory {
     @JoinColumn(name = "restaurant_id", nullable = false)
     private Restaurant restaurant;
 
+    @OneToMany(mappedBy = "category")
+    private List<Menu> menuList = new ArrayList<>();
+
     public MenuCategory(String name, Restaurant restaurant) {
         this.categoryName = name;
         this.restaurant = restaurant;
+    }
+
+    public void update(String categoryName) {
+        this.categoryName = categoryName;
     }
 }

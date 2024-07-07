@@ -167,6 +167,13 @@ public class RestaurantService {
                 requestDto.getHolidays(), requestDto.getRestaurantNumber(), requestDto.getDescription());
     }
 
+    @Transactional(readOnly = true)
+    public RestaurantResponseUpdateInfoDto getRestaurantUpdateInfo(Long restaurantId) {
+        Restaurant restaurant = getRestaurantById(restaurantId);
+        RestaurantDetail restaurantDetail = getRestaurantDetailByRestaurant(restaurant);
+        return RestaurantResponseUpdateInfoDto.of(restaurant, restaurantDetail);
+    }
+
     private Member getMemberByUsername(String username) {
         return memberRepository.findMemberByUsername(username)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
