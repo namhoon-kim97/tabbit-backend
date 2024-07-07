@@ -45,10 +45,6 @@ public class ImageService {
         String originalFileName = file.getOriginalFilename();
         String mimeType = file.getContentType();
 
-        if (originalFileName.equals("DEFAULT")) {
-            return originalFileName;
-        }
-
         if (file.getSize() > parseFileSize(MAX_FILE_SIZE)) {
             throw new FileException(ResponseStatus.FAIL_FILE_SIZE);
         }
