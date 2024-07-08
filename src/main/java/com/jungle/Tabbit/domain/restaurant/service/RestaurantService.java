@@ -191,9 +191,6 @@ public class RestaurantService {
             throw new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND);
         }
 
-        if (restaurants.isEmpty()) {
-            throw new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND);
-        }
         return restaurants.stream()
                 .map(RestaurantResponseSearchDto::new)
                 .collect(Collectors.toList());
