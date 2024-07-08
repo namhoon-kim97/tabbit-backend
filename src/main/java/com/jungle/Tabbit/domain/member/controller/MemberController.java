@@ -58,4 +58,13 @@ public class MemberController {
 
         return CommonResponse.success(ResponseStatus.SUCCESS_UPDATE);
     }
+    //회원탈퇴
+    @DeleteMapping("/delete")
+    @Operation(summary = "회원 탈퇴", description = "회원 탈퇴합니다.")
+    @ApiResponse(responseCode = "200", description = "회원 탈퇴 성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
+    public CommonResponse<?> delete(@AuthenticationPrincipal CustomUserDetails userDetails,@RequestBody @Valid MemberDeleteRequestDto memberDeleteRequestDto) {
+        memberService.deleteMember(userDetails.getUsername(), memberDeleteRequestDto);
+
+        return CommonResponse.success(ResponseStatus.SUCCESS_DELETE);
+    }
 }
