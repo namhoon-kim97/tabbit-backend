@@ -339,16 +339,29 @@ public class WaitingService {
         }
     }
 
-    @Scheduled(cron = "0 0 5 * * ?")
+    @Scheduled(cron = "0 */10 * * * *")
     @Transactional
     public void resetQueueNumbers() {
         storeQueueNumbers.replaceAll((storeId, queueNumber) -> new AtomicLong(0));
         List<Waiting> waitingList = waitingRepository.findAllByWaitingStatus(WaitingStatus.STATUS_WAITING);
+        List<Waiting> calledList = waitingRepository.findAllByWaitingStatus(WaitingStatus.STATUS_CALLED);
 
         for (Waiting waiting : waitingList) {
             waiting.updateStatus(WaitingStatus.STATUS_CANCELLED);
         }
 
+        for (Waiting waiting : calledList) {
+            Restaurant restaurant = waiting.getRestaurant();
+            waiting.updateStatus(WaitingStatus.STATUS_SEATED);
+            Optional<MemberStamp> memberStamp = stampRepository.findByMemberAndRestaurant(waiting.getMember(), restaurant);
+            if (memberStamp.isPresent()) {
+                memberStamp.get().updateVisitCount(memberStamp.get().getVisitCount());
+                stampRepository.save(memberStamp.get());
+            } else {
+                stampRepository.save(new MemberStamp(waiting.getMember(), restaurant, restaurant.getCategory()));
+            }
+            badgeTriggerService.checkAndAwardBadges(waiting.getMember());
+        }
         waitingRepository.saveAll(waitingList);
     }
 }
