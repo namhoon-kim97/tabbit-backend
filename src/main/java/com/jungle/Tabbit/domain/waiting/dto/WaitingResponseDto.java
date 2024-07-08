@@ -45,7 +45,6 @@ public class WaitingResponseDto {
     private LocalDateTime updatedAt;
 
     public static WaitingResponseDto of(Waiting waiting, Long estimatedWaitTime, int currentWaitingPosition) {
-        log.info("@@@@@@@@@@@@@@@@@@@@@@@this is (OF) waiting created time: " + waiting.getCreatedAt());
         return WaitingResponseDto.builder()
                 .restaurantId(waiting.getRestaurant().getRestaurantId())
                 .waitingId(waiting.getWaitingId())
