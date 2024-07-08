@@ -33,6 +33,9 @@ public class MemberStamp extends Timestamped {
     @Column(name = "visit_count", nullable = false)
     private Long visitCount;
 
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
+
     public MemberStamp(Member member, Restaurant restaurant, Category category) {
         this.member = member;
         this.restaurant = restaurant;
@@ -42,5 +45,9 @@ public class MemberStamp extends Timestamped {
 
     public void updateVisitCount(Long visitCount) {
         this.visitCount = visitCount + 1;
+    }
+
+    public void delete() {
+        this.isDeleted = true;
     }
 }
