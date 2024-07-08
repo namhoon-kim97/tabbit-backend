@@ -18,6 +18,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -88,6 +90,15 @@ public class RestaurantController {
         restaurantService.updateRestaurant(restaurantId, requestDto, userDetails.getUsername());
         return CommonResponse.success(ResponseStatus.SUCCESS_OK);
     }
+
+    @GetMapping("/search")
+    @Operation(summary = "레스토랑 검색", description = "레스토랑 이름, 카테고리, 주소 등을 기준으로 검색합니다.")
+    @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = RestaurantResponseDto.class)))
+    public CommonResponse<?> searchRestaurants(@RequestParam String searchTerm) {
+        List<RestaurantResponseSearchDto> responseDtos = restaurantService.searchRestaurants(searchTerm);
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK, responseDtos);
+    }
+
 
     @GetMapping("/updateInfo/{restaurantId}")
     @Operation(summary = "맛집 수정 조회", description = "맛집 수정 시 필요한 정보를 조회합니다.")
