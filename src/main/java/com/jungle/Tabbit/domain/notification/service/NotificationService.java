@@ -35,7 +35,6 @@ public class NotificationService {
                 .title(requestDto.getTitle())
                 .body(requestDto.getMessage())
                 .data(fcmData)
-                .dataOnly(dataOnly)
                 .build();
 
         fcmService.sendMessageTo(fcmRequestDto, dataOnly);
