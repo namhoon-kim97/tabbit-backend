@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 @Builder
 @Schema(description = "시도 스탬프")
-public class SidoStamp {
+public class SidoStampResponseDto {
     @Schema(description = "시도")
     private String sidoName;
     @Schema(description = "해당 시도 총 스탬프 수", example = "10")
@@ -15,8 +15,8 @@ public class SidoStamp {
     @Schema(description = "해당 시도 획득 스탬프 수", example = "5")
     private Long earnedsidoStampCount;
 
-    public static SidoStamp of(String sidoName, Long totalsidoStampCount, Long earnedsidoStampCount) {
-        return SidoStamp.builder()
+    public static SidoStampResponseDto of(String sidoName, Long totalsidoStampCount, Long earnedsidoStampCount) {
+        return SidoStampResponseDto.builder()
                 .sidoName(sidoName)
                 .totalsidoStampCount(totalsidoStampCount)
                 .earnedsidoStampCount(earnedsidoStampCount)
