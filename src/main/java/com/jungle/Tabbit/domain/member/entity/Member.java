@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity(name = "member")
+@SQLDelete(sql = "UPDATE member SET is_deleted = true WHERE member_id = ?")
 public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,14 +39,17 @@ public class Member {
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Badge badge;
 
-    @OneToMany(mappedBy = "member")
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<MemberStamp> memberStampList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "member")
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<MemberBadge> memberBadgeList = new ArrayList<>();
 
     @Column(nullable = false, name = "fcm_token")
     private String fcmToken;
+
+    @Column(nullable = false, name = "is_deleted")
+    private boolean isDeleted = false;
 
 
     public Member(String nickname, String password, String username, MemberRole memberRole, Badge badge, String fcmToken) {
@@ -66,5 +71,15 @@ public class Member {
 
     public void updateFcmToken(String fcmToken) {
         this.fcmToken = fcmToken;
+    }
+
+    public void deleteMember() {
+        this.isDeleted = true;
+        if (memberStampList != null) {
+            memberStampList.forEach(MemberStamp::delete);
+        }
+        if (memberBadgeList != null) {
+            memberBadgeList.forEach(MemberBadge ::delete);
+        }
     }
 }
