@@ -1,5 +1,6 @@
 package com.jungle.Tabbit.domain.order.controller;
 
+import com.jungle.Tabbit.domain.order.dto.order.OrderCreateResponseDto;
 import com.jungle.Tabbit.domain.order.dto.order.OrderRequestDto;
 import com.jungle.Tabbit.domain.order.dto.order.OrderResponseDto;
 import com.jungle.Tabbit.domain.order.dto.order.OrderUpdateRequestDto;
@@ -26,10 +27,10 @@ public class OrderController {
 
     @PostMapping
     @Operation(summary = "주문 생성", description = "새로운 주문을 생성합니다.")
-    @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
+    @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = OrderCreateResponseDto.class)))
     public CommonResponse<?> createOrder(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody OrderRequestDto requestDto) {
-        orderService.createOrder(userDetails.getUsername(), requestDto);
-        return CommonResponse.success(ResponseStatus.SUCCESS_OK);
+
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK, orderService.createOrder(userDetails.getUsername(), requestDto));
     }
 
     @PutMapping("/{orderId}")

@@ -13,5 +13,4 @@ public class FcmRequestDto {
     private String title;
     private String body;
     private FcmData data;
-    private boolean dataOnly;
 }

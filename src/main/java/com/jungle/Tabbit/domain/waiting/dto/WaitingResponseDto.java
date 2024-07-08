@@ -6,11 +6,13 @@ import com.jungle.Tabbit.domain.waiting.entity.WaitingStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Builder
+@Slf4j
 @Schema(description = "웨이팅 응답 DTO")
 public class WaitingResponseDto {
     @Schema(description = "맛집 ID", example = "1")
