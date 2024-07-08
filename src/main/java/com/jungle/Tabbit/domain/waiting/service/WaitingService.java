@@ -339,8 +339,16 @@ public class WaitingService {
         }
     }
 
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 0 5 * * ?")
+    @Transactional
     public void resetQueueNumbers() {
         storeQueueNumbers.replaceAll((storeId, queueNumber) -> new AtomicLong(0));
+        List<Waiting> waitingList = waitingRepository.findAllByWaitingStatus(WaitingStatus.STATUS_WAITING);
+
+        for (Waiting waiting : waitingList) {
+            waiting.updateStatus(WaitingStatus.STATUS_CANCELLED);
+        }
+
+        waitingRepository.saveAll(waitingList);
     }
 }
