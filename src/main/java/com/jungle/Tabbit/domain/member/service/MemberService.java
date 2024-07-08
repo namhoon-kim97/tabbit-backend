@@ -105,4 +105,15 @@ public class MemberService {
 
         member.updateMemberPassword(passwordEncoder.encode(memberPasswordUpdateDto.getNewPassword()));
     }
+
+    public void deleteMember(String username, MemberDeleteRequestDto memberDeleteRequestDto) {
+        Member member = memberRepository.findMemberByUsername(username)
+                .orElseThrow(() -> new NotFoundException(FAIL_MEMBER_NOT_FOUND));
+
+        if (!passwordEncoder.matches(memberDeleteRequestDto.getPassword(), member.getPassword())) {
+            throw new PasswordNotMatchException(FAIL_PASSWORD_NOT_MATCH);
+        }
+
+        member.deleteMember();
+    }
 }
