@@ -99,7 +99,10 @@ public enum ResponseStatus {
 
     // Order
     FAIL_ORDER_NOT_FOUND("주문 항목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
-    FAIL_ORDER_MEMBER_EQUAL("주문한 유저만이 수정 가능합니다.", HttpStatus.BAD_REQUEST);
+    FAIL_ORDER_MEMBER_EQUAL("주문한 유저만이 수정 가능합니다.", HttpStatus.BAD_REQUEST),
+
+    // delete
+    FAIL_MEMBER_DELETE_WAITING("웨이팅을 취소해야 탈퇴가 가능합니다.", HttpStatus.BAD_REQUEST);
 
     private String message;
 

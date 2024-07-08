@@ -24,8 +24,15 @@ public class MemberBadge extends EarnedTimestamped {
     @JoinColumn(name = "badge_id", nullable = false)
     private Badge badge;
 
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
+
     public MemberBadge(Member member, Badge badge) {
         this.member = member;
         this.badge = badge;
+    }
+
+    public void delete() {
+        this.isDeleted = true;
     }
 }
