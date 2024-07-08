@@ -2,10 +2,7 @@ package com.jungle.Tabbit.domain.order.service;
 
 import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
-import com.jungle.Tabbit.domain.order.dto.order.MenuQuantityDto;
-import com.jungle.Tabbit.domain.order.dto.order.OrderRequestDto;
-import com.jungle.Tabbit.domain.order.dto.order.OrderResponseDto;
-import com.jungle.Tabbit.domain.order.dto.order.OrderUpdateRequestDto;
+import com.jungle.Tabbit.domain.order.dto.order.*;
 import com.jungle.Tabbit.domain.order.entity.Menu;
 import com.jungle.Tabbit.domain.order.entity.Order;
 import com.jungle.Tabbit.domain.order.entity.OrderMenu;
@@ -38,7 +35,7 @@ public class OrderService {
     private final WaitingRepository waitingRepository;
 
     @Transactional
-    public void createOrder(String username, OrderRequestDto requestDto) {
+    public OrderCreateResponseDto createOrder(String username, OrderRequestDto requestDto) {
         Member member = getMemberByUsername(username);
         Restaurant restaurant = getRestaurantById(requestDto.getRestaurantId());
         Waiting waiting = waitingRepository.findByWaitingId(requestDto.getWaitingId())
@@ -52,6 +49,7 @@ public class OrderService {
             OrderMenu orderMenu = new OrderMenu(order, menu, menuQuantity.getQuantity());
             orderMenuRepository.save(orderMenu);
         }
+        return OrderCreateResponseDto.of(order);
     }
 
     @Transactional(readOnly = true)
