@@ -31,6 +31,4 @@ public interface WaitingRepository extends Repository<Waiting, Long> {
     boolean existsByMemberAndWaitingStatusIn(Member member, List<WaitingStatus> waitingStatus);
 
     List<Waiting> findAllByWaitingStatus(WaitingStatus status);
-
-    void saveAll(List<Waiting> waitings);
 }

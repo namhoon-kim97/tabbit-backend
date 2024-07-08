@@ -362,6 +362,5 @@ public class WaitingService {
             }
             badgeTriggerService.checkAndAwardBadges(waiting.getMember());
         }
-        waitingRepository.saveAll(waitingList);
     }
 }
