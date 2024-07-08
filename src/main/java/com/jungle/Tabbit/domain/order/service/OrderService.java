@@ -16,7 +16,6 @@ import com.jungle.Tabbit.domain.order.repository.OrderRepository;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
 import com.jungle.Tabbit.domain.restaurant.repository.RestaurantRepository;
 import com.jungle.Tabbit.domain.waiting.entity.Waiting;
-import com.jungle.Tabbit.domain.waiting.entity.WaitingStatus;
 import com.jungle.Tabbit.domain.waiting.repository.WaitingRepository;
 import com.jungle.Tabbit.global.exception.BusinessLogicException;
 import com.jungle.Tabbit.global.exception.NotFoundException;
@@ -42,7 +41,7 @@ public class OrderService {
     public void createOrder(String username, OrderRequestDto requestDto) {
         Member member = getMemberByUsername(username);
         Restaurant restaurant = getRestaurantById(requestDto.getRestaurantId());
-        Waiting waiting = waitingRepository.findByRestaurantAndWaitingNumberAndWaitingStatus(restaurant, requestDto.getWaitingNumber(), WaitingStatus.STATUS_WAITING)
+        Waiting waiting = waitingRepository.findByWaitingId(requestDto.getWaitingId())
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_GET_CURRENT_WAIT_POSITION));
 
         Order order = new Order(member, restaurant, waiting);
