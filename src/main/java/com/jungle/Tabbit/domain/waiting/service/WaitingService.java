@@ -339,7 +339,7 @@ public class WaitingService {
         }
     }
 
-    @Scheduled(cron = "0 */10 * * * *")
+    @Scheduled(cron = "0 0 5 * * *")
     @Transactional
     public void resetQueueNumbers() {
         storeQueueNumbers.replaceAll((storeId, queueNumber) -> new AtomicLong(0));
