@@ -39,7 +39,10 @@ public class Notification {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    public Notification(String title, String message, String target, String messageType, Member member) {
+    @Column(nullable = false, name = "data_only")
+    private boolean dataOnly;
+
+    public Notification(String title, String message, String target, String messageType, Member member, boolean dataOnly) {
         this.title = title;
         this.message = message;
         this.target = target;
@@ -47,6 +50,7 @@ public class Notification {
         this.createdAt = LocalDateTime.now();
         this.isRead = false;
         this.member = member;
+        this.dataOnly = dataOnly;
     }
 
     public void check() {
