@@ -27,13 +27,13 @@ public class Guestbook extends EarnedTimestamped {
     @Column(name = "content", length = 255)
     private String content;
 
-    @Column(name = "image_url", length = 255)
-    private String imageUrl;
+    @Column(name = "mapping_id", length = 255)
+    private Long mappingId;
 
-    public Guestbook(Member member, Restaurant restaurant, String content, String imageUrl) {
+    public Guestbook(Member member, Restaurant restaurant, String content, Long mappingId) {
         this.member = member;
         this.restaurant = restaurant;
         this.content = content;
-        this.imageUrl = imageUrl;
+        this.mappingId = mappingId;
     }
 }
