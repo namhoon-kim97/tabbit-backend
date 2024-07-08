@@ -183,6 +183,22 @@ public class RestaurantService {
         return RestaurantResponseUpdateInfoDto.of(restaurant, restaurantDetail);
     }
 
+    public List<RestaurantResponseSearchDto> searchRestaurants(String searchTerm) {
+        List<Restaurant> restaurants;
+        try {
+            restaurants = restaurantRepository.searchRestaurants(searchTerm);
+        } catch (Exception e) {
+            throw new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND);
+        }
+
+        if (restaurants.isEmpty()) {
+            throw new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND);
+        }
+        return restaurants.stream()
+                .map(RestaurantResponseSearchDto::new)
+                .collect(Collectors.toList());
+    }
+
     private Member getMemberByUsername(String username) {
         return memberRepository.findMemberByUsername(username)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
