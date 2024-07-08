@@ -27,8 +27,8 @@ public class FcmService {
         this.webClient = webClientBuilder.baseUrl("https://fcm.googleapis.com/v1/projects/tabbit-c1857").build();
     }
 
-    public void sendMessageTo(FcmRequestDto fcmRequestDto, boolean flag) {
-        String message = flag ? makeMessageDataOnly(fcmRequestDto) : makeMessage(fcmRequestDto);
+    public void sendMessageTo(FcmRequestDto fcmRequestDto, boolean dataOnly) {
+        String message = dataOnly ? makeMessageDataOnly(fcmRequestDto) : makeMessage(fcmRequestDto);
         System.out.printf("------------message : %s", message); // 메시지 내용 로그 출력
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

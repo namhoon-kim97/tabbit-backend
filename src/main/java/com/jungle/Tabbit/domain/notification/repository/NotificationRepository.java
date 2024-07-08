@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface NotificationRepository extends Repository<Notification, Long> {
     void save(Notification notification);
 
-    List<Notification> findAllByMember(Member member);
+    List<Notification> findAllByMemberAndDataOnlyFalse(Member member);
 
     Optional<Notification> findNotificationByNotificationId(Long notificationId);
 

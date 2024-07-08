@@ -26,7 +26,7 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final FcmService fcmService;
 
-    public void sendNotification(NotificationRequestCreateDto requestDto, boolean flag) {
+    public void sendNotification(NotificationRequestCreateDto requestDto, boolean dataOnly) {
         Member member = getMemberById(requestDto.getMemberId());
         FcmData fcmData = requestDto.getFcmData();
 
@@ -35,17 +35,18 @@ public class NotificationService {
                 .title(requestDto.getTitle())
                 .body(requestDto.getMessage())
                 .data(fcmData)
+                .dataOnly(dataOnly)
                 .build();
 
-        fcmService.sendMessageTo(fcmRequestDto, flag);
+        fcmService.sendMessageTo(fcmRequestDto, dataOnly);
 
-        notificationRepository.save(new Notification(requestDto.getTitle(), requestDto.getMessage(), fcmData.getTarget(), fcmData.getMessageType(), member));
+        notificationRepository.save(new Notification(requestDto.getTitle(), requestDto.getMessage(), fcmData.getTarget(), fcmData.getMessageType(), member, dataOnly));
     }
 
     @Transactional(readOnly = true)
     public List<NotificationResponseDto> getNotificationList(Long userId) {
         Member member = getMemberById(userId);
-        List<Notification> findNotifications = notificationRepository.findAllByMember(member);
+        List<Notification> findNotifications = notificationRepository.findAllByMemberAndDataOnlyFalse(member);
         List<NotificationResponseDto> findNotificationsDto = findNotifications.stream()
                 .map(NotificationResponseDto::of)
                 .collect(Collectors.toList());
