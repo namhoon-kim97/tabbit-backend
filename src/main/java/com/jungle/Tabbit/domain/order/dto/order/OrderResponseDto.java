@@ -34,6 +34,7 @@ public class OrderResponseDto {
                                 .menuName(orderItem.getMenu().getName())
                                 .quantity(orderItem.getQuantity())
                                 .price(orderItem.getMenu().getPrice())
+                                .imageUrl(orderItem.getMenu().getImageUrl())
                                 .build())
                         .collect(Collectors.toList())
                 : Collections.emptyList();
