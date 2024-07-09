@@ -40,7 +40,7 @@ public class BadgeController {
     @GetMapping("/users/{badgeId}")
     @Operation(summary = "칭호를 가진 유저 목록 조회", description = "특정 칭호를 가진 모든 유저의 목록을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "칭호를 가진 유저 목록 조회 성공", content = @Content(schema = @Schema(implementation = UserWithBadgeResponseListDto.class)))
-    public CommonResponse<?> getUsersWithBadge(@PathVariable Long badgeId) {
-        return CommonResponse.success(ResponseStatus.SUCCESS_OK, badgeService.getUsersWithBadge(badgeId));
+    public CommonResponse<?> getUsersWithBadge(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long badgeId) {
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK, badgeService.getUsersWithBadge(userDetails.getUsername(), badgeId));
     }
 }
