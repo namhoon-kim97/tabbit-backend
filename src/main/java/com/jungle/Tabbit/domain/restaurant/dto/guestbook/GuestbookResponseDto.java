@@ -9,17 +9,15 @@ import lombok.Getter;
 @Builder
 @Schema(description = "방명록 응답 DTO")
 public class GuestbookResponseDto {
-
+    @Schema(description = "매핑 ID")
+    private Long mappingId;
     @Schema(description = "방명록 내용")
     private String content;
 
-    @Schema(description = "방명록 이미지 경로")
-    private String imageUrl;
-
     public static GuestbookResponseDto of(Guestbook guestbook) {
         return GuestbookResponseDto.builder()
+                .mappingId(guestbook.getMappingId())
                 .content(guestbook.getContent())
-                .imageUrl(guestbook.getImageUrl())
                 .build();
     }
 }

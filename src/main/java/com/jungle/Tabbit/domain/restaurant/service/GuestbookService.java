@@ -1,6 +1,5 @@
 package com.jungle.Tabbit.domain.restaurant.service;
 
-import com.jungle.Tabbit.domain.image.service.ImageService;
 import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
 import com.jungle.Tabbit.domain.restaurant.dto.guestbook.GuestbookRequestDto;
@@ -33,15 +32,15 @@ public class GuestbookService {
     private final RestaurantRepository restaurantRepository;
     private final GuestbookRepository guestbookRepository;
     private final StampRepository stampRepository;
-    private final ImageService imageService;
 
     @Transactional(readOnly = true)
-    public GuestbookResponseListDto getAllGuestbook(String username, Long restaurantId) {
+    public GuestbookResponseListDto getAllGuestbook(String username, Long restaurantId, Long pageNumber, Long pageSize) {
         Member member = getMemberByUsername(username);
         Restaurant restaurant = getRestaurantById(restaurantId);
 
         List<Guestbook> guestbookList = restaurant.getGuestbookList();
         List<GuestbookResponseDto> guestbookResponseList = guestbookList.stream()
+                .filter(guestbook -> (pageNumber - 1) * pageSize < guestbook.getMappingId() && guestbook.getMappingId() < pageNumber * pageSize)
                 .map(GuestbookResponseDto::of)
                 .collect(Collectors.toList());
 
@@ -56,13 +55,16 @@ public class GuestbookService {
         Member member = getMemberByUsername(username);
         Restaurant restaurant = getRestaurantById(restaurantId);
 
-        String imageFileName = imageService.uploadImage(requestDto.getMultipartFile());
+        guestbookRepository.findByRestaurantAndMappingId(restaurant, requestDto.getMappingId())
+                .ifPresent(guestbook -> {
+                    throw new BusinessLogicException(ResponseStatus.FAIL_GUESTBOOK_MAPPING_ID);
+                });
 
         Guestbook guestbook = new Guestbook(
                 member,
                 restaurant,
                 requestDto.getContent(),
-                imageFileName
+                requestDto.getMappingId()
         );
         guestbookRepository.save(guestbook);
     }
@@ -75,11 +77,6 @@ public class GuestbookService {
         }
 
         Guestbook guestbook = getGuestbookById(guestbookId);
-
-        if (imageService.isExistImage(guestbook.getImageUrl())) {
-            imageService.deleteImage(guestbook.getImageUrl());
-        }
-
         guestbookRepository.delete(guestbook);
     }
 

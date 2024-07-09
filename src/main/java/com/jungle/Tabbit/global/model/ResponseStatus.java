@@ -91,6 +91,7 @@ public enum ResponseStatus {
 
     // Guestbook
     FAIL_GUESTBOOK_NOT_FOUND("해당 방명록을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    FAIL_GUESTBOOK_MAPPING_ID("해당 방명록 mapping_id 에는 방명록이 작성되어 있습니다.", HttpStatus.BAD_REQUEST),
 
     // Menu
     FAIL_MENU_NOT_FOUND("해당 메뉴를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
