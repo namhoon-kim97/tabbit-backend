@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @Slf4j
@@ -38,10 +39,19 @@ public class GuestbookService {
         Member member = getMemberByUsername(username);
         Restaurant restaurant = getRestaurantById(restaurantId);
 
-        List<Guestbook> guestbookList = restaurant.getGuestbookList();
-        List<GuestbookResponseDto> guestbookResponseList = guestbookList.stream()
-                .filter(guestbook -> (pageNumber - 1) * pageSize < guestbook.getMappingId() && guestbook.getMappingId() < pageNumber * pageSize)
-                .map(GuestbookResponseDto::of)
+        List<Guestbook> guestbookList = restaurant.getGuestbookList().stream()
+                .filter(guestbook -> (pageNumber - 1) * pageSize <= guestbook.getMappingId() && guestbook.getMappingId() <= pageNumber * pageSize)
+                .collect(Collectors.toList());
+
+        List<GuestbookResponseDto> guestbookResponseList = IntStream.range(0, pageSize.intValue())
+                .mapToObj(i -> {
+                    Long currentId = (pageNumber - 1) * pageSize + i + 1;
+                    return guestbookList.stream()
+                            .filter(guestbook -> guestbook.getMappingId().equals(currentId))
+                            .findFirst()
+                            .map(GuestbookResponseDto::of)
+                            .orElseGet(() -> GuestbookResponseDto.emptyOf(Long.valueOf(currentId)));
+                })
                 .collect(Collectors.toList());
 
         Boolean isWritable = stampRepository.findByMemberAndRestaurant(member, restaurant)

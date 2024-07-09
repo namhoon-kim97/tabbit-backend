@@ -20,4 +20,11 @@ public class GuestbookResponseDto {
                 .content(guestbook.getContent())
                 .build();
     }
+
+    public static GuestbookResponseDto emptyOf(Long mappingId) {
+        return GuestbookResponseDto.builder()
+                .mappingId(mappingId)
+                .content("")
+                .build();
+    }
 }

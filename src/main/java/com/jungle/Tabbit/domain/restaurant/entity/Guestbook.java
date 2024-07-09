@@ -27,7 +27,7 @@ public class Guestbook extends EarnedTimestamped {
     @Column(name = "content", length = 255)
     private String content;
 
-    @Column(name = "mapping_id", length = 255)
+    @Column(name = "mapping_id", nullable = false)
     private Long mappingId;
 
     public Guestbook(Member member, Restaurant restaurant, String content, Long mappingId) {
