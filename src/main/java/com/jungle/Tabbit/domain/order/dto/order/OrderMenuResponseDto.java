@@ -16,4 +16,6 @@ public class OrderMenuResponseDto {
     private int quantity;
     @Schema(description = "메뉴 가격")
     private Long price;
+    @Schema(description = "이미지 경로")
+    private String imageUrl;
 }
