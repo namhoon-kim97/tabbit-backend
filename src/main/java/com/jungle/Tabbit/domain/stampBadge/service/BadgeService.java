@@ -54,13 +54,14 @@ public class BadgeService {
     }
 
     @Transactional(readOnly = true)
-    public UserWithBadgeResponseListDto getUsersWithBadge(Long badgeId) {
+    public UserWithBadgeResponseListDto getUsersWithBadge(String username, Long badgeId) {
         Badge badge = badgeRepository.findByBadgeId(badgeId)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_BADGE_NOT_FOUND));
 
         List<MemberBadge> memberBadges = memberBadgeRepository.findByBadge_BadgeId(badgeId);
 
         List<MemberBadgeResponseDto> members = memberBadges.stream()
+                .filter(memberBadge -> !memberBadge.getMember().getUsername().equals(username)) // 본인 제외
                 .map(MemberBadgeResponseDto::of)
                 .collect(Collectors.toList());
 
