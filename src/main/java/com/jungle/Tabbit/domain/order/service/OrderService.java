@@ -15,6 +15,7 @@ import com.jungle.Tabbit.domain.restaurant.repository.RestaurantRepository;
 import com.jungle.Tabbit.domain.waiting.entity.Waiting;
 import com.jungle.Tabbit.domain.waiting.repository.WaitingRepository;
 import com.jungle.Tabbit.global.exception.BusinessLogicException;
+import com.jungle.Tabbit.global.exception.DuplicatedException;
 import com.jungle.Tabbit.global.exception.NotFoundException;
 import com.jungle.Tabbit.global.model.ResponseStatus;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,11 @@ public class OrderService {
         Restaurant restaurant = getRestaurantById(requestDto.getRestaurantId());
         Waiting waiting = waitingRepository.findByWaitingId(requestDto.getWaitingId())
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_GET_CURRENT_WAIT_POSITION));
+
+        // 주문을 삽입하기 전에 waitingId가 중복되는지 확인
+        if (orderRepository.findByWaiting_WaitingId(waiting.getWaitingId()).isPresent()) {
+            throw new DuplicatedException(ResponseStatus.FAIL_ORDER_DUPLICATED);
+        }
 
         Order order = new Order(member, restaurant, waiting);
         orderRepository.save(order);
