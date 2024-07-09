@@ -18,4 +18,6 @@ public interface OrderRepository extends Repository<Order, Long> {
     void delete(Order order);
 
     Optional<Order> findByOrderId(Long orderId);
+
+    Optional<Order> findByOrderIdAndIsDeletedFalse(Long orderId);
 }

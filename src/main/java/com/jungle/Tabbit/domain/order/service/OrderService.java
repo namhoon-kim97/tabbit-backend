@@ -111,6 +111,13 @@ public class OrderService {
         });
     }
 
+    @Transactional
+    public void deleteOrder(Long orderId) {
+        Order order = orderRepository.findByOrderIdAndIsDeletedFalse(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found or already deleted"));
+        orderRepository.delete(order);
+    }
+
     private Member getMemberByUsername(String username) {
         return memberRepository.findMemberByUsername(username)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
