@@ -46,4 +46,12 @@ public class OrderController {
     public CommonResponse<?> getUserOrders(@PathVariable Long orderId) {
         return CommonResponse.success(ResponseStatus.SUCCESS_OK, orderService.getUserOrders(orderId));
     }
+
+    @DeleteMapping("/{orderId}")
+    @Operation(summary = "유저 주문 취소", description = "특정 유저의 주문을 취소합니다.")
+    @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
+    public CommonResponse<?> deleteUserOrder(@PathVariable Long orderId) {
+        orderService.deleteOrder(orderId);
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK);
+    }
 }

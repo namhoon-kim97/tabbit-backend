@@ -8,6 +8,8 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +18,8 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity(name = "orders")
+@SQLDelete(sql = "UPDATE orders SET is_deleted = true WHERE order_id = ?")
+@Where(clause = "is_deleted = false")
 public class Order extends Timestamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,16 +34,20 @@ public class Order extends Timestamped {
     @JoinColumn(name = "restaurant_id", nullable = false)
     private Restaurant restaurant;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "waiting_id", nullable = false)
     private Waiting waiting;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Where(clause = "is_deleted = false")
     private final List<OrderMenu> orderMenus = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus status;
+
+    @Column(nullable = false, name = "is_deleted")
+    private boolean isDeleted = false;  // soft delete flag
 
     public Order(Member member, Restaurant restaurant, Waiting waiting) {
         this.member = member;
@@ -50,5 +58,13 @@ public class Order extends Timestamped {
 
     public void updateStatus(OrderStatus status) {
         this.status = status;
+    }
+
+    @PreRemove
+    private void preRemove() {
+        this.isDeleted = true;
+        for (OrderMenu orderMenu : this.orderMenus) {
+            orderMenu.setDeleted(true);
+        }
     }
 }
