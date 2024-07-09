@@ -59,8 +59,8 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public OrderResponseDto getUserOrders(Long waitingId) {
-        Order order = orderRepository.findByWaiting_WaitingId(waitingId)
+    public OrderResponseDto getUserOrders(Long orderId) {
+        Order order = orderRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_ORDER_NOT_FOUND));
         return OrderResponseDto.of(order);
     }
