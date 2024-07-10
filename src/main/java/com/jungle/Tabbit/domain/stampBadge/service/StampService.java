@@ -31,8 +31,8 @@ public class StampService {
     private final StampRepository stampRepository;
 
     @Transactional(readOnly = true)
-    public StampResponseListDto getStampAll(String username) {
-        Member member = memberRepository.findMemberByUsername(username)
+    public StampResponseListDto getStampAll(Long memberId) {
+        Member member = memberRepository.findMemberByMemberId(memberId)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
 
         // 시도별 총 스탬프 수와 획득 스탬프 수 조회
