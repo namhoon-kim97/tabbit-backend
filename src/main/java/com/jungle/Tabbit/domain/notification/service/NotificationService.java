@@ -45,12 +45,11 @@ public class NotificationService {
     @Transactional(readOnly = true)
     public List<NotificationResponseDto> getNotificationList(Long userId) {
         Member member = getMemberById(userId);
-        List<Notification> findNotifications = notificationRepository.findAllByMemberAndDataOnlyFalse(member);
-        List<NotificationResponseDto> findNotificationsDto = findNotifications.stream()
+        List<Notification> findNotifications = notificationRepository.findAllByMemberAndDataOnlyFalseOrderByCreatedAtDesc(member);
+
+        return findNotifications.stream()
                 .map(NotificationResponseDto::of)
                 .collect(Collectors.toList());
-
-        return findNotificationsDto;
     }
 
     @Transactional
