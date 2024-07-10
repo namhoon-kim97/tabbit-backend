@@ -81,7 +81,7 @@ public class BadgeService {
             memberBadgeRepository.save(memberBadge);
             sendNotification(memberBadge.getMember().getMemberId(),
                     "칭호 획득", badge.getName() + " 칭호를 획득하였습니다.",
-                    createFcmData("client", "confirm"));
+                    createFcmData("client", "badge"));
         }
     }
 
