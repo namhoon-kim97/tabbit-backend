@@ -1,7 +1,10 @@
 package com.jungle.Tabbit.domain.stampBadge.service;
 
+import com.jungle.Tabbit.domain.fcm.dto.FcmData;
 import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
+import com.jungle.Tabbit.domain.notification.dto.NotificationRequestCreateDto;
+import com.jungle.Tabbit.domain.notification.service.NotificationService;
 import com.jungle.Tabbit.domain.stampBadge.dto.BadgeResponseDto;
 import com.jungle.Tabbit.domain.stampBadge.dto.BadgeResponseListDto;
 import com.jungle.Tabbit.domain.stampBadge.dto.MemberBadgeResponseDto;
@@ -29,6 +32,7 @@ public class BadgeService {
     private final MemberRepository memberRepository;
     private final BadgeRepository badgeRepository;
     private final MemberBadgeRepository memberBadgeRepository;
+    private final NotificationService notificationService;
 
 
     @Transactional(readOnly = true)
@@ -75,6 +79,30 @@ public class BadgeService {
         if (!memberBadgeRepository.existsByMemberAndBadge(member, badge)) {
             MemberBadge memberBadge = new MemberBadge(member, badge);
             memberBadgeRepository.save(memberBadge);
+            sendNotification(memberBadge.getMember().getMemberId(),
+                    "칭호 획득", badge.getName() + " 칭호를 획득하였습니다.",
+                    createFcmData("client", "confirm"));
         }
+    }
+
+    private void sendNotification(Long memberId, String title, String message, FcmData data, boolean flag) {
+        NotificationRequestCreateDto notificationRequest = NotificationRequestCreateDto.builder()
+                .memberId(memberId)
+                .title(title)
+                .message(message)
+                .fcmData(data)
+                .build();
+        notificationService.sendNotification(notificationRequest, flag);
+    }
+
+    private void sendNotification(Long memberId, String title, String message, FcmData data) {
+        sendNotification(memberId, title, message, data, false);
+    }
+
+    private FcmData createFcmData(String role, String messageType) {
+        return FcmData.builder()
+                .target(role)
+                .messageType(messageType)
+                .build();
     }
 }
