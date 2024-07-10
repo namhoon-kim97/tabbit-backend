@@ -33,7 +33,7 @@ public class BadgeController {
         return CommonResponse.success(ResponseStatus.SUCCESS_OK, badgeService.getBadgeAll(userDetails.getUserId()));
     }
 
-    @GetMapping("/{memberId}}")
+    @GetMapping("/{memberId}")
     @Operation(summary = "유저의 모든 칭호 조회", description = "특정 유저가 가진 모든 칭호를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "유저의 모든 칭호 조회 성공", content = @Content(schema = @Schema(implementation = BadgeResponseListDto.class)))
     public CommonResponse<?> getBadgeAllByUser(@PathVariable Long memberId) {
