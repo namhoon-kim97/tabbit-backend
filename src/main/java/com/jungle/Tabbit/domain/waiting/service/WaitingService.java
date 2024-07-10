@@ -34,9 +34,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -135,15 +132,9 @@ public class WaitingService {
         }
 
         badgeTriggerService.checkAndAwardBadges(waiting.getMember());
-//        sendNotification(waiting.getMember().getMemberId(),
-//                "입장 완료", restaurant.getName() + " 입장완료 하였습니다.",
-//                createFcmData("client", "confirm", restaurant, waiting), true);
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        scheduler.schedule(() -> {
-            sendNotification(waiting.getMember().getMemberId(),
-                    "입장 완료", restaurant.getName() + " 입장완료 하였습니다.",
-                    createFcmData("client", "confirm", restaurant, waiting), true);
-        }, 10, TimeUnit.SECONDS);
+        sendNotification(waiting.getMember().getMemberId(),
+                "입장 완료", restaurant.getName() + " 입장완료 하였습니다.",
+                createFcmData("client", "confirm", restaurant, waiting), true);
     }
 
     @Transactional
@@ -264,7 +255,7 @@ public class WaitingService {
     }
 
     private int getCurrentWaitingPosition(Waiting waiting) {
-        if (waiting.getWaitingStatus() == WaitingStatus.STATUS_CALLED || waiting.getWaitingStatus() == WaitingStatus.STATUS_SEATED) {
+        if (waiting.getWaitingStatus() == WaitingStatus.STATUS_CALLED || waiting.getWaitingStatus() == WaitingStatus.STATUS_SEATED || waiting.getWaitingStatus() == WaitingStatus.STATUS_CANCELLED) {
             return 0;  // called 상태이면 0 반환
         }
 
