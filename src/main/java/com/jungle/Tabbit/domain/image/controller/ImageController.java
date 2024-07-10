@@ -30,6 +30,7 @@ public class ImageController {
     @Operation(summary = "이미지 조회", description = "이미지를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = CommonResponse.class)))
     public ResponseEntity<byte[]> getImage(@RequestParam @Parameter(description = "요청 이미지 url", required = true) String imageUrl) {
+        log.info("imageUrl: {}@@@@@@@@@@@@@@@@@@@@@@@", imageUrl);
         byte[] imageBytes = imageService.getImage(imageUrl);
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(imageService.getContentType(imageUrl)))
