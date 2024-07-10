@@ -34,6 +34,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -135,6 +138,12 @@ public class WaitingService {
         sendNotification(waiting.getMember().getMemberId(),
                 "입장 완료", restaurant.getName() + " 입장완료 하였습니다.",
                 createFcmData("client", "confirm", restaurant, waiting), true);
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        scheduler.schedule(() -> {
+            sendNotification(waiting.getMember().getMemberId(),
+                    "입장 완료", restaurant.getName() + " 입장완료 하였습니다.",
+                    createFcmData("client", "confirm", restaurant, waiting), true);
+        }, 10, TimeUnit.SECONDS);
     }
 
     @Transactional
@@ -258,7 +267,7 @@ public class WaitingService {
         if (waiting.getWaitingStatus() == WaitingStatus.STATUS_CALLED) {
             return 0;  // called 상태이면 0 반환
         }
-        
+
         List<Waiting> waitingList = waitingRepository.findByRestaurantAndWaitingStatusOrderByWaitingNumberAsc(waiting.getRestaurant(), WaitingStatus.STATUS_WAITING);
         for (int i = 0; i < waitingList.size(); i++) {
             if (waitingList.get(i).getWaitingId().equals(waiting.getWaitingId())) {
