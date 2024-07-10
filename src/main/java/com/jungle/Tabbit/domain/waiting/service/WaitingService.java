@@ -135,9 +135,9 @@ public class WaitingService {
         }
 
         badgeTriggerService.checkAndAwardBadges(waiting.getMember());
-        sendNotification(waiting.getMember().getMemberId(),
-                "입장 완료", restaurant.getName() + " 입장완료 하였습니다.",
-                createFcmData("client", "confirm", restaurant, waiting), true);
+//        sendNotification(waiting.getMember().getMemberId(),
+//                "입장 완료", restaurant.getName() + " 입장완료 하였습니다.",
+//                createFcmData("client", "confirm", restaurant, waiting), true);
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         scheduler.schedule(() -> {
             sendNotification(waiting.getMember().getMemberId(),
