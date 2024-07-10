@@ -63,7 +63,7 @@ public class WaitingService {
         Waiting waiting = new Waiting(requestDto.getPeopleNumber(), queueNumber.intValue(), restaurant, WaitingStatus.STATUS_WAITING, member);
         waitingRepository.save(waiting);
 
-        int currentWaitingPosition = getCurrentWaitingPosition(waiting, Arrays.asList(WaitingStatus.STATUS_WAITING, WaitingStatus.STATUS_CALLED));
+        int currentWaitingPosition = getCurrentWaitingPosition(waiting);
         Long estimatedWaitTime = calculateEstimatedWaitTime(currentWaitingPosition, restaurant.getEstimatedTimePerTeam());
 
         sendRegistrationNotification(member, restaurant, waiting, currentWaitingPosition, estimatedWaitTime, queueNumber);
@@ -74,7 +74,7 @@ public class WaitingService {
     @Transactional(readOnly = true)
     public WaitingResponseDto getWaitingOverview(Long waitingId) {
         Waiting waiting = getWaitingById(waitingId);
-        int currentWaitingPosition = getCurrentWaitingPosition(waiting, Arrays.asList(WaitingStatus.STATUS_WAITING, WaitingStatus.STATUS_CALLED));
+        int currentWaitingPosition = getCurrentWaitingPosition(waiting);
         Long estimatedWaitTime = calculateEstimatedWaitTime(currentWaitingPosition, waiting.getRestaurant().getEstimatedTimePerTeam());
         return WaitingResponseDto.of(waiting, estimatedWaitTime, currentWaitingPosition);
     }
@@ -87,7 +87,7 @@ public class WaitingService {
 
         List<WaitingResponseDto> waitingResponseDtos = waitingList.stream()
                 .map(waiting -> {
-                    int currentWaitingPosition = getCurrentWaitingPosition(waiting, Arrays.asList(WaitingStatus.STATUS_WAITING, WaitingStatus.STATUS_CALLED));
+                    int currentWaitingPosition = getCurrentWaitingPosition(waiting);
                     Long estimatedWaitTime = calculateEstimatedWaitTime(currentWaitingPosition, waiting.getRestaurant().getEstimatedTimePerTeam());
                     return WaitingResponseDto.of(waiting, estimatedWaitTime, currentWaitingPosition);
                 })
@@ -254,8 +254,12 @@ public class WaitingService {
         return storeQueueNumbers.get(storeId).incrementAndGet();
     }
 
-    private int getCurrentWaitingPosition(Waiting waiting, List<WaitingStatus> statuses) {
-        List<Waiting> waitingList = waitingRepository.findByRestaurantAndWaitingStatusInOrderByWaitingNumberAsc(waiting.getRestaurant(), statuses);
+    private int getCurrentWaitingPosition(Waiting waiting) {
+        if (waiting.getWaitingStatus() == WaitingStatus.STATUS_CALLED) {
+            return 0;  // called 상태이면 0 반환
+        }
+        
+        List<Waiting> waitingList = waitingRepository.findByRestaurantAndWaitingStatusOrderByWaitingNumberAsc(waiting.getRestaurant(), WaitingStatus.STATUS_WAITING);
         for (int i = 0; i < waitingList.size(); i++) {
             if (waitingList.get(i).getWaitingId().equals(waiting.getWaitingId())) {
                 return i + 1;
