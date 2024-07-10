@@ -264,7 +264,7 @@ public class WaitingService {
     }
 
     private int getCurrentWaitingPosition(Waiting waiting) {
-        if (waiting.getWaitingStatus() == WaitingStatus.STATUS_CALLED) {
+        if (waiting.getWaitingStatus() == WaitingStatus.STATUS_CALLED || waiting.getWaitingStatus() == WaitingStatus.STATUS_SEATED) {
             return 0;  // called 상태이면 0 반환
         }
 

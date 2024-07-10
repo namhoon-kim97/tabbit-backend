@@ -77,6 +77,7 @@ public class OrderService {
         Optional<Order> order = orderRepository.findByWaiting_WaitingId(waitingId);
         if (order.isPresent()) {
             order.get().updateStatus(OrderStatus.CONFIRMED);
+            orderRepository.save(order.get());
             orderRepository.delete(order.get());
         }
     }
