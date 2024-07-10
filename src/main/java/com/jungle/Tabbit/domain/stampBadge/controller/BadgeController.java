@@ -13,7 +13,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
@@ -27,14 +30,14 @@ public class BadgeController {
     @Operation(summary = "칭호 전체 조회", description = "사용자의 모든 칭호를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "칭호 조회 성공", content = @Content(schema = @Schema(implementation = BadgeResponseListDto.class)))
     public CommonResponse<?> getBadgeAll(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return CommonResponse.success(ResponseStatus.SUCCESS_OK, badgeService.getBadgeAll(userDetails.getUsername()));
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK, badgeService.getBadgeAll(userDetails.getUserId()));
     }
 
-    @GetMapping("/user")
+    @GetMapping("/{memberId}}")
     @Operation(summary = "유저의 모든 칭호 조회", description = "특정 유저가 가진 모든 칭호를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "유저의 모든 칭호 조회 성공", content = @Content(schema = @Schema(implementation = BadgeResponseListDto.class)))
-    public CommonResponse<?> getBadgeAllByUser(@RequestParam String username) {
-        return CommonResponse.success(ResponseStatus.SUCCESS_OK, badgeService.getBadgeAll(username));
+    public CommonResponse<?> getBadgeAllByUser(@PathVariable Long memberId) {
+        return CommonResponse.success(ResponseStatus.SUCCESS_OK, badgeService.getBadgeAll(memberId));
     }
 
     @GetMapping("/users/{badgeId}")

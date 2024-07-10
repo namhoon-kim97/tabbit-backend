@@ -32,8 +32,8 @@ public class BadgeService {
 
 
     @Transactional(readOnly = true)
-    public BadgeResponseListDto getBadgeAll(String username) {
-        Member member = memberRepository.findMemberByUsername(username)
+    public BadgeResponseListDto getBadgeAll(Long memberId) {
+        Member member = memberRepository.findMemberByMemberId(memberId)
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_MEMBER_NOT_FOUND));
 
         List<Badge> badgeList = badgeRepository.findAll();
