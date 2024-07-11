@@ -255,10 +255,10 @@ public class WaitingService {
     }
 
     private int getCurrentWaitingPosition(Waiting waiting) {
-        if (waiting.getWaitingStatus() == WaitingStatus.STATUS_CALLED) {
+        if (waiting.getWaitingStatus() == WaitingStatus.STATUS_CALLED || waiting.getWaitingStatus() == WaitingStatus.STATUS_SEATED || waiting.getWaitingStatus() == WaitingStatus.STATUS_CANCELLED) {
             return 0;  // called 상태이면 0 반환
         }
-        
+
         List<Waiting> waitingList = waitingRepository.findByRestaurantAndWaitingStatusOrderByWaitingNumberAsc(waiting.getRestaurant(), WaitingStatus.STATUS_WAITING);
         for (int i = 0; i < waitingList.size(); i++) {
             if (waitingList.get(i).getWaitingId().equals(waiting.getWaitingId())) {

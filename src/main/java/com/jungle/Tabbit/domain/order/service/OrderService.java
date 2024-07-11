@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -73,8 +74,12 @@ public class OrderService {
 
     @Transactional
     public void deleteOrderIfExists(Long waitingId) {
-        orderRepository.findByWaiting_WaitingId(waitingId)
-                .ifPresent(orderRepository::delete);
+        Optional<Order> order = orderRepository.findByWaiting_WaitingId(waitingId);
+        if (order.isPresent()) {
+            order.get().updateStatus(OrderStatus.CONFIRMED);
+            orderRepository.save(order.get());
+            orderRepository.delete(order.get());
+        }
     }
 
     @Transactional
