@@ -1,17 +1,16 @@
 package com.jungle.Tabbit.domain.member.service;
 
-import com.jungle.Tabbit.domain.member.dto.MemberJoinRequestDto;
-import com.jungle.Tabbit.domain.member.dto.MemberLoginRequestDto;
+import com.jungle.Tabbit.domain.member.dto.*;
 import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.member.repository.MemberRepository;
 import com.jungle.Tabbit.domain.stampBadge.entity.Badge;
 import com.jungle.Tabbit.domain.stampBadge.entity.MemberBadge;
 import com.jungle.Tabbit.domain.stampBadge.repository.BadgeRepository;
 import com.jungle.Tabbit.domain.stampBadge.repository.MemberBadgeRepository;
+import com.jungle.Tabbit.domain.waiting.entity.WaitingStatus;
+import com.jungle.Tabbit.domain.waiting.repository.WaitingRepository;
 import com.jungle.Tabbit.global.config.security.jwt.JwtProvider;
-import com.jungle.Tabbit.global.exception.DuplicatedException;
-import com.jungle.Tabbit.global.exception.LoginFailException;
-import com.jungle.Tabbit.global.exception.NotFoundException;
+import com.jungle.Tabbit.global.exception.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import static com.jungle.Tabbit.global.model.ResponseStatus.*;
@@ -36,6 +36,7 @@ public class MemberService {
     private final AuthenticationManager authenticationManager;
     private final BadgeRepository badgeRepository;
     private final MemberBadgeRepository memberBadgeRepository;
+    private final WaitingRepository waitingRepository;
 
 
     public void join(MemberJoinRequestDto memberJoinRequestDto) {
@@ -55,7 +56,7 @@ public class MemberService {
     }
 
 
-    public String login(MemberLoginRequestDto memberLoginRequestDto) {
+    public MemberLoginDto login(MemberLoginRequestDto memberLoginRequestDto) {
         Authentication authenticate = null;
         try {
             authenticate = authenticationManager.authenticate(
@@ -75,6 +76,52 @@ public class MemberService {
                 .orElseThrow(() -> new LoginFailException(FAIL_LOGIN_NOT_SUCCESS));
         member.updateFcmToken(memberLoginRequestDto.getFcmToken());
 
-        return jwtProvider.generateToken(authenticate.getName());
+        String token = jwtProvider.generateToken(authenticate.getName());
+
+        return MemberLoginDto.builder()
+                .nickname(member.getNickname())
+                .memberRole(member.getMemberRole())
+                .badgeId(member.getBadge().getBadgeId())
+                .token(token)
+                .build();
+    }
+    public void updateMemberInfo(String username, MemberUpdateRequestDto requestDto){
+        Member member = memberRepository.findMemberByUsername(username)
+                .orElseThrow(() -> new NotFoundException(FAIL_MEMBER_NOT_FOUND));
+
+        Badge updateBadge = badgeRepository.findByBadgeId(requestDto.getBadgeId())
+                .orElseThrow(() -> new NotFoundException(FAIL_BADGE_NOT_FOUND));
+
+        if(!memberBadgeRepository.existsByMemberAndBadge(member, updateBadge)){
+            throw new InvalidRequestException(FAIL_BADGE_NOT_EARNED);
+        }
+
+        member.updateMemberInfo(requestDto.getNickname(), updateBadge);
+    }
+
+    public void updateMemberPassword(String username, MemberPasswordUpdateDto memberPasswordUpdateDto) {
+        Member member = memberRepository.findMemberByUsername(username)
+                .orElseThrow(() -> new NotFoundException(FAIL_MEMBER_NOT_FOUND));
+
+        if (!passwordEncoder.matches(memberPasswordUpdateDto.getOriginPassword(), member.getPassword())) {
+            throw new PasswordNotMatchException(FAIL_PASSWORD_NOT_MATCH);
+        }
+
+        member.updateMemberPassword(passwordEncoder.encode(memberPasswordUpdateDto.getNewPassword()));
+    }
+
+    public void deleteMember(String username, MemberDeleteRequestDto memberDeleteRequestDto) {
+        Member member = memberRepository.findMemberByUsername(username)
+                .orElseThrow(() -> new NotFoundException(FAIL_MEMBER_NOT_FOUND));
+        //웨이팅 리스트에 있으면 탈퇴 불가
+        if(waitingRepository.existsByMemberAndWaitingStatusIn(member, Arrays.asList(WaitingStatus.STATUS_WAITING, WaitingStatus.STATUS_CALLED))){
+            throw new InvalidRequestException(FAIL_MEMBER_DELETE_WAITING);
+        }
+
+        if (!passwordEncoder.matches(memberDeleteRequestDto.getPassword(), member.getPassword())) {
+            throw new PasswordNotMatchException(FAIL_PASSWORD_NOT_MATCH);
+        }
+
+        member.deleteMember();
     }
 }

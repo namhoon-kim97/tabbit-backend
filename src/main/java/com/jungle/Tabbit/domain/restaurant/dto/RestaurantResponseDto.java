@@ -51,4 +51,8 @@ public class RestaurantResponseDto {
                 .earnedStamp(hasStamp)
                 .build();
     }
+
+    public static Boolean getHasStamp(RestaurantResponseDto restaurantResponseDto) {
+        return restaurantResponseDto.getEarnedStamp();
+    }
 }

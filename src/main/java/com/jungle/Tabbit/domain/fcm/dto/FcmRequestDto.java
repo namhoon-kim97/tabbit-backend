@@ -1,6 +1,8 @@
 package com.jungle.Tabbit.domain.fcm.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 
 
 @Getter
@@ -11,6 +13,4 @@ public class FcmRequestDto {
     private String title;
     private String body;
     private FcmData data;
-
-
 }

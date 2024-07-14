@@ -26,8 +26,8 @@ public class SwaggerConfig {
                 .addSecurityItem(new SecurityRequirement().addList(SECURITY_SCHEME_NAME))
                 // 여기까지
                 .info(new Info()
-                        .title("JungleBoard API")
-                        .description("jwt를 활용한 게시판 API입니다. 토큰을 발급받아 사용")
+                        .title("tabbit")
+                        .description("tabbit API 명세서")
                         .version("1.0.0"));
     }
 }

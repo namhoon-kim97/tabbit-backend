@@ -7,11 +7,15 @@ import com.jungle.Tabbit.domain.nfc.entity.Nfc;
 import com.jungle.Tabbit.domain.nfc.repository.NfcRepository;
 import com.jungle.Tabbit.domain.notification.dto.NotificationRequestCreateDto;
 import com.jungle.Tabbit.domain.notification.service.NotificationService;
+import com.jungle.Tabbit.domain.order.dto.order.OrderMenuResponseDto;
+import com.jungle.Tabbit.domain.order.repository.OrderMenuRepository;
+import com.jungle.Tabbit.domain.order.service.OrderService;
 import com.jungle.Tabbit.domain.restaurant.dto.RestaurantResponseSummaryDto;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
 import com.jungle.Tabbit.domain.restaurant.repository.RestaurantRepository;
 import com.jungle.Tabbit.domain.stampBadge.entity.MemberStamp;
 import com.jungle.Tabbit.domain.stampBadge.repository.StampRepository;
+import com.jungle.Tabbit.domain.stampBadge.service.BadgeTriggerService;
 import com.jungle.Tabbit.domain.waiting.dto.*;
 import com.jungle.Tabbit.domain.waiting.entity.Waiting;
 import com.jungle.Tabbit.domain.waiting.entity.WaitingStatus;
@@ -23,8 +27,10 @@ import com.jungle.Tabbit.global.model.ResponseStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,9 +46,12 @@ public class WaitingService {
     private final RestaurantRepository restaurantRepository;
     private final StampRepository stampRepository;
     private final NotificationService notificationService;
+    private final BadgeTriggerService badgeTriggerService;
+    private final OrderService orderService;
+    private final OrderMenuRepository orderMenuRepository;
     private static final ConcurrentHashMap<Long, AtomicLong> storeQueueNumbers = new ConcurrentHashMap<>();  // 가게별 전역 대기번호 변수
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public WaitingResponseDto registerWaiting(WaitingRequestCreateDto requestDto, String username) {
         Member member = getMemberByUsername(username);
         Nfc nfc = getNfcById(requestDto.getNfcId());
@@ -63,14 +72,18 @@ public class WaitingService {
     }
 
     @Transactional(readOnly = true)
-    public WaitingResponseDto getWaitingOverview(Long restaurantId, String username) {
-        return getWaitingResponseDto(username, getRestaurantById(restaurantId));
+    public WaitingResponseDto getWaitingOverview(Long waitingId) {
+        Waiting waiting = getWaitingById(waitingId);
+        int currentWaitingPosition = getCurrentWaitingPosition(waiting);
+        Long estimatedWaitTime = calculateEstimatedWaitTime(currentWaitingPosition, waiting.getRestaurant().getEstimatedTimePerTeam());
+        return WaitingResponseDto.of(waiting, estimatedWaitTime, currentWaitingPosition);
     }
 
     @Transactional(readOnly = true)
     public WaitingListResponseDto getUserWaitingList(String username) {
         Member member = getMemberByUsername(username);
-        List<Waiting> waitingList = waitingRepository.findByMemberAndWaitingStatus(member, WaitingStatus.STATUS_WAITING);
+        List<Waiting> waitingList = waitingRepository.findByMemberAndWaitingStatusIn(
+                member, Arrays.asList(WaitingStatus.STATUS_WAITING, WaitingStatus.STATUS_CALLED));
 
         List<WaitingResponseDto> waitingResponseDtos = waitingList.stream()
                 .map(waiting -> {
@@ -86,71 +99,73 @@ public class WaitingService {
     }
 
     @Transactional
-    public void cancelWaiting(Long restaurantId, String username) {
+    public void cancelWaiting(Long waitingId, String username) {
+        Waiting waiting = getWaitingById(waitingId);
         Member member = getMemberByUsername(username);
-        Restaurant restaurant = getRestaurantById(restaurantId);
-        Waiting waiting = getWaitingByMemberAndRestaurant(member, restaurant);
 
         waiting.updateStatus(WaitingStatus.STATUS_CANCELLED);
+        orderService.deleteOrderIfExists(waiting.getWaitingId());
 
-        sendCancellationNotification(member, restaurant, waiting);
+        sendCancellationNotification(member, waiting.getRestaurant(), waiting);
 
-        notifyImminentEntryToWaiters(restaurant, waiting);
+        notifyImminentEntryToWaiters(waiting.getRestaurant(), waiting);
     }
 
     @Transactional
-    public void confirmWaiting(Long restaurantId, String username, int waitingNumber) {
+    public void confirmWaiting(Long waitingId, String username) {
+        Waiting waiting = getWaitingById(waitingId);
         Member owner = getMemberByUsername(username);
-        Restaurant restaurant = getRestaurantById(restaurantId);
+        Restaurant restaurant = waiting.getRestaurant();
 
         validateRestaurantOwner(restaurant, owner);
-
-        Waiting waiting = getWaitingByNumberAndRestaurant(waitingNumber, restaurant, WaitingStatus.STATUS_CALLED);
 
         waiting.updateStatus(WaitingStatus.STATUS_SEATED);
         Optional<MemberStamp> memberStamp = stampRepository.findByMemberAndRestaurant(waiting.getMember(), restaurant);
         if (memberStamp.isPresent()) {
             memberStamp.get().updateVisitCount(memberStamp.get().getVisitCount());
             stampRepository.save(memberStamp.get());
-            return;
+        } else {
+            stampRepository.save(new MemberStamp(waiting.getMember(), restaurant, restaurant.getCategory()));
+            sendNotification(waiting.getMember().getMemberId(),
+                    "스탬프 획득", restaurant.getName() + " 스탬프를 획득하였습니다.",
+                    createFcmData("client", "confirm", restaurant, waiting));
         }
-        stampRepository.save(new MemberStamp(waiting.getMember(), restaurant));
 
+        badgeTriggerService.checkAndAwardBadges(waiting.getMember());
         sendNotification(waiting.getMember().getMemberId(),
-                "스탬프 획득", restaurant.getName()+" 스탬프를 획득하였습니다.",
-                createFcmData("client","confirm", restaurant, waiting));
+                "입장 완료", restaurant.getName() + " 입장완료 하였습니다.",
+                createFcmData("client", "confirm", restaurant, waiting), true);
     }
 
     @Transactional
-    public void callWaiting(Long restaurantId, String username, int waitingNumber) {
+    public void callWaiting(Long waitingId, String username) {
+        Waiting waiting = getWaitingById(waitingId);
         Member owner = getMemberByUsername(username);
-        Restaurant restaurant = getRestaurantById(restaurantId);
+        Restaurant restaurant = waiting.getRestaurant();
 
         validateRestaurantOwner(restaurant, owner);
-
-        Waiting waiting = getWaitingByNumberAndRestaurant(waitingNumber, restaurant, WaitingStatus.STATUS_WAITING);
 
         waiting.updateStatus(WaitingStatus.STATUS_CALLED);
 
         sendNotification(waiting.getMember().getMemberId(),
                 "입장 알림", "입장 차례가 되었습니다. 가게로 입장해 주세요. 5분이내 입장하지 않을 시 자동 취소됩니다.",
-                createFcmData("client","call", restaurant, waiting));
+                createFcmData("client", "call", restaurant, waiting));
 
         notifyImminentEntryToWaiters(restaurant, waiting);
+        orderService.updateOrderStatusToConfirmed(waiting.getMember(), restaurant);
     }
 
     @Transactional
-    public void noShowWaiting(Long restaurantId, String username, int waitingNumber) {
+    public void noShowWaiting(Long waitingId, String username) {
+        Waiting waiting = getWaitingById(waitingId);
         Member owner = getMemberByUsername(username);
-        Restaurant restaurant = getRestaurantById(restaurantId);
+        Restaurant restaurant = waiting.getRestaurant();
 
         validateRestaurantOwner(restaurant, owner);
 
-        Waiting waiting = getWaitingByNumberAndRestaurant(waitingNumber, restaurant, WaitingStatus.STATUS_CALLED);
-
         waiting.updateStatus(WaitingStatus.STATUS_NOSHOW);
 
-        sendNotification(waiting.getMember().getMemberId(), "No-Show 처리 알림", "No-Show로 처리되었습니다.", createFcmData("client","noshow", restaurant, waiting));
+        sendNotification(waiting.getMember().getMemberId(), "No-Show 처리 알림", "No-Show로 처리되었습니다.", createFcmData("client", "noshow", restaurant, waiting));
     }
 
     @Transactional(readOnly = true)
@@ -159,15 +174,37 @@ public class WaitingService {
         List<Waiting> calledWaitingList = waitingRepository.findByRestaurantAndWaitingStatus(restaurant, WaitingStatus.STATUS_CALLED);
         List<Waiting> waitingList = waitingRepository.findByRestaurantAndWaitingStatus(restaurant, WaitingStatus.STATUS_WAITING);
 
-        List<WaitingUpdateResponseDto> calledWaitingDtos = calledWaitingList.stream()
-                .map(WaitingUpdateResponseDto::of)
-                .collect(Collectors.toList());
+        List<WaitingWithOrderDto> calledWaitingDtos = mapWaitingsToDtos(calledWaitingList);
+        List<WaitingWithOrderDto> waitingDtos = mapWaitingsToDtos(waitingList);
 
-        List<WaitingUpdateResponseDto> waitingDtos = waitingList.stream()
-                .map(WaitingUpdateResponseDto::of)
-                .collect(Collectors.toList());
+        return OwnerWaitingListResponseDto.builder()
+                .estimatedWaitTime(restaurant.getEstimatedTimePerTeam())
+                .calledWaitingList(calledWaitingDtos)
+                .waitingList(waitingDtos)
+                .build();
+    }
 
-        return new OwnerWaitingListResponseDto(calledWaitingDtos, waitingDtos);
+    private List<WaitingWithOrderDto> mapWaitingsToDtos(List<Waiting> waitings) {
+        return waitings.stream()
+                .map(waiting -> {
+                    List<OrderMenuResponseDto> menuItems = getOrderMenuDtosForWaiting(waiting);
+                    return WaitingWithOrderDto.builder()
+                            .waiting(WaitingUpdateResponseDto.of(waiting))
+                            .menuItems(menuItems)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    private List<OrderMenuResponseDto> getOrderMenuDtosForWaiting(Waiting waiting) {
+        return orderMenuRepository.findByOrder_Waiting(waiting).stream()
+                .map(orderMenu -> OrderMenuResponseDto.builder()
+                        .menuId(orderMenu.getMenu().getMenuId())
+                        .menuName(orderMenu.getMenu().getName())
+                        .quantity(orderMenu.getQuantity())
+                        .price(orderMenu.getMenu().getPrice())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -177,6 +214,11 @@ public class WaitingService {
         Long currentWaitingNumber = waitingRepository.countByRestaurantAndWaitingStatus(restaurant, WaitingStatus.STATUS_WAITING);
 
         return RestaurantResponseSummaryDto.of(restaurant, false, currentWaitingNumber, restaurant.getEstimatedTimePerTeam() * currentWaitingNumber);
+    }
+
+    private Waiting getWaitingById(Long waitingId) {
+        return waitingRepository.findByWaitingId(waitingId)
+                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_GET_CURRENT_WAIT_POSITION));
     }
 
     private Member getMemberByUsername(String username) {
@@ -194,18 +236,8 @@ public class WaitingService {
                 .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_RESTAURANT_NOT_FOUND));
     }
 
-    private Waiting getWaitingByMemberAndRestaurant(Member member, Restaurant restaurant) {
-        return waitingRepository.findByRestaurantAndMemberAndWaitingStatus(restaurant, member, WaitingStatus.STATUS_WAITING)
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_GET_CURRENT_WAIT_POSITION));
-    }
-
-    private Waiting getWaitingByNumberAndRestaurant(int waitingNumber, Restaurant restaurant, WaitingStatus waitingStatus) {
-        return waitingRepository.findByRestaurantAndWaitingNumberAndWaitingStatus(restaurant, waitingNumber, waitingStatus)
-                .orElseThrow(() -> new NotFoundException(ResponseStatus.FAIL_GET_CURRENT_WAIT_POSITION));
-    }
-
     private void validateDuplicateWaiting(Member member, Restaurant restaurant) {
-        boolean alreadyWaiting = waitingRepository.existsByMemberAndRestaurantAndWaitingStatus(member, restaurant, WaitingStatus.STATUS_WAITING);
+        boolean alreadyWaiting = waitingRepository.existsByMemberAndRestaurantAndWaitingStatusIn(member, restaurant, Arrays.asList(WaitingStatus.STATUS_WAITING, WaitingStatus.STATUS_CALLED));
         if (alreadyWaiting) {
             throw new DuplicatedException(ResponseStatus.FAIL_MEMBER_WAITING_DUPLICATED);
         }
@@ -223,6 +255,10 @@ public class WaitingService {
     }
 
     private int getCurrentWaitingPosition(Waiting waiting) {
+        if (waiting.getWaitingStatus() == WaitingStatus.STATUS_CALLED || waiting.getWaitingStatus() == WaitingStatus.STATUS_SEATED || waiting.getWaitingStatus() == WaitingStatus.STATUS_CANCELLED) {
+            return 0;  // called 상태이면 0 반환
+        }
+
         List<Waiting> waitingList = waitingRepository.findByRestaurantAndWaitingStatusOrderByWaitingNumberAsc(waiting.getRestaurant(), WaitingStatus.STATUS_WAITING);
         for (int i = 0; i < waitingList.size(); i++) {
             if (waitingList.get(i).getWaitingId().equals(waiting.getWaitingId())) {
@@ -236,17 +272,21 @@ public class WaitingService {
         return position * estimatedTimePerTeam;
     }
 
-    private void sendNotification(Long memberId, String title, String message, FcmData data) {
+    private void sendNotification(Long memberId, String title, String message, FcmData data, boolean flag) {
         NotificationRequestCreateDto notificationRequest = NotificationRequestCreateDto.builder()
                 .memberId(memberId)
                 .title(title)
                 .message(message)
                 .fcmData(data)
                 .build();
-        notificationService.sendNotification(notificationRequest);
+        notificationService.sendNotification(notificationRequest, flag);
     }
 
-    private FcmData createFcmData(String role,String messageType, Restaurant restaurant, Waiting waiting) {
+    private void sendNotification(Long memberId, String title, String message, FcmData data) {
+        sendNotification(memberId, title, message, data, false);
+    }
+
+    private FcmData createFcmData(String role, String messageType, Restaurant restaurant, Waiting waiting) {
         return FcmData.builder()
                 .target(role)
                 .messageType(messageType)
@@ -257,20 +297,20 @@ public class WaitingService {
     }
 
     private void sendRegistrationNotification(Member member, Restaurant restaurant, Waiting waiting, int currentWaitingPosition, Long estimatedWaitTime, Long queueNumber) {
-        FcmData clientData = createFcmData("client","register", restaurant, waiting);
+        FcmData clientData = createFcmData("client", "register", restaurant, waiting);
         sendNotification(member.getMemberId(), "웨이팅 등록 완료 알림",
                 "웨이팅이 성공적으로 등록되었습니다. 현재 대기 순서는 " + currentWaitingPosition + "번째이며, 예상 대기시간은 " + estimatedWaitTime + "분입니다.", clientData);
 
-        FcmData ownerData = createFcmData("owner","register", restaurant, waiting);
+        FcmData ownerData = createFcmData("owner", "register", restaurant, waiting);
         sendNotification(restaurant.getMember().getMemberId(), "새로운 웨이팅 알림",
                 "새로운 웨이팅이 등록되었습니다. 대기번호는 " + queueNumber + "번입니다.", ownerData);
     }
 
     private void sendCancellationNotification(Member member, Restaurant restaurant, Waiting waiting) {
-        FcmData clientData = createFcmData("client","cancel", restaurant, waiting);
+        FcmData clientData = createFcmData("client", "cancel", restaurant, waiting);
         sendNotification(member.getMemberId(), "웨이팅 취소 알림", "웨이팅이 성공적으로 취소되었습니다.", clientData);
 
-        FcmData ownerData = createFcmData("owner","cancel", restaurant, waiting);
+        FcmData ownerData = createFcmData("owner", "cancel", restaurant, waiting);
         sendNotification(restaurant.getMember().getMemberId(), "웨이팅 취소 알림", "웨이팅이 취소되었습니다.", ownerData);
     }
 
@@ -282,20 +322,10 @@ public class WaitingService {
         }
     }
 
-    private WaitingResponseDto getWaitingResponseDto(String username, Restaurant restaurant) {
-        Member member = getMemberByUsername(username);
-        Waiting userWaiting = getWaitingByMemberAndRestaurant(member, restaurant);
-
-        int currentWaitingPosition = getCurrentWaitingPosition(userWaiting);
-        Long estimatedWaitTime = calculateEstimatedWaitTime(currentWaitingPosition, restaurant.getEstimatedTimePerTeam());
-
-        return WaitingResponseDto.of(userWaiting, estimatedWaitTime, currentWaitingPosition);
-    }
-
     private void sendImminentEntryNotification(Member member, int currentWaitingPosition, Restaurant restaurant, Waiting waiting) {
         String message = getImminentEntryMessage(currentWaitingPosition);
         if (!message.isEmpty()) {
-            FcmData data = createFcmData("client","imminent", restaurant, waiting);
+            FcmData data = createFcmData("client", "imminent", restaurant, waiting);
             sendNotification(member.getMemberId(), "입장 임박 알림", message, data);
         }
     }
@@ -313,8 +343,28 @@ public class WaitingService {
         }
     }
 
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 0 5 * * *")
+    @Transactional
     public void resetQueueNumbers() {
         storeQueueNumbers.replaceAll((storeId, queueNumber) -> new AtomicLong(0));
+        List<Waiting> waitingList = waitingRepository.findAllByWaitingStatus(WaitingStatus.STATUS_WAITING);
+        List<Waiting> calledList = waitingRepository.findAllByWaitingStatus(WaitingStatus.STATUS_CALLED);
+
+        for (Waiting waiting : waitingList) {
+            waiting.updateStatus(WaitingStatus.STATUS_CANCELLED);
+        }
+
+        for (Waiting waiting : calledList) {
+            Restaurant restaurant = waiting.getRestaurant();
+            waiting.updateStatus(WaitingStatus.STATUS_SEATED);
+            Optional<MemberStamp> memberStamp = stampRepository.findByMemberAndRestaurant(waiting.getMember(), restaurant);
+            if (memberStamp.isPresent()) {
+                memberStamp.get().updateVisitCount(memberStamp.get().getVisitCount());
+                stampRepository.save(memberStamp.get());
+            } else {
+                stampRepository.save(new MemberStamp(waiting.getMember(), restaurant, restaurant.getCategory()));
+            }
+            badgeTriggerService.checkAndAwardBadges(waiting.getMember());
+        }
     }
 }

@@ -37,6 +37,7 @@ public enum ResponseStatus {
     FAIL_MEMBER_USERNAME_INVALID("최소 4자 이상, 10자 이하이며 알파벳 소문자(a~z), 숫자(0~9)로 이루어져있지 않습니다.", HttpStatus.BAD_REQUEST),
     FAIL_MEMBER_PASSWORD_INVALID("최소 8자 이상, 15자 이하이며 알파벳 대소문자(a~z, A~Z), 숫자(0~9), 특수문자로 이루어져있지 않습니다.", HttpStatus.BAD_REQUEST),
     FAIL_MEMBER_ROLE_INVALID("클라이언트의 권한이 없습니다.", HttpStatus.BAD_REQUEST),
+    FAIL_PASSWORD_NOT_MATCH("현재 비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
 
     // Post
     FAIL_BOARD_NOT_FOUND("클라이언트가 요청한 게시글을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
@@ -70,12 +71,40 @@ public enum ResponseStatus {
 
     // Restaurant
     FAIL_RESTAURANT_NOT_FOUND("클라이언트가 요청한 맛집을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    FAIL_RESTAURANT_DETAIL_NOT_FOUND("클라이언트가 요청한 맛집 상세정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
     // Notification
     FAIL_NOTIFICATION_NOT_FOUND("클라이언트가 요청한 알림을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
     // Badge
-    FAIL_BADGE_NOT_FOUND("해당 칭호를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
+    FAIL_BADGE_NOT_FOUND("해당 칭호를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    FAIL_BADGE_NOT_EARNED("획득하지 않은 칭호입니다.", HttpStatus.BAD_REQUEST),
+
+    // File
+    FAIL_FILE_SIZE("5MB 이하 파일만 업로드 할 수 있습니다.", HttpStatus.PAYLOAD_TOO_LARGE),
+    FAIL_FILE_MIME("이미지 파일만 업로드할 수 있습니다.", HttpStatus.BAD_REQUEST),
+    FAIL_FILE_UPLOAD("파일을 저장하는 도중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    FAIL_FILE_LOAD("파일을 불러오는 도중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    FAIL_FILE_NOT_FOUND("해당 파일을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    FAIL_FILE_PATH("해당 파일 경로가 비어 있습니다.", HttpStatus.BAD_REQUEST),
+    FAIL_FILE_DELETE("파일을 삭제하는 도중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+
+    // Guestbook
+    FAIL_GUESTBOOK_NOT_FOUND("해당 방명록을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    FAIL_GUESTBOOK_MAPPING_ID("해당 방명록 mapping_id 에는 방명록이 작성되어 있습니다.", HttpStatus.BAD_REQUEST),
+
+    // Menu
+    FAIL_MENU_NOT_FOUND("해당 메뉴를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    FAIL_CATEGORY_DELETE("해당 카테고리 메뉴가 존재합니다. 삭제할 수 없습니다.", HttpStatus.BAD_REQUEST),
+    FAIL_CATEGORY_CREATE("해당 카테고리가 존재합니다.", HttpStatus.BAD_REQUEST),
+
+    // Order
+    FAIL_ORDER_NOT_FOUND("주문 항목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    FAIL_ORDER_MEMBER_EQUAL("주문한 유저만이 수정 가능합니다.", HttpStatus.BAD_REQUEST),
+    FAIL_ORDER_DUPLICATED("이미 주문한 항목이 있습니다.", HttpStatus.BAD_REQUEST),
+
+    // delete
+    FAIL_MEMBER_DELETE_WAITING("웨이팅을 취소해야 탈퇴가 가능합니다.", HttpStatus.BAD_REQUEST);
 
     private String message;
 

@@ -14,6 +14,10 @@ public class RestaurantDetail {
     @Column(name = "restaurant_detail_id")
     private Long restaurantDetailId;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "restaurant_id", nullable = false)
+    private Restaurant restaurant;
+
     @Column(name = "opening_hours", length = 255)
     private String openingHours;
 
@@ -29,7 +33,16 @@ public class RestaurantDetail {
     @Column(name = "description", length = 255)
     private String description;
 
-    public RestaurantDetail(String openingHours, String breakTime, String holidays, String restaurantNumber, String description) {
+    public RestaurantDetail(Restaurant restaurant, String openingHours, String breakTime, String holidays, String restaurantNumber, String description) {
+        this.restaurant = restaurant;
+        this.openingHours = openingHours;
+        this.breakTime = breakTime;
+        this.holidays = holidays;
+        this.restaurantNumber = restaurantNumber;
+        this.description = description;
+    }
+
+    public void update(String openingHours, String breakTime, String holidays, String restaurantNumber, String description) {
         this.openingHours = openingHours;
         this.breakTime = breakTime;
         this.holidays = holidays;

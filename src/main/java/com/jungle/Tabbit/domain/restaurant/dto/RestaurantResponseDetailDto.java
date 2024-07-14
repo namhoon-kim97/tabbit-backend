@@ -1,13 +1,14 @@
 package com.jungle.Tabbit.domain.restaurant.dto;
 
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
+import com.jungle.Tabbit.domain.restaurant.entity.RestaurantDetail;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @Builder
-@Schema(description = "맛집 디테일 응답DTO")
+@Schema(description = "맛집 디테일 응답 DTO")
 public class RestaurantResponseDetailDto {
 
     @Schema(description = "맛집 id", example = "1")
@@ -15,6 +16,9 @@ public class RestaurantResponseDetailDto {
 
     @Schema(description = "가게 이름", example = "맛있는 식당")
     private String name; // 가게 이름
+
+    @Schema(description = "맛집 이미지 경로", example = "image.png")
+    private String imageUrl; // 맛집 이미지 경로
 
     @Schema(description = "카테고리 이름", example = "한식")
     private String categoryName; // 카테고리 이름
@@ -43,18 +47,19 @@ public class RestaurantResponseDetailDto {
     @Schema(description = "스탬프 획득 유무", example = "true")
     private Boolean earnedStamp; // 스탬프 획득 유무
 
-    public static RestaurantResponseDetailDto of(Restaurant restaurant, Boolean earnedStamp) {
+    public static RestaurantResponseDetailDto of(Restaurant restaurant, RestaurantDetail restaurantDetail, Boolean earnedStamp) {
         return RestaurantResponseDetailDto.builder()
                 .restaurantId(restaurant.getRestaurantId())
                 .name(restaurant.getName())
+                .imageUrl(restaurant.getImageUrl())
                 .categoryName(restaurant.getCategory().getCategoryName())
                 .roadAddress(restaurant.getAddress().getRoadAddress())
                 .detailAddress(restaurant.getAddress().getDetailAddress())
-                .openingHours(restaurant.getRestaurantDetail().getOpeningHours())
-                .breakTime(restaurant.getRestaurantDetail().getBreakTime())
-                .holidays(restaurant.getRestaurantDetail().getHolidays())
-                .restaurantNumber(restaurant.getRestaurantDetail().getRestaurantNumber())
-                .description(restaurant.getRestaurantDetail().getDescription())
+                .openingHours(restaurantDetail.getOpeningHours())
+                .breakTime(restaurantDetail.getBreakTime())
+                .holidays(restaurantDetail.getHolidays())
+                .restaurantNumber(restaurantDetail.getRestaurantNumber())
+                .description(restaurantDetail.getDescription())
                 .earnedStamp(earnedStamp)
                 .build();
     }

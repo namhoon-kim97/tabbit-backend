@@ -30,11 +30,11 @@ public class WaitingController {
         return CommonResponse.success(ResponseStatus.SUCCESS_CREATE, responseDto);
     }
 
-    @GetMapping("/{restaurantId}")
+    @GetMapping("/{waitingId}")
     @Operation(summary = "웨이팅 개요 조회", description = "특정 맛집의 웨이팅 개요를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "웨이팅 개요 조회 성공", content = @Content(schema = @Schema(implementation = WaitingResponseDto.class)))
-    public CommonResponse<?> getWaitingOverview(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable @Parameter(description = "맛집 ID", required = true) Long restaurantId) {
-        WaitingResponseDto responseDto = waitingService.getWaitingOverview(restaurantId, userDetails.getUsername());
+    public CommonResponse<?> getWaitingOverview(@PathVariable @Parameter(description = "웨이팅 ID", required = true) Long waitingId) {
+        WaitingResponseDto responseDto = waitingService.getWaitingOverview(waitingId);
         return CommonResponse.success(ResponseStatus.SUCCESS_OK, responseDto);
     }
 
@@ -46,38 +46,38 @@ public class WaitingController {
         return CommonResponse.success(ResponseStatus.SUCCESS_OK, responseDto);
     }
 
-    @PutMapping("/{restaurantId}/cancel")
+    @PutMapping("/{waitingId}/cancel")
     @Operation(summary = "웨이팅 취소", description = "특정 맛집의 웨이팅을 취소합니다.")
     @ApiResponse(responseCode = "200", description = "웨이팅 취소 성공")
-    public CommonResponse<?> cancelWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable @Parameter(description = "맛집 ID", required = true) Long restaurantId) {
-        waitingService.cancelWaiting(restaurantId, userDetails.getUsername());
+    public CommonResponse<?> cancelWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable @Parameter(description = "웨이팅 ID", required = true) Long waitingId) {
+        waitingService.cancelWaiting(waitingId, userDetails.getUsername());
         return CommonResponse.success(ResponseStatus.SUCCESS_DELETE);
     }
 
-    @PutMapping("/{restaurantId}/confirm")
+    @PutMapping("/{waitingId}/confirm")
     @PreAuthorize("hasRole('ROLE_MANAGER')")
     @Operation(summary = "웨이팅 확정", description = "특정 맛집의 웨이팅을 확정합니다.")
     @ApiResponse(responseCode = "200", description = "웨이팅 확정 성공")
-    public CommonResponse<?> confirmWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable @Parameter(description = "맛집 ID", required = true) Long restaurantId, @RequestBody @Parameter(description = "웨이팅 번호 요청 DTO", required = true) WaitingRequestUpdateDto requestDto) {
-        waitingService.confirmWaiting(restaurantId, userDetails.getUsername(), requestDto.getWaitingNumber());
+    public CommonResponse<?> confirmWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable @Parameter(description = "웨이팅 ID", required = true) Long waitingId) {
+        waitingService.confirmWaiting(waitingId, userDetails.getUsername());
         return CommonResponse.success(ResponseStatus.SUCCESS_UPDATE);
     }
 
-    @PutMapping("/{restaurantId}/call")
+    @PutMapping("/{waitingId}/call")
     @PreAuthorize("hasRole('ROLE_MANAGER')")
     @Operation(summary = "웨이팅 호출", description = "특정 맛집의 웨이팅을 호출합니다.")
     @ApiResponse(responseCode = "200", description = "웨이팅 호출 성공")
-    public CommonResponse<?> callWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable @Parameter(description = "맛집 ID", required = true) Long restaurantId, @RequestBody @Parameter(description = "웨이팅 번호 요청 DTO", required = true) WaitingRequestUpdateDto requestDto) {
-        waitingService.callWaiting(restaurantId, userDetails.getUsername(), requestDto.getWaitingNumber());
+    public CommonResponse<?> callWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable @Parameter(description = "웨이팅 ID", required = true) Long waitingId) {
+        waitingService.callWaiting(waitingId, userDetails.getUsername());
         return CommonResponse.success(ResponseStatus.SUCCESS_UPDATE);
     }
 
-    @PutMapping("/{restaurantId}/no-show")
+    @PutMapping("/{waitingId}/no-show")
     @PreAuthorize("hasRole('ROLE_MANAGER')")
     @Operation(summary = "웨이팅 노쇼 처리", description = "특정 맛집의 웨이팅을 노쇼 처리합니다.")
     @ApiResponse(responseCode = "200", description = "웨이팅 노쇼 처리 성공")
-    public CommonResponse<?> noShowWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable @Parameter(description = "맛집 ID", required = true) Long restaurantId, @RequestBody @Parameter(description = "웨이팅 번호 요청 DTO", required = true) WaitingRequestUpdateDto requestDto) {
-        waitingService.noShowWaiting(restaurantId, userDetails.getUsername(), requestDto.getWaitingNumber());
+    public CommonResponse<?> noShowWaiting(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable @Parameter(description = "웨이팅 ID", required = true) Long waitingId) {
+        waitingService.noShowWaiting(waitingId, userDetails.getUsername());
         return CommonResponse.success(ResponseStatus.SUCCESS_UPDATE);
     }
 

@@ -40,4 +40,13 @@ public class Address {
         this.streetAddress = streetAddress;
         this.detailAddress = detailAddress;
     }
+
+    public void update(String sido, String sigungu, String eupmyeondong, String roadAddress, String streetAddress, String detailAddress) {
+        this.sido = sido;
+        this.sigungu = sigungu;
+        this.eupmyeondong = eupmyeondong;
+        this.roadAddress = roadAddress;
+        this.streetAddress = streetAddress;
+        this.detailAddress = detailAddress;
+    }
 }

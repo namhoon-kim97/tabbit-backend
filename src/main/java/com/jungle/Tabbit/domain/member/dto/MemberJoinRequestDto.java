@@ -9,7 +9,7 @@ import lombok.Getter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Getter
-@Schema(description = "멤버 회원가입 응답DTO")
+@Schema(description = "멤버 회원가입 응답 DTO")
 public class MemberJoinRequestDto {
     @Pattern(regexp = "^[a-z0-9]{4,10}$", message = "Username must be between 4 and 10 characters long and contain only lowercase letters and digits.")
     @Schema(description = "멤버 아이디")

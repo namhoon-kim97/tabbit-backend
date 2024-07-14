@@ -23,7 +23,7 @@ public class FcmController {
     @PostMapping("/send")
     public CommonResponse<?> pushMessage(@RequestBody @Validated FcmRequestDto fcmRequestDto) {
         log.debug("[+] 푸시 메시지를 전송합니다. ");
-        fcmService.sendMessageTo(fcmRequestDto);
+        //fcmService.sendMessageTo(fcmRequestDto);
 
         return CommonResponse.success(ResponseStatus.SUCCESS_OK);
     }

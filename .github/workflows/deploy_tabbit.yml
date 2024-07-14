@@ -88,7 +88,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
-            nohup java -jar /home/ubuntu/tabbit/build/libs/app.jar --spring.config.location=/home/ubuntu/tabbit/application.yaml > /home/ubuntu/tabbit/app.log 2>&1 &
+            nohup java -jar -Duser.timezone=Asia/Seoul /home/ubuntu/tabbit/build/libs/app.jar --spring.config.location=/home/ubuntu/tabbit/application.yaml > /home/ubuntu/tabbit/app.log 2>&1 &
       
       
 
