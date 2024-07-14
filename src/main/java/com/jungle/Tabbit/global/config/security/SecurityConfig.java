@@ -29,7 +29,6 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     public static final String[] PERMIT_URI_ARRAY = {
-            "/**", // 개발을 위한 전체 허용 룰 시점 잡아서 제거해야 됨
             "/api/member/join",
             "/api/member/login",
             "/swagger-ui.html",
