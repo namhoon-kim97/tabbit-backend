@@ -66,6 +66,7 @@ public class BadgeService {
 
         List<MemberBadgeResponseDto> members = memberBadges.stream()
                 .filter(memberBadge -> !memberBadge.getMember().getUsername().equals(username)) // 본인 제외
+                .filter(memberBadge -> !memberBadge.isDeleted())
                 .map(MemberBadgeResponseDto::of)
                 .collect(Collectors.toList());
 
