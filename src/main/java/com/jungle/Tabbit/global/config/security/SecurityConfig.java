@@ -1,7 +1,6 @@
 package com.jungle.Tabbit.global.config.security;
 
 
-
 import com.jungle.Tabbit.global.config.security.filter.JwtAuthenticationFilter;
 import com.jungle.Tabbit.global.config.security.filter.SecurityExceptionHandlingFilter;
 import lombok.RequiredArgsConstructor;
@@ -34,10 +33,11 @@ public class SecurityConfig {
             "/swagger-ui.html",
             "/swagger-ui/**",
             "/v3/api-docs/**",
+            "/api/images/**",
     };
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception{
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
