@@ -25,6 +25,6 @@ public class MemberJoinRequestDto {
     private String fcmToken;
 
     public Member createMember(PasswordEncoder passwordEncoder, Badge badge) {
-        return new Member(nickname, passwordEncoder.encode(password), username, memberRole, badge, "");
+        return new Member(nickname, passwordEncoder.encode(password), username, memberRole, badge, fcmToken);
     }
 }
