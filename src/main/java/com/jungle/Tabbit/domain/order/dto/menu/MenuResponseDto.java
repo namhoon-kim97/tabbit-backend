@@ -20,6 +20,8 @@ public class MenuResponseDto {
     private String description;
     @Schema(description = "이미지 경로")
     private String imageUrl;
+    @Schema(description = "카테고리ID")
+    private Long categoryId;
     @Schema(description = "카테고리명")
     private String categoryName;
 
@@ -30,6 +32,7 @@ public class MenuResponseDto {
                 .price(menu.getPrice())
                 .description(menu.getDescription())
                 .imageUrl(menu.getImageUrl())
+                .categoryId(menu.getCategory().getCategoryId())
                 .categoryName(menu.getCategory().getCategoryName())
                 .build();
     }
