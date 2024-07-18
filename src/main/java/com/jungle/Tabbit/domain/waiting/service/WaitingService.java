@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -86,6 +87,7 @@ public class WaitingService {
                 member, Arrays.asList(WaitingStatus.STATUS_WAITING, WaitingStatus.STATUS_CALLED));
 
         List<WaitingResponseDto> waitingResponseDtos = waitingList.stream()
+                .sorted(Comparator.comparing(Waiting::getCreatedAt).reversed())
                 .map(waiting -> {
                     int currentWaitingPosition = getCurrentWaitingPosition(waiting);
                     Long estimatedWaitTime = calculateEstimatedWaitTime(currentWaitingPosition, waiting.getRestaurant().getEstimatedTimePerTeam());
