@@ -11,9 +11,6 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "waiting", indexes = {
-        @Index(name = "idx_restaurant_waiting_status", columnList = "restaurant_id, waiting_status")
-})
 public class Waiting extends Timestamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
