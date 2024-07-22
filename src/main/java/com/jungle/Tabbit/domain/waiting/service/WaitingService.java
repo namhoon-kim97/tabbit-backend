@@ -25,6 +25,9 @@ import com.jungle.Tabbit.global.exception.DuplicatedException;
 import com.jungle.Tabbit.global.exception.NotFoundException;
 import com.jungle.Tabbit.global.model.ResponseStatus;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -40,6 +43,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class WaitingService {
     private final WaitingRepository waitingRepository;
     private final NfcRepository nfcRepository;
@@ -51,6 +55,9 @@ public class WaitingService {
     private final OrderService orderService;
     private final OrderMenuRepository orderMenuRepository;
     private static final ConcurrentHashMap<Long, AtomicLong> storeQueueNumbers = new ConcurrentHashMap<>();  // 가게별 전역 대기번호 변수
+
+    private static final Logger logger = LoggerFactory.getLogger(WaitingService.class);
+
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public WaitingResponseDto registerWaiting(WaitingRequestCreateDto requestDto, String username) {
@@ -317,11 +324,14 @@ public class WaitingService {
     }
 
     private void notifyImminentEntryToWaiters(Restaurant restaurant, Waiting waiting) {
+        long start = System.currentTimeMillis();
         List<Waiting> waitingList = waitingRepository.findByRestaurantAndWaitingStatusOrderByWaitingNumberAsc(restaurant, WaitingStatus.STATUS_WAITING);
         for (int i = 0; i < waitingList.size(); i++) {
             Waiting nextWaiting = waitingList.get(i);
             sendImminentEntryNotification(nextWaiting.getMember(), i, restaurant, waiting);
         }
+        long executionTime = System.currentTimeMillis() - start;
+        logger.info("notifyImminentEntryToWaiters executed in {}ms", executionTime);
     }
 
     private void sendImminentEntryNotification(Member member, int currentWaitingPosition, Restaurant restaurant, Waiting waiting) {
