@@ -37,9 +37,11 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -323,13 +325,32 @@ public class WaitingService {
         sendNotification(restaurant.getMember().getMemberId(), "웨이팅 취소 알림", "웨이팅이 취소되었습니다.", ownerData);
     }
 
+//    public void notifyImminentEntryToWaiters(Restaurant restaurant, Waiting waiting) {
+//        long start = System.currentTimeMillis();
+//        List<Waiting> waitingList = waitingRepository.findWaitingsByRestaurantAndStatus(restaurant.getRestaurantId(), WaitingStatus.STATUS_WAITING);
+//        for (int i = 0; i < waitingList.size(); i++) {
+//            Waiting nextWaiting = waitingList.get(i);
+//            sendImminentEntryNotification(nextWaiting.getMember(), i, restaurant, waiting);
+//        }
+//        long executionTime = System.currentTimeMillis() - start;
+//        logger.info("notifyImminentEntryToWaiters executed in {}ms", executionTime);
+//    }
+
     public void notifyImminentEntryToWaiters(Restaurant restaurant, Waiting waiting) {
         long start = System.currentTimeMillis();
         List<Waiting> waitingList = waitingRepository.findWaitingsByRestaurantAndStatus(restaurant.getRestaurantId(), WaitingStatus.STATUS_WAITING);
-        for (int i = 0; i < waitingList.size(); i++) {
-            Waiting nextWaiting = waitingList.get(i);
-            sendImminentEntryNotification(nextWaiting.getMember(), i, restaurant, waiting);
-        }
+
+        // 인덱스와 함께 병렬 처리를 수행하여 각 작업의 위치를 보장
+        List<CompletableFuture<Void>> futures = IntStream.range(0, waitingList.size())
+                .mapToObj(index -> CompletableFuture.runAsync(() -> {
+                    Waiting nextWaiting = waitingList.get(index);
+                    sendImminentEntryNotification(nextWaiting.getMember(), index, restaurant, waiting);
+                }))
+                .toList();
+
+        // 모든 비동기 작업이 완료될 때까지 대기
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
         long executionTime = System.currentTimeMillis() - start;
         logger.info("notifyImminentEntryToWaiters executed in {}ms", executionTime);
     }
