@@ -4,8 +4,9 @@ import com.jungle.Tabbit.domain.member.entity.Member;
 import com.jungle.Tabbit.domain.restaurant.entity.Restaurant;
 import com.jungle.Tabbit.domain.waiting.entity.Waiting;
 import com.jungle.Tabbit.domain.waiting.entity.WaitingStatus;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,8 +16,8 @@ public interface WaitingRepository extends Repository<Waiting, Long> {
 
     Optional<Waiting> findByWaitingId(Long id);
 
-    @Cacheable("waitingList")
-    List<Waiting> findByRestaurantAndWaitingStatusOrderByWaitingNumberAsc(Restaurant restaurant, WaitingStatus status);
+    @Query(value = "SELECT w FROM Waiting w WHERE w.restaurant.restaurantId = :restaurantId AND w.waitingStatus = :status ORDER BY w.waitingNumber ASC")
+    List<Waiting> findWaitingsByRestaurantAndStatus(@Param("restaurantId") Long restaurantId, @Param("status") WaitingStatus status);
 
     boolean existsByMemberAndRestaurantAndWaitingStatusIn(Member member, Restaurant restaurant, List<WaitingStatus> statuses);
 

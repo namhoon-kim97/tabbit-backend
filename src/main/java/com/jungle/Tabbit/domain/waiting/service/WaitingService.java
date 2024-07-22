@@ -268,7 +268,7 @@ public class WaitingService {
             return 0;  // called 상태이면 0 반환
         }
 
-        List<Waiting> waitingList = waitingRepository.findByRestaurantAndWaitingStatusOrderByWaitingNumberAsc(waiting.getRestaurant(), WaitingStatus.STATUS_WAITING);
+        List<Waiting> waitingList = waitingRepository.findWaitingsByRestaurantAndStatus(waiting.getRestaurant().getRestaurantId(), WaitingStatus.STATUS_WAITING);
         for (int i = 0; i < waitingList.size(); i++) {
             if (waitingList.get(i).getWaitingId().equals(waiting.getWaitingId())) {
                 return i + 1;
@@ -325,7 +325,7 @@ public class WaitingService {
 
     public void notifyImminentEntryToWaiters(Restaurant restaurant, Waiting waiting) {
         long start = System.currentTimeMillis();
-        List<Waiting> waitingList = waitingRepository.findByRestaurantAndWaitingStatusOrderByWaitingNumberAsc(restaurant, WaitingStatus.STATUS_WAITING);
+        List<Waiting> waitingList = waitingRepository.findWaitingsByRestaurantAndStatus(restaurant.getRestaurantId(), WaitingStatus.STATUS_WAITING);
         for (int i = 0; i < waitingList.size(); i++) {
             Waiting nextWaiting = waitingList.get(i);
             sendImminentEntryNotification(nextWaiting.getMember(), i, restaurant, waiting);
