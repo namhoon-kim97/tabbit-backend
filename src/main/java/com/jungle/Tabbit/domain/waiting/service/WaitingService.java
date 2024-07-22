@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -323,7 +324,8 @@ public class WaitingService {
         sendNotification(restaurant.getMember().getMemberId(), "웨이팅 취소 알림", "웨이팅이 취소되었습니다.", ownerData);
     }
 
-    private void notifyImminentEntryToWaiters(Restaurant restaurant, Waiting waiting) {
+    @Async
+    public void notifyImminentEntryToWaitersAsync(Restaurant restaurant, Waiting waiting) {
         long start = System.currentTimeMillis();
         List<Waiting> waitingList = waitingRepository.findByRestaurantAndWaitingStatusOrderByWaitingNumberAsc(restaurant, WaitingStatus.STATUS_WAITING);
         for (int i = 0; i < waitingList.size(); i++) {
@@ -332,6 +334,10 @@ public class WaitingService {
         }
         long executionTime = System.currentTimeMillis() - start;
         logger.info("notifyImminentEntryToWaiters executed in {}ms", executionTime);
+    }
+
+    public void notifyImminentEntryToWaiters(Restaurant restaurant, Waiting waiting) {
+        notifyImminentEntryToWaitersAsync(restaurant, waiting);
     }
 
     private void sendImminentEntryNotification(Member member, int currentWaitingPosition, Restaurant restaurant, Waiting waiting) {
