@@ -324,17 +324,35 @@ public class WaitingService {
         sendNotification(restaurant.getMember().getMemberId(), "웨이팅 취소 알림", "웨이팅이 취소되었습니다.", ownerData);
     }
 
+//    @Async
+//    public void notifyImminentEntryToWaitersAsync(Restaurant restaurant, Waiting waiting) {
+//        long start = System.currentTimeMillis();
+//        List<Waiting> waitingList = waitingRepository.findByRestaurantAndWaitingStatusOrderByWaitingNumberAsc(restaurant, WaitingStatus.STATUS_WAITING);
+//        for (int i = 0; i < waitingList.size(); i++) {
+//            Waiting nextWaiting = waitingList.get(i);
+//            sendImminentEntryNotification(nextWaiting.getMember(), i, restaurant, waiting);
+//        }
+//        long executionTime = System.currentTimeMillis() - start;
+//        logger.info("notifyImminentEntryToWaiters executed in {}ms", executionTime);
+//    }
+
     @Async
     public void notifyImminentEntryToWaitersAsync(Restaurant restaurant, Waiting waiting) {
         long start = System.currentTimeMillis();
+
         List<Waiting> waitingList = waitingRepository.findByRestaurantAndWaitingStatusOrderByWaitingNumberAsc(restaurant, WaitingStatus.STATUS_WAITING);
-        for (int i = 0; i < waitingList.size(); i++) {
-            Waiting nextWaiting = waitingList.get(i);
-            sendImminentEntryNotification(nextWaiting.getMember(), i, restaurant, waiting);
-        }
-        long executionTime = System.currentTimeMillis() - start;
-        logger.info("notifyImminentEntryToWaiters executed in {}ms", executionTime);
+        waitingList.parallelStream().forEach(nextWaiting -> {
+            int index = waitingList.indexOf(nextWaiting);
+            long notificationStart = System.currentTimeMillis();
+            sendImminentEntryNotification(nextWaiting.getMember(), index, restaurant, waiting);
+            long notificationEnd = System.currentTimeMillis();
+            System.out.println("Notification sent to " + nextWaiting.getMember().getUsername() + " in " + (notificationEnd - notificationStart) + "ms");
+        });
+
+        long end = System.currentTimeMillis();
+        System.out.println("notifyImminentEntryToWaitersAsync executed in " + (end - start) + "ms");
     }
+
 
     public void notifyImminentEntryToWaiters(Restaurant restaurant, Waiting waiting) {
         notifyImminentEntryToWaitersAsync(restaurant, waiting);
