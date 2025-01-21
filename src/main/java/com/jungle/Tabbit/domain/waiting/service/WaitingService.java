@@ -89,18 +89,24 @@ public class WaitingService {
 
     @Transactional(readOnly = true)
     public WaitingListResponseDto getUserWaitingList(String username) {
+        long startTime = System.currentTimeMillis(); // 시작 시간 측정
+
         Member member = getMemberByUsername(username);
+
         List<Waiting> waitingList = waitingRepository.findByMemberAndWaitingStatusIn(
                 member, Arrays.asList(WaitingStatus.STATUS_WAITING, WaitingStatus.STATUS_CALLED));
 
         List<WaitingResponseDto> waitingResponseDtos = waitingList.stream()
-                .sorted(Comparator.comparing(Waiting::getCreatedAt).reversed())
                 .map(waiting -> {
                     int currentWaitingPosition = getCurrentWaitingPosition(waiting);
-                    Long estimatedWaitTime = calculateEstimatedWaitTime(currentWaitingPosition, waiting.getRestaurant().getEstimatedTimePerTeam());
+                    Long estimatedWaitTime = calculateEstimatedWaitTime(
+                            currentWaitingPosition, waiting.getRestaurant().getEstimatedTimePerTeam());
                     return WaitingResponseDto.of(waiting, estimatedWaitTime, currentWaitingPosition);
                 })
                 .collect(Collectors.toList());
+
+        long endTime = System.currentTimeMillis(); // 종료 시간 측정
+        System.out.println("getUserWaitingList executed in " + (endTime - startTime) + "ms");
 
         return WaitingListResponseDto.builder()
                 .waitingResponseDtos(waitingResponseDtos)
@@ -264,17 +270,14 @@ public class WaitingService {
     }
 
     private int getCurrentWaitingPosition(Waiting waiting) {
-        if (waiting.getWaitingStatus() == WaitingStatus.STATUS_CALLED || waiting.getWaitingStatus() == WaitingStatus.STATUS_SEATED || waiting.getWaitingStatus() == WaitingStatus.STATUS_CANCELLED) {
-            return 0;  // called 상태이면 0 반환
+        if (waiting.getWaitingStatus() == WaitingStatus.STATUS_CALLED ||
+                waiting.getWaitingStatus() == WaitingStatus.STATUS_SEATED ||
+                waiting.getWaitingStatus() == WaitingStatus.STATUS_CANCELLED) {
+            return 0;
         }
-
-        List<Waiting> waitingList = waitingRepository.findWaitingsByRestaurantAndStatus(waiting.getRestaurant().getRestaurantId(), WaitingStatus.STATUS_WAITING);
-        for (int i = 0; i < waitingList.size(); i++) {
-            if (waitingList.get(i).getWaitingId().equals(waiting.getWaitingId())) {
-                return i + 1;
-            }
-        }
-        throw new BusinessLogicException(ResponseStatus.FAIL_MEMBER_WAITING_DUPLICATED);
+        return waitingRepository.countByRestaurantAndStatusBefore(waiting.getRestaurant().getRestaurantId(),
+                waiting.getWaitingNumber(),
+                WaitingStatus.STATUS_WAITING) + 1;
     }
 
     private Long calculateEstimatedWaitTime(int position, Long estimatedTimePerTeam) {
