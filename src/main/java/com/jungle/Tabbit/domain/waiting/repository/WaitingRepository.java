@@ -27,11 +27,23 @@ public interface WaitingRepository extends Repository<Waiting, Long> {
 
     Optional<Waiting> findByRestaurantAndWaitingNumberAndWaitingStatus(Restaurant restaurant, int waitingNumber, WaitingStatus waitingStatus);
 
-    List<Waiting> findByMemberAndWaitingStatusIn(Member member, List<WaitingStatus> waitingStatuses);
+    @Query("SELECT w FROM Waiting w JOIN FETCH w.restaurant r WHERE w.member = :member AND w.waitingStatus IN :statuses ORDER BY w.createdAt DESC")
+    List<Waiting> findByMemberAndWaitingStatusIn(
+            @Param("member") Member member,
+            @Param("statuses") List<WaitingStatus> statuses);
+
+    //List<Waiting> findByMemberAndWaitingStatusIn(Member member, List<WaitingStatus> waitingStatuses);
 
     List<Waiting> findByRestaurantAndWaitingStatusInOrderByWaitingNumberAsc(Restaurant restaurant, List<WaitingStatus> waitingStatuses);
 
     boolean existsByMemberAndWaitingStatusIn(Member member, List<WaitingStatus> waitingStatus);
 
     List<Waiting> findAllByWaitingStatus(WaitingStatus status);
+    @Query("SELECT COUNT(w) FROM Waiting w " +
+            "WHERE w.restaurant.restaurantId = :restaurantId " +
+            "AND w.waitingStatus = :status " +
+            "AND w.waitingNumber < :waitingNumber")
+    int countByRestaurantAndStatusBefore(@Param("restaurantId") Long restaurantId,
+                                         @Param("waitingNumber") int waitingNumber,
+                                         @Param("status") WaitingStatus status);
 }
