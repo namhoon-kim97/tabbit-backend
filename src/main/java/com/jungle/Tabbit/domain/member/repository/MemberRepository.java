@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface MemberRepository extends Repository<Member, Long> {
     Member save(Member member);
-    @Query("SELECT m FROM member m WHERE m.username = :username AND m.isDeleted = false")
+    @Query("select m from member m join fetch m.badge where m.username = :username AND m.isDeleted = false")
     Optional<Member> findMemberByUsername(@Param("username") String username);
     @Query("SELECT m FROM member m WHERE m.memberId = :memberId AND m.isDeleted = false")
     Optional<Member> findMemberByMemberId(@Param("memberId") Long memberId);
