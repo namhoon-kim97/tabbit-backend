@@ -22,6 +22,8 @@ import java.util.List;
 public class FcmService {
 
     private final WebClient webClient;
+    private String accessToken;
+    private long expireTime;
 
     public FcmService(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.baseUrl("https://fcm.googleapis.com/v1/projects/tabbit-c1857").build();
@@ -51,21 +53,24 @@ public class FcmService {
     }
 
     private String getAccessToken() {
+        if (accessToken != null && expireTime > System.currentTimeMillis()) {
+            return accessToken;
+        }
+        // 새로 발급
         try {
-            String firebaseConfigPath = "firebase/tabbit-c1857-firebase-adminsdk-d0wb2-29074368c4.json";
-
+            String firebaseConfigPath = "firebase/tabbit-69517-firebase-adminsdk-fbsvc-91f92182cc.json";
             GoogleCredentials googleCredentials = GoogleCredentials
                     .fromStream(new ClassPathResource(firebaseConfigPath).getInputStream())
                     .createScoped(List.of("https://www.googleapis.com/auth/cloud-platform"));
 
             googleCredentials.refreshIfExpired();
-            return googleCredentials.getAccessToken().getTokenValue();
-
+            accessToken = googleCredentials.getAccessToken().getTokenValue();
+            expireTime = System.currentTimeMillis() + 3500 * 1000; // 3500초 = 58분 정도
+            return accessToken;
         } catch (IOException e) {
-
             e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
     private String makeMessage(FcmRequestDto fcmRequestDto) {
