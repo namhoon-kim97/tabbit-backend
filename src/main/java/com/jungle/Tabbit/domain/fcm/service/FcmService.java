@@ -26,7 +26,7 @@ public class FcmService {
     private long expireTime;
 
     public FcmService(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("https://fcm.googleapis.com/v1/projects/tabbit-c1857").build();
+        this.webClient = webClientBuilder.baseUrl("https://fcm.googleapis.com/v1/projects/tabbit-69517").build();
     }
 
     public void sendMessageTo(FcmRequestDto fcmRequestDto, boolean dataOnly) {
@@ -36,7 +36,7 @@ public class FcmService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(getAccessToken());
 
-        String API_URL = "https://fcm.googleapis.com/v1/projects/tabbit-c1857/messages:send";
+        String API_URL = "https://fcm.googleapis.com/v1/projects/tabbit-69517/messages:send";
         try {
             webClient.post()
                     .uri(API_URL)
