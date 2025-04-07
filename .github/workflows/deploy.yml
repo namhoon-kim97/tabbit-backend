@@ -20,7 +20,7 @@ jobs:
         username: ${{ secrets.GCP_USERNAME }}
         key: ${{ secrets.GCP_SSH_KEY }}
         script: |
-          cd /home/kskcmh5723
+          cd /home/kskcmh5723/tabbit-backend
           git pull origin main
           ./gradlew build
           sudo systemctl restart tabbit.service
