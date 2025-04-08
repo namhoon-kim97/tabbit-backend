@@ -61,7 +61,7 @@ public class FcmService {
             String firebaseConfigPath = "firebase/tabbit-69517-firebase-adminsdk-fbsvc-91f92182cc.json";
             GoogleCredentials googleCredentials = GoogleCredentials
                     .fromStream(new ClassPathResource(firebaseConfigPath).getInputStream())
-                    .createScoped(List.of("https://www.googleapis.com/auth/cloud-platform"));
+                    .createScoped(List.of("https://www.googleapis.com/auth/firebase.messaging"));
 
             googleCredentials.refreshIfExpired();
             accessToken = googleCredentials.getAccessToken().getTokenValue();
