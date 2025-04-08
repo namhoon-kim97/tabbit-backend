@@ -17,7 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
@@ -25,11 +26,12 @@ public class NotificationService {
     private final MemberRepository memberRepository;
     private final NotificationRepository notificationRepository;
     private final FcmService fcmService;
+    private static final Logger log = LoggerFactory.getLogger(NotificationService.class);
 
     public void sendNotification(NotificationRequestCreateDto requestDto, boolean dataOnly) {
         Member member = getMemberById(requestDto.getMemberId());
         FcmData fcmData = requestDto.getFcmData();
-
+        log.info("찾은 멤버 ID: {}, FCM Token: {}", member.getMemberId(), member.getFcmToken());
         FcmRequestDto fcmRequestDto = FcmRequestDto.builder()
                 .token(member.getFcmToken())
                 .title(requestDto.getTitle())
