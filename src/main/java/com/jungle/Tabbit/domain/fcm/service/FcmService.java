@@ -53,7 +53,7 @@ public class FcmService {
 
     private String getAccessToken() {
         try {
-            String firebaseConfigPath = "firebase/tabbit-69517-firebase-adminsdk-fbsvc-91f92182cc.json";
+            String firebaseConfigPath = "firebase/tabbit-69517-firebase-adminsdk-fbsvc-28c68558e9.json";
 
             GoogleCredentials googleCredentials = GoogleCredentials
                     .fromStream(new ClassPathResource(firebaseConfigPath).getInputStream())
