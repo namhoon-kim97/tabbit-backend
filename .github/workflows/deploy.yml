@@ -1,60 +1,60 @@
-name: Deploy to EC2
+# name: Deploy to EC2
 
-on:
-  push:
-    branches:
-      - develop  # develop 브랜치에 push될 때만
+# on:
+#   push:
+#     branches:
+#       - develop  # develop 브랜치에 push될 때만
 
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
+# jobs:
+#   build-and-deploy:
+#     runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v3
+#     steps:
+#     - name: Checkout Code
+#       uses: actions/checkout@v3
 
-    - name: Set up Java
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: '17'
+#     - name: Set up Java
+#       uses: actions/setup-java@v3
+#       with:
+#         distribution: 'temurin'
+#         java-version: '17'
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x ./gradlew
+#     - name: Grant execute permission for gradlew
+#       run: chmod +x ./gradlew
 
-    - name: Build with Gradle
-      run: ./gradlew build -x test
+#     - name: Build with Gradle
+#       run: ./gradlew build -x test
 
-    - name: Stop and Remove Existing Application on EC2
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USERNAME }}
-        key: ${{ secrets.EC2_PRIVATE_KEY }}
-        port: 2222
-        script: |
-          cd /home/ubuntu/tabbit-backend
-          pkill -f 'tabbit.jar' || true
-          rm -f tabbit.jar
-          exit
+#     - name: Stop and Remove Existing Application on EC2
+#       uses: appleboy/ssh-action@v0.1.10
+#       with:
+#         host: ${{ secrets.EC2_HOST }}
+#         username: ${{ secrets.EC2_USERNAME }}
+#         key: ${{ secrets.EC2_PRIVATE_KEY }}
+#         port: 2222
+#         script: |
+#           cd /home/ubuntu/tabbit-backend
+#           pkill -f 'tabbit.jar' || true
+#           rm -f tabbit.jar
+#           exit
 
-    - name: Copy Jar to EC2
-      uses: appleboy/scp-action@v0.1.6
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USERNAME }}
-        key: ${{ secrets.EC2_PRIVATE_KEY }}
-        port: 2222
-        source: build/libs/tabbit.jar
-        target: /home/ubuntu/tabbit-backend
+#     - name: Copy Jar to EC2
+#       uses: appleboy/scp-action@v0.1.6
+#       with:
+#         host: ${{ secrets.EC2_HOST }}
+#         username: ${{ secrets.EC2_USERNAME }}
+#         key: ${{ secrets.EC2_PRIVATE_KEY }}
+#         port: 2222
+#         source: build/libs/tabbit.jar
+#         target: /home/ubuntu/tabbit-backend
 
-    - name: Restart Application on EC2
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USERNAME }}
-        key: ${{ secrets.EC2_PRIVATE_KEY }}
-        port: 2222
-        script: |
-          cd /home/ubuntu/tabbit-backend
-          nohup java -jar tabbit.jar > app.log 2>&1 &
+#     - name: Restart Application on EC2
+#       uses: appleboy/ssh-action@v0.1.10
+#       with:
+#         host: ${{ secrets.EC2_HOST }}
+#         username: ${{ secrets.EC2_USERNAME }}
+#         key: ${{ secrets.EC2_PRIVATE_KEY }}
+#         port: 2222
+#         script: |
+#           cd /home/ubuntu/tabbit-backend
+#           nohup java -jar tabbit.jar > app.log 2>&1 &
