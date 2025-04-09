@@ -24,6 +24,17 @@ jobs:
 
     - name: Build with Gradle
       run: ./gradlew build -x test
+      
+    - name: Check SSH Connection
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_PRIVATE_KEY }}
+        port: 2222
+        script: |
+          whoami
+          pwd
 
     - name: Stop and Remove Existing Application on EC2
       uses: appleboy/ssh-action@v0.1.10
