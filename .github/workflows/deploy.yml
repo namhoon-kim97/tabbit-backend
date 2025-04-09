@@ -32,17 +32,16 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
 
-      # 5. application.yaml 복원
       - name: Create application.yaml from Secret
         run: |
           mkdir -p src/main/resources
-          echo "${{ secrets.APPLICATION_YAML }}" > src/main/resources/application.yml
+          printf '%s' "${{ secrets.APPLICATION_YAML }}" > src/main/resources/application.yml
 
-      # 6. firebase json 복원
       - name: Create firebase .json from Secret
         run: |
           mkdir -p src/main/resources/firebase
-          echo "${{ secrets.FIREBASE_JSON }}" > src/main/resources/firebase/tabbit-69517-firebase-adminsdk-fbsvc-91f92182cc.json
+          printf '%s' "${{ secrets.FIREBASE_JSON }}" > src/main/resources/firebase/tabbit-69517-firebase-adminsdk-fbsvc-91f92182cc.json
+      
 
       # 7. Gradle 빌드 (테스트 제외)
       - name: Build with Gradle Wrapper
