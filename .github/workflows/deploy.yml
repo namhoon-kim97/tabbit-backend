@@ -18,23 +18,12 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: '17'
-        
+
     - name: Grant execute permission for gradlew
       run: chmod +x ./gradlew
 
     - name: Build with Gradle
       run: ./gradlew build -x test
-      
-    - name: Check SSH Connection
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USERNAME }}
-        key: ${{ secrets.EC2_PRIVATE_KEY }}
-        port: 2222
-        script: |
-          whoami
-          pwd
 
     - name: Stop and Remove Existing Application on EC2
       uses: appleboy/ssh-action@v0.1.10
@@ -44,7 +33,7 @@ jobs:
         key: ${{ secrets.EC2_PRIVATE_KEY }}
         port: 2222
         script: |
-          cd /home/ubuntu
+          cd /home/ubuntu/tabbit-backend
           pkill -f 'tabbit.jar' || true
           rm -f tabbit.jar
           exit
@@ -57,7 +46,7 @@ jobs:
         key: ${{ secrets.EC2_PRIVATE_KEY }}
         port: 2222
         source: build/libs/tabbit.jar
-        target: /home/ubuntu
+        target: /home/ubuntu/tabbit-backend
 
     - name: Restart Application on EC2
       uses: appleboy/ssh-action@v0.1.10
@@ -67,5 +56,5 @@ jobs:
         key: ${{ secrets.EC2_PRIVATE_KEY }}
         port: 2222
         script: |
-          cd /home/ubuntu
+          cd /home/ubuntu/tabbit-backend
           nohup java -jar tabbit.jar > app.log 2>&1 &
