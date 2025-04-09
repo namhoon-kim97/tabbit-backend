@@ -58,8 +58,8 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           port: 2222
           source: |
-            src/main/resources/application.yml
-            src/main/resources/firebase/tabbit-69517-firebase-adminsdk-fbsvc-91f92182cc.json
+            ./src/main/resources/application.yml
+            ./src/main/resources/firebase/tabbit-69517-firebase-adminsdk-fbsvc-91f92182cc.json
           target: "/home/ubuntu/tabbit-backend/"
           debug: true
 
