@@ -335,6 +335,7 @@ public class WaitingService {
         }
         long executionTime = System.currentTimeMillis() - start;
         logger.info("notifyImminentEntryToWaiters executed in {}ms", executionTime);
+
     }
 
     private void sendImminentEntryNotification(Member member, int currentWaitingPosition, Restaurant restaurant, Waiting waiting) {
