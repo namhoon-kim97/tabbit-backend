@@ -59,7 +59,7 @@ public class FcmService {
                     .fromStream(new ClassPathResource(firebaseConfigPath).getInputStream())
                     .createScoped(List.of("https://www.googleapis.com/auth/firebase.messaging"));
 
-            googleCredentials.refreshIfExpired();
+            googleCredentials.refresh();
             return googleCredentials.getAccessToken().getTokenValue();
 
         } catch (IOException e) {
