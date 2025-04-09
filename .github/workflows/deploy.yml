@@ -1,9 +1,9 @@
-name: Deploy to GCP
+name: Deploy to EC2
 
 on:
   push:
     branches:
-      - develop  # main 브랜치 push될 때만
+      - develop  # develop 브랜치에 push될 때만
 
 jobs:
   build-and-deploy:
@@ -25,32 +25,36 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build -x test
 
-    - name: Deploy to GCP Server
+    - name: Stop and Remove Existing Application on EC2
       uses: appleboy/ssh-action@v0.1.10
       with:
-        host: ${{ secrets.GCP_HOST }}
-        username: ${{ secrets.GCP_USERNAME }}
-        key: ${{ secrets.GCP_PRIVATE_KEY }}
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_PRIVATE_KEY }}
+        port: 2222
         script: |
-          cd /home/kskcmh5723
+          cd /home/ubuntu
           pkill -f 'tabbit.jar' || true
           rm -f tabbit.jar
           exit
-    - name: Copy Jar to Server
+
+    - name: Copy Jar to EC2
       uses: appleboy/scp-action@v0.1.6
       with:
-        host: ${{ secrets.GCP_HOST }}
-        username: ${{ secrets.GCP_USERNAME }}
-        key: ${{ secrets.GCP_PRIVATE_KEY }}
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_PRIVATE_KEY }}
+        port: 2222
         source: build/libs/tabbit.jar
-        target: /home/kskcmh5723
+        target: /home/ubuntu
 
-    - name: Restart Application
+    - name: Restart Application on EC2
       uses: appleboy/ssh-action@v0.1.10
       with:
-        host: ${{ secrets.GCP_HOST }}
-        username: ${{ secrets.GCP_USERNAME }}
-        key: ${{ secrets.GCP_PRIVATE_KEY }}
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_PRIVATE_KEY }}
+        port: 2222
         script: |
-          cd /home/kskcmh5723
+          cd /home/ubuntu
           nohup java -jar tabbit.jar > app.log 2>&1 &
