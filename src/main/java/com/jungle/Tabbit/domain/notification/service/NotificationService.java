@@ -12,6 +12,7 @@ import com.jungle.Tabbit.domain.notification.repository.NotificationRepository;
 import com.jungle.Tabbit.global.exception.NotFoundException;
 import com.jungle.Tabbit.global.model.ResponseStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,7 @@ public class NotificationService {
     private final FcmService fcmService;
     private static final Logger log = LoggerFactory.getLogger(NotificationService.class);
 
+    @Async("taskExecutor")
     public void sendNotification(NotificationRequestCreateDto requestDto, boolean dataOnly) {
         Member member = getMemberById(requestDto.getMemberId());
         FcmData fcmData = requestDto.getFcmData();
