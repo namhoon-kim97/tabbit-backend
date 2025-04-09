@@ -7,6 +7,7 @@ import com.jungle.Tabbit.domain.fcm.dto.FcmRequestDto;
 import com.jungle.Tabbit.domain.fcm.dto.FcmResponseDto;
 import com.jungle.Tabbit.global.exception.NotFoundException;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import java.io.FileInputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
@@ -53,10 +54,12 @@ public class FcmService {
 
     private String getAccessToken() {
         try {
-            String firebaseConfigPath = "firebase/tabbit-69517-firebase-adminsdk-fbsvc-91f92182cc.json";
+            //String firebaseConfigPath = "firebase/tabbit-69517-firebase-adminsdk-fbsvc-91f92182cc.json";
+            String firebaseConfigPath = "/home/ubuntu/tabbit-backend/tabbit-69517-firebase-adminsdk-fbsvc-91f92182cc.json";
 
             GoogleCredentials googleCredentials = GoogleCredentials
-                    .fromStream(new ClassPathResource(firebaseConfigPath).getInputStream())
+                    //.fromStream(new ClassPathResource(firebaseConfigPath).getInputStream())
+                    .fromStream(new FileInputStream(firebaseConfigPath))
                     .createScoped(List.of("https://www.googleapis.com/auth/firebase.messaging"));
 
             googleCredentials.refresh();
