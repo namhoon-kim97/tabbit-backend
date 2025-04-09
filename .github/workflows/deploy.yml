@@ -117,7 +117,7 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           port: 2222
           script: |
-            nohup java -jar -Duser.timezone=Asia/Seoul /home/ubuntu/tabbit-backend/build/libs/app.jar --spring.config.location=/home/ubuntu/tabbit-backend/application.yml > /home/ubuntu/tabbit-backend/app.log 2>&1 &
+            nohup java -jar -Duser.timezone=Asia/Seoul /home/ubuntu/tabbit-backend/build/libs/app.jar --spring.config.location=/home/ubuntu/tabbit-backend/src/main/resources/application.yml > /home/ubuntu/tabbit-backend/app.log 2>&1 &
 
       # 14. 오래된 백업 삭제
       - name: Cleanup old backups
