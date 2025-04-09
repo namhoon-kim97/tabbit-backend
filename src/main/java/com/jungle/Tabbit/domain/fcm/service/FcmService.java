@@ -22,11 +22,9 @@ import java.util.List;
 public class FcmService {
 
     private final WebClient webClient;
-    private String accessToken;
-    private long expireTime;
 
     public FcmService(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("https://fcm.googleapis.com/v1/projects/tabbit-69517").build();
+        this.webClient = webClientBuilder.baseUrl("https://fcm.googleapis.com").build();
     }
 
     public void sendMessageTo(FcmRequestDto fcmRequestDto, boolean dataOnly) {
@@ -34,9 +32,10 @@ public class FcmService {
         System.out.printf("------------message : %s", message); // 메시지 내용 로그 출력
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        System.out.println("AccessToken : " + getAccessToken());
         headers.setBearerAuth(getAccessToken());
 
-        String API_URL = "https://fcm.googleapis.com/v1/projects/tabbit-69517/messages:send";
+        String API_URL = "/v1/projects/tabbit-69517/messages:send";
         try {
             webClient.post()
                     .uri(API_URL)
@@ -53,24 +52,21 @@ public class FcmService {
     }
 
     private String getAccessToken() {
-        if (accessToken != null && expireTime > System.currentTimeMillis()) {
-            return accessToken;
-        }
-        // 새로 발급
         try {
             String firebaseConfigPath = "firebase/tabbit-69517-firebase-adminsdk-fbsvc-91f92182cc.json";
+
             GoogleCredentials googleCredentials = GoogleCredentials
                     .fromStream(new ClassPathResource(firebaseConfigPath).getInputStream())
                     .createScoped(List.of("https://www.googleapis.com/auth/firebase.messaging"));
 
             googleCredentials.refreshIfExpired();
-            accessToken = googleCredentials.getAccessToken().getTokenValue();
-            expireTime = System.currentTimeMillis() + 3500 * 1000; // 3500초 = 58분 정도
-            return accessToken;
+            return googleCredentials.getAccessToken().getTokenValue();
+
         } catch (IOException e) {
+
             e.printStackTrace();
-            return null;
         }
+        return null;
     }
 
     private String makeMessage(FcmRequestDto fcmRequestDto) {
