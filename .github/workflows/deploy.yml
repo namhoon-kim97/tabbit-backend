@@ -32,11 +32,23 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
 
-      # 5. Gradle 빌드 (테스트 제외)
+      # 5. application.yaml 복원
+      - name: Create application.yaml from Secret
+        run: |
+          mkdir -p src/main/resources
+          echo "${{ secrets.APPLICATION_YAML }}" > src/main/resources/application.yml
+
+      # 6. firebase json 복원
+      - name: Create firebase .json from Secret
+        run: |
+          mkdir -p src/main/resources/firebase
+          echo "${{ secrets.FIREBASE_JSON }}" > src/main/resources/firebase/tabbit-69517-firebase-adminsdk-fbsvc-91f92182cc.json
+
+      # 7. Gradle 빌드 (테스트 제외)
       - name: Build with Gradle Wrapper
         run: ./gradlew build -x test
 
-      # 6. 서버에 application.yaml + firebase .json 복사
+      # 8. 서버에 application.yaml + firebase .json 복사
       - name: Copy config files (application.yaml + firebase json) via SCP
         uses: appleboy/scp-action@v0.1.1
         with:
@@ -45,12 +57,12 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           port: 2222
           source: |
-            src/main/resources/application.yaml
+            src/main/resources/application.yml
             src/main/resources/firebase/tabbit-69517-firebase-adminsdk-fbsvc-91f92182cc.json
           target: "/home/ubuntu/tabbit-backend/"
           debug: true
 
-      # 7. 서버에 JAR 파일 복사
+      # 9. 서버에 JAR 파일 복사
       - name: Copy JAR via SCP
         uses: appleboy/scp-action@v0.1.1
         with:
@@ -62,7 +74,7 @@ jobs:
           target: "/home/ubuntu/tabbit-backend/"
           debug: true
 
-      # 8. 기존 애플리케이션 종료
+      # 10. 기존 애플리케이션 종료
       - name: Stop current application
         uses: appleboy/ssh-action@v0.1.1
         with:
@@ -73,7 +85,7 @@ jobs:
           script: |
             screen -dmS stop_app bash -c 'pkill -f "java -jar" || true'
 
-      # 9. 현재 JAR 백업
+      # 11. 현재 JAR 백업
       - name: Backup current JAR
         uses: appleboy/ssh-action@v0.1.1
         with:
@@ -84,7 +96,7 @@ jobs:
           script: |
             screen -dmS backup_jar bash -c 'mv /home/ubuntu/tabbit-backend/build/libs/app.jar /home/ubuntu/tabbit-backend/build/libs/app_backup.jar || true'
 
-      # 10. 새 JAR 배포
+      # 12. 새 JAR 배포
       - name: Deploy new JAR
         uses: appleboy/ssh-action@v0.1.1
         with:
@@ -95,7 +107,7 @@ jobs:
           script: |
             screen -dmS deploy_jar bash -c 'mv /home/ubuntu/tabbit-backend/build/libs/tabbit.jar /home/ubuntu/tabbit-backend/build/libs/app.jar'
 
-      # 11. 애플리케이션 시작
+      # 13. 애플리케이션 시작
       - name: Start new application
         uses: appleboy/ssh-action@v0.1.1
         with:
@@ -106,7 +118,7 @@ jobs:
           script: |
             nohup java -jar -Duser.timezone=Asia/Seoul /home/ubuntu/tabbit-backend/build/libs/app.jar --spring.config.location=/home/ubuntu/tabbit-backend/application.yaml > /home/ubuntu/tabbit-backend/app.log 2>&1 &
 
-      # 12. 오래된 백업 삭제
+      # 14. 오래된 백업 삭제
       - name: Cleanup old backups
         uses: appleboy/ssh-action@v0.1.1
         with:
