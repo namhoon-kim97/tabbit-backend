@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -27,6 +28,7 @@ public class FcmService {
         this.webClient = webClientBuilder.baseUrl("https://fcm.googleapis.com").build();
     }
 
+    @Async("taskExecutor")
     public void sendMessageTo(FcmRequestDto fcmRequestDto, boolean dataOnly) {
         String message = dataOnly ? makeMessageDataOnly(fcmRequestDto) : makeMessage(fcmRequestDto);
         System.out.printf("------------message : %s", message); // 메시지 내용 로그 출력
@@ -45,7 +47,7 @@ public class FcmService {
                     .toEntity(String.class)
                     .doOnSuccess(res -> System.out.println(res.getStatusCode()))
                     .doOnError(err -> System.err.println("Error sending FCM message: " + err.getMessage()))
-                    .block();
+                    .subscribe();
         } catch (Exception e) {
             log.error("FCM 메시지 전송 실패: {}", fcmRequestDto, e);
         }

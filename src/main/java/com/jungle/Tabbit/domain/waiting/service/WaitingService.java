@@ -6,6 +6,7 @@ import com.jungle.Tabbit.domain.member.repository.MemberRepository;
 import com.jungle.Tabbit.domain.nfc.entity.Nfc;
 import com.jungle.Tabbit.domain.nfc.repository.NfcRepository;
 import com.jungle.Tabbit.domain.notification.dto.NotificationRequestCreateDto;
+import com.jungle.Tabbit.domain.notification.publisher.NotificationPublisher;
 import com.jungle.Tabbit.domain.notification.service.NotificationService;
 import com.jungle.Tabbit.domain.order.dto.order.OrderMenuResponseDto;
 import com.jungle.Tabbit.domain.order.repository.OrderMenuRepository;
@@ -51,6 +52,7 @@ public class WaitingService {
     private final RestaurantRepository restaurantRepository;
     private final StampRepository stampRepository;
     private final NotificationService notificationService;
+    private final NotificationPublisher notificationPublisher;
     private final BadgeTriggerService badgeTriggerService;
     private final OrderService orderService;
     private final OrderMenuRepository orderMenuRepository;
@@ -291,7 +293,8 @@ public class WaitingService {
                 .message(message)
                 .fcmData(data)
                 .build();
-        notificationService.sendNotification(notificationRequest, flag);
+        notificationPublisher.publish(notificationRequest);
+        //notificationService.sendNotification(notificationRequest, flag);
     }
 
     private void sendNotification(Long memberId, String title, String message, FcmData data) {
