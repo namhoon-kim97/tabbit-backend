@@ -65,7 +65,7 @@ public class WaitingService {
         Nfc nfc = getNfcById(requestDto.getNfcId());
         Restaurant restaurant = nfc.getRestaurant();
 
-        validateDuplicateWaiting(member, restaurant);
+        //validateDuplicateWaiting(member, restaurant);
 
         Long queueNumber = getNextQueueNumber(restaurant.getRestaurantId());
         Waiting waiting = new Waiting(requestDto.getPeopleNumber(), queueNumber.intValue(), restaurant, WaitingStatus.STATUS_WAITING, member);
