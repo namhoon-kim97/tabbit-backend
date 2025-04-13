@@ -29,7 +29,7 @@ public class NotificationService {
     private final FcmService fcmService;
     private static final Logger log = LoggerFactory.getLogger(NotificationService.class);
 
-    @Async("taskExecutor")
+
     public void sendNotification(NotificationRequestCreateDto requestDto, boolean dataOnly) {
         Member member = getMemberById(requestDto.getMemberId());
         FcmData fcmData = requestDto.getFcmData();
