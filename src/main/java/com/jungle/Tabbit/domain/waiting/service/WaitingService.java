@@ -61,7 +61,7 @@ public class WaitingService {
     private static final Logger logger = LoggerFactory.getLogger(WaitingService.class);
 
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional
     public WaitingResponseDto registerWaiting(WaitingRequestCreateDto requestDto, String username) {
         Member member = getMemberByUsername(username);
         Nfc nfc = getNfcById(requestDto.getNfcId());
