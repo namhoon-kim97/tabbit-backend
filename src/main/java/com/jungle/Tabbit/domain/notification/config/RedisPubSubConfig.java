@@ -4,6 +4,7 @@ import com.jungle.Tabbit.domain.notification.subscriber.NotificationSubscriber;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
@@ -12,10 +13,11 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
-@RequiredArgsConstructor
 public class RedisPubSubConfig {
-
     private final NotificationSubscriber notificationSubscriber;
+    public RedisPubSubConfig(@Lazy NotificationSubscriber notificationSubscriber) {
+        this.notificationSubscriber = notificationSubscriber;
+    }
 
     @Bean
     public RedisMessageListenerContainer redisContainer(RedisConnectionFactory connectionFactory) {
