@@ -1,7 +1,10 @@
 package com.jungle.Tabbit.domain.notification.publisher;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jungle.Tabbit.domain.notification.dto.NotificationRequestCreateDto;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.connection.stream.StreamRecords;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.scheduling.annotation.Async;
@@ -11,11 +14,24 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class NotificationPublisher {
 
+//    private final RedisTemplate<String, Object> redisTemplate;
+//    private final ChannelTopic topic;
+//
+//    @Async("taskExecutor")
+//    public void publish(NotificationRequestCreateDto requestDto) {
+//        redisTemplate.convertAndSend(topic.getTopic(), requestDto);
+//    }
     private final RedisTemplate<String, Object> redisTemplate;
-    private final ChannelTopic topic;
+    private final ObjectMapper objectMapper;
 
-    @Async("taskExecutor")
-    public void publish(NotificationRequestCreateDto requestDto) {
-        redisTemplate.convertAndSend(topic.getTopic(), requestDto);
+    private static final String STREAM_KEY = "stream:notifications";
+
+    public void publish(NotificationRequestCreateDto dto) {
+        Map<String, Object> map = objectMapper.convertValue(dto, Map.class);
+
+        redisTemplate.opsForStream().add(
+                StreamRecords.mapBacked(map)
+                        .withStreamKey(STREAM_KEY)
+        );
     }
 }

@@ -14,36 +14,51 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 public class RedisPubSubConfig {
-    private final NotificationSubscriber notificationSubscriber;
-    public RedisPubSubConfig(@Lazy NotificationSubscriber notificationSubscriber) {
-        this.notificationSubscriber = notificationSubscriber;
-    }
-
-    @Bean
-    public RedisMessageListenerContainer redisContainer(RedisConnectionFactory connectionFactory) {
-        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        container.setConnectionFactory(connectionFactory);
-        container.addMessageListener(notificationSubscriber, topic());
-        return container;
-    }
-
-    @Bean
-    public ChannelTopic topic() {
-        return new ChannelTopic("notification-channel");
-    }
-
+//    private final NotificationSubscriber notificationSubscriber;
+//    public RedisPubSubConfig(@Lazy NotificationSubscriber notificationSubscriber) {
+//        this.notificationSubscriber = notificationSubscriber;
+//    }
+//
+//    @Bean
+//    public RedisMessageListenerContainer redisContainer(RedisConnectionFactory connectionFactory) {
+//        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+//        container.setConnectionFactory(connectionFactory);
+//        container.addMessageListener(notificationSubscriber, topic());
+//        return container;
+//    }
+//
+//    @Bean
+//    public ChannelTopic topic() {
+//        return new ChannelTopic("notification-channel");
+//    }
+//
+//    @Bean
+//    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+//        RedisTemplate<String, Object> template = new RedisTemplate<>();
+//        template.setConnectionFactory(connectionFactory);
+//
+//        // Key는 String 직렬화
+//        template.setKeySerializer(new StringRedisSerializer());
+//        template.setHashKeySerializer(new StringRedisSerializer());
+//
+//        // Value는 JSON 직렬화
+//        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+//        template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+//
+//        return template;
+//    }
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
-        // Key는 String 직렬화
+        // Key는 문자열, Value는 JSON
+        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer();
+
         template.setKeySerializer(new StringRedisSerializer());
         template.setHashKeySerializer(new StringRedisSerializer());
-
-        // Value는 JSON 직렬화
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-        template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setValueSerializer(serializer);
+        template.setHashValueSerializer(serializer);
 
         return template;
     }
