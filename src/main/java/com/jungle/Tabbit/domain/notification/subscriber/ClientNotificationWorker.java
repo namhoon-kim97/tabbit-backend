@@ -30,7 +30,7 @@ public class ClientNotificationWorker {
     private static final String GROUP = "notification-client";
     private static final String CONSUMER_NAME = "client-worker-1";
 
-    @Scheduled(fixedDelay = 2000)
+    @Scheduled(fixedDelay = 500)
     public void pollStream() {
         List<MapRecord<String, Object, Object>> messages = redisTemplate.opsForStream().read(
                 Consumer.from(GROUP, CONSUMER_NAME),
@@ -49,7 +49,7 @@ public class ClientNotificationWorker {
                 redisTemplate.opsForStream().acknowledge(STREAM_KEY, GROUP, record.getId());
 
             } catch (Exception e) {
-                log.error("알림 전송 실패 [owner]", e);
+                log.error("알림 전송 실패 [client]", e);
             }
         }
     }

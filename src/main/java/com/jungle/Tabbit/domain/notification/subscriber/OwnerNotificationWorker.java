@@ -30,7 +30,7 @@ public class OwnerNotificationWorker {
     private static final String GROUP = "notification-owner";
     private static final String CONSUMER_NAME = "owner-worker-1";
 
-    @Scheduled(fixedDelay = 2000)
+    @Scheduled(fixedDelay = 500)
     public void pollStream() {
         List<MapRecord<String, Object, Object>> messages = redisTemplate.opsForStream().read(
                 Consumer.from(GROUP, CONSUMER_NAME),
