@@ -7,8 +7,10 @@ import jakarta.annotation.PostConstruct;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.connection.stream.Consumer;
@@ -20,7 +22,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -29,6 +30,8 @@ public class ClientNotificationWorker {
     private final RedisTemplate<String, Object> redisTemplate;
     private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
+    @Qualifier("taskExecutor")
+    private final Executor taskExecutor;
 
     private static final String STREAM_KEY = "stream:notifications";
     private static final String GROUP = "notification-client";
@@ -56,11 +59,19 @@ public class ClientNotificationWorker {
 
                         if (!"client".equals(dto.getFcmData().getTarget())) continue;
 
-                        notificationService.sendNotification(dto, false);
-                        redisTemplate.opsForStream().acknowledge(STREAM_KEY, GROUP, record.getId());
+                        // ✅ 병렬 처리
+                        taskExecutor.execute(() -> {
+                            try {
+                                notificationService.sendNotification(dto, false);
+                                redisTemplate.opsForStream().acknowledge(STREAM_KEY, GROUP, record.getId());
+                            } catch (Exception e) {
+                                log.error("병렬 알림 전송 실패 [client] - recordId: {}", record.getId(), e);
+                                // ACK 생략 → 다음 read에서 재시도 가능
+                            }
+                        });
 
                     } catch (Exception e) {
-                        log.error("알림 전송 실패 [client] - recordId: {}", record.getId(), e);
+                        log.error("DTO 파싱 실패 [client] - recordId: {}", record.getId(), e);
                     }
                 }
 
@@ -75,4 +86,3 @@ public class ClientNotificationWorker {
         }
     }
 }
-
