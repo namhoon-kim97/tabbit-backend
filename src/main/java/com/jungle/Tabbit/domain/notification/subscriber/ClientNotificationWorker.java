@@ -3,6 +3,7 @@ package com.jungle.Tabbit.domain.notification.subscriber;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jungle.Tabbit.domain.notification.dto.NotificationRequestCreateDto;
 import com.jungle.Tabbit.domain.notification.service.NotificationService;
+import jakarta.annotation.PostConstruct;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import org.springframework.data.redis.connection.stream.ReadOffset;
 import org.springframework.data.redis.connection.stream.StreamOffset;
 import org.springframework.data.redis.connection.stream.StreamReadOptions;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -30,27 +32,45 @@ public class ClientNotificationWorker {
     private static final String GROUP = "notification-client";
     private static final String CONSUMER_NAME = "client-worker-1";
 
-    @Scheduled(fixedDelay = 500)
-    public void pollStream() {
-        List<MapRecord<String, Object, Object>> messages = redisTemplate.opsForStream().read(
-                Consumer.from(GROUP, CONSUMER_NAME),
-                StreamReadOptions.empty().count(10).block(Duration.ofMillis(1000)),
-                StreamOffset.create(STREAM_KEY, ReadOffset.lastConsumed())
-        );
+    @PostConstruct
+    @Async("notificationExecutor")
+    public void listenClientNotifications() {
+        log.info("ClientNotificationWorker 시작됨");
 
-        for (MapRecord<String, Object, Object> record : messages) {
+        while (true) {
             try {
-                Map<Object, Object> rawData = record.getValue();
-                NotificationRequestCreateDto dto = objectMapper.convertValue(rawData, NotificationRequestCreateDto.class);
+                List<MapRecord<String, Object, Object>> messages = redisTemplate.opsForStream().read(
+                        Consumer.from(GROUP, CONSUMER_NAME),
+                        StreamReadOptions.empty().count(10).block(Duration.ofSeconds(1)),
+                        StreamOffset.create(STREAM_KEY, ReadOffset.lastConsumed())
+                );
 
-                if (!"client".equals(dto.getFcmData().getTarget())) continue;
+                if (messages == null || messages.isEmpty()) continue;
 
-                notificationService.sendNotification(dto, false);
-                redisTemplate.opsForStream().acknowledge(STREAM_KEY, GROUP, record.getId());
+                for (MapRecord<String, Object, Object> record : messages) {
+                    try {
+                        Map<Object, Object> rawData = record.getValue();
+                        NotificationRequestCreateDto dto = objectMapper.convertValue(rawData, NotificationRequestCreateDto.class);
+
+                        if (!"client".equals(dto.getFcmData().getTarget())) continue;
+
+                        notificationService.sendNotification(dto, false);
+                        redisTemplate.opsForStream().acknowledge(STREAM_KEY, GROUP, record.getId());
+
+                    } catch (Exception e) {
+                        log.error("알림 전송 실패 [client] - recordId: {}", record.getId(), e);
+                    }
+                }
 
             } catch (Exception e) {
-                log.error("알림 전송 실패 [client]", e);
+                log.error("Redis 읽기 오류 [client]", e);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ignored) {
+                    Thread.currentThread().interrupt();
+                }
             }
         }
     }
 }
+
