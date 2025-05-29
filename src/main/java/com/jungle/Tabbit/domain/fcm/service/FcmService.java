@@ -7,6 +7,7 @@ import com.jungle.Tabbit.domain.fcm.dto.FcmRequestDto;
 import com.jungle.Tabbit.domain.fcm.dto.FcmResponseDto;
 import com.jungle.Tabbit.global.exception.NotFoundException;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
@@ -20,13 +21,14 @@ import java.util.List;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class FcmService {
 
     private final WebClient webClient;
 
-    public FcmService(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("https://fcm.googleapis.com").build();
-    }
+//    public FcmService(WebClient.Builder webClientBuilder) {
+//        this.webClient = webClientBuilder.baseUrl("https://fcm.googleapis.com").build();
+//    }
 
     @Async("taskExecutor")
     public void sendMessageTo(FcmRequestDto fcmRequestDto, boolean dataOnly) {
