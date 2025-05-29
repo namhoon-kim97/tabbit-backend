@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.connection.stream.Consumer;
 import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.ReadOffset;
@@ -32,8 +34,8 @@ public class OwnerNotificationWorker {
     private static final String GROUP = "notification-owner";
     private static final String CONSUMER_NAME = "owner-worker-1";
 
-    @PostConstruct
-    @Async("notificationExecutor")
+    @EventListener(ApplicationReadyEvent.class)
+    @Async("taskExecutor")
     public void listenOwnerNotifications() {
         log.info("OwnerNotificationWorker 시작됨");
 
