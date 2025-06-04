@@ -24,7 +24,7 @@ import java.util.concurrent.Executor;
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
-public class ClientNotificationWorker implements StreamListener<String, ObjectRecord<String, Object>>, InitializingBean {
+public class ClientNotificationWorker implements StreamListener<String, ObjectRecord<String, NotificationRequestCreateDto>>, InitializingBean {
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final NotificationService notificationService;
@@ -32,7 +32,7 @@ public class ClientNotificationWorker implements StreamListener<String, ObjectRe
     @Qualifier("taskExecutor")
     private final Executor taskExecutor;
 
-    private StreamMessageListenerContainer<String, ObjectRecord<String, Object>> listenerContainer;
+    private StreamMessageListenerContainer<String, ObjectRecord<String, NotificationRequestCreateDto>> listenerContainer;
 
     private static final String STREAM_KEY = "stream:notifications";
     private static final String GROUP = "notification-client";
@@ -49,7 +49,7 @@ public class ClientNotificationWorker implements StreamListener<String, ObjectRe
         var options = StreamMessageListenerContainer.StreamMessageListenerContainerOptions
                 .<String, ObjectRecord<String, Object>>builder()
                 .pollTimeout(Duration.ofSeconds(2))
-                .targetType(Object.class)
+                .targetType(NotificationRequestCreateDto.class)
                 .executor(taskExecutor)
                 .build();
 
@@ -66,12 +66,10 @@ public class ClientNotificationWorker implements StreamListener<String, ObjectRe
     }
 
     @Override
-    public void onMessage(ObjectRecord<String, Object> message) {
+    public void onMessage(ObjectRecord<String, NotificationRequestCreateDto> message) {
         String recordId = message.getId().getValue();
         try {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> rawData = objectMapper.convertValue(message.getValue(), Map.class);
-            NotificationRequestCreateDto dto = objectMapper.convertValue(rawData, NotificationRequestCreateDto.class);
+            NotificationRequestCreateDto dto = message.getValue();
 
             if (!"client".equals(dto.getFcmData().getTarget())) return;
 
@@ -82,7 +80,7 @@ public class ClientNotificationWorker implements StreamListener<String, ObjectRe
                     log.info("Client ACK 결과: {} (ID: {})", ackResult, message.getId());
                 } catch (Exception e) {
                     log.error("Client 알림 처리 실패 - recordId: {}", message.getId(), e);
-                    NotificationFailureLogger.log(recordId, rawData, e);
+                    NotificationFailureLogger.log(recordId, dto, e);
                 }
             });
 

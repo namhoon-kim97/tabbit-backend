@@ -13,5 +13,13 @@ public class NotificationRequestCreateDto {
 
     private FcmData fcmData;
 
-
+    @Override
+    public String toString() {
+        return "NotificationRequestCreateDto{" +
+                "memberId=" + memberId +
+                ", title='" + title + '\'' +
+                ", message='" + message + '\'' +
+                ", fcmData=" + fcmData +
+                '}';
+    }
 }
