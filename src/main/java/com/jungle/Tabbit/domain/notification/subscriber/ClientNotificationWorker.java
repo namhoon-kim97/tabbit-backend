@@ -68,7 +68,11 @@ public class ClientNotificationWorker {
                         taskExecutor.execute(() -> {
                             try {
                                 notificationService.sendNotification(dto, false);
-                                redisTemplate.opsForStream().acknowledge(STREAM_KEY, GROUP, record.getId());
+                                log.info("📩 Client ACK 시도: {}", record.getId());
+                                Long ackResult = redisTemplate.opsForStream()
+                                        .acknowledge(STREAM_KEY, GROUP, record.getId());
+                                log.info("📬 ACK 결과: {} (ID: {})", ackResult, record.getId());
+                                //redisTemplate.opsForStream().acknowledge(STREAM_KEY, GROUP, record.getId());
                             } catch (Exception e) {
                                 log.error("병렬 알림 전송 실패 [client] - recordId: {}", record.getId(), e);
                                 NotificationFailureLogger.log(record.getId().getValue(), rawData, e);
