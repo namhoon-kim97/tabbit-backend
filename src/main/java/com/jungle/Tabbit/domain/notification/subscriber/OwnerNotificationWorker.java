@@ -72,6 +72,7 @@ public class OwnerNotificationWorker {
                                 redisTemplate.opsForStream().acknowledge(STREAM_KEY, GROUP, record.getId());
                             } catch (Exception e) {
                                 log.error("병렬 알림 전송 실패 [owner] - recordId: {}", record.getId(), e);
+                                NotificationFailureLogger.log(record.getId().getValue(), rawData, e);
                             }
                         });
 

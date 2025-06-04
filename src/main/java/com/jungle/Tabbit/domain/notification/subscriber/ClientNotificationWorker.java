@@ -71,6 +71,7 @@ public class ClientNotificationWorker {
                                 redisTemplate.opsForStream().acknowledge(STREAM_KEY, GROUP, record.getId());
                             } catch (Exception e) {
                                 log.error("병렬 알림 전송 실패 [client] - recordId: {}", record.getId(), e);
+                                NotificationFailureLogger.log(record.getId().getValue(), rawData, e);
                             }
                         });
 
