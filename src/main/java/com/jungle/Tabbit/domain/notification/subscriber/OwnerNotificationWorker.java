@@ -47,7 +47,7 @@ public class OwnerNotificationWorker implements StreamListener<String, ObjectRec
         }
 
         var options = StreamMessageListenerContainer.StreamMessageListenerContainerOptions
-                .<String, ObjectRecord<String, Object>>builder()
+                .<String, ObjectRecord<String, NotificationRequestCreateDto>>builder()
                 .pollTimeout(Duration.ofSeconds(2))
                 .targetType(NotificationRequestCreateDto.class)
                 .executor(taskExecutor)
