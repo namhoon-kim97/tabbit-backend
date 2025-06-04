@@ -28,8 +28,10 @@ public class NotificationPublisher {
     private static final String STREAM_KEY = "stream:notifications";
 
     public void publish(NotificationRequestCreateDto dto) {
-        redisTemplate.opsForStream().add(
-                ObjectRecord.create(STREAM_KEY, dto)
-        );
+        Map<String, Object> map = objectMapper.convertValue(dto, Map.class);
+        redisTemplate.opsForStream().add(StreamRecords
+                        .mapBacked(map)
+                        .withStreamKey(STREAM_KEY));
     }
+
 }
