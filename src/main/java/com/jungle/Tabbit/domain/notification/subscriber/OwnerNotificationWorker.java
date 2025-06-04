@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jungle.Tabbit.domain.notification.dto.NotificationRequestCreateDto;
 import com.jungle.Tabbit.domain.notification.service.NotificationService;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -33,17 +34,22 @@ public class OwnerNotificationWorker {
     private final ObjectMapper objectMapper;
     @Qualifier("taskExecutor")
     private final Executor taskExecutor;
+    private volatile boolean running = true; // 종료 시 false로 전환
 
     private static final String STREAM_KEY = "stream:notifications";
     private static final String GROUP = "notification-owner";
     private static final String CONSUMER_NAME = "owner-worker-1";
-
+    @PreDestroy
+    public void shutdown() {
+        log.info("🛑 OwnerNotificationWorker 종료 요청");
+        running = false;
+    }
     @EventListener(ApplicationReadyEvent.class)
     @Async("taskExecutor")
     public void listenOwnerNotifications() {
         log.info("OwnerNotificationWorker 시작됨");
 
-        while (true) {
+        while (running) {
             try {
                 List<MapRecord<String, Object, Object>> messages = redisTemplate.opsForStream().read(
                         Consumer.from(GROUP, CONSUMER_NAME),
@@ -60,7 +66,6 @@ public class OwnerNotificationWorker {
 
                         if (!"owner".equals(dto.getFcmData().getTarget())) continue;
 
-                        // 병렬 처리 with ThreadPoolExecutor
                         taskExecutor.execute(() -> {
                             try {
                                 notificationService.sendNotification(dto, false);
