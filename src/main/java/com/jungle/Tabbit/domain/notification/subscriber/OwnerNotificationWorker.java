@@ -24,7 +24,7 @@ import java.util.concurrent.Executor;
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
-public class OwnerNotificationWorker implements StreamListener<String, ObjectRecord<String, Map>>, InitializingBean {
+public class OwnerNotificationWorker implements StreamListener<String, ObjectRecord<String, Object>>, InitializingBean {
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final NotificationService notificationService;
@@ -32,7 +32,7 @@ public class OwnerNotificationWorker implements StreamListener<String, ObjectRec
     @Qualifier("taskExecutor")
     private final Executor taskExecutor;
 
-    private StreamMessageListenerContainer<String, ObjectRecord<String, Map>> listenerContainer;
+    private StreamMessageListenerContainer<String, ObjectRecord<String, Object>> listenerContainer;
 
     private static final String STREAM_KEY = "stream:notifications";
     private static final String GROUP = "notification-owner";
@@ -46,29 +46,33 @@ public class OwnerNotificationWorker implements StreamListener<String, ObjectRec
             log.info("Consumer group already exists: {}", GROUP);
         }
 
-        StreamMessageListenerContainer.StreamMessageListenerContainerOptions<String, ObjectRecord<String, Map>> options =
-                StreamMessageListenerContainer.StreamMessageListenerContainerOptions.builder()
-                        .pollTimeout(Duration.ofSeconds(2))
-                        .targetType(Map.class)
-                        .executor(taskExecutor)
-                        .build();
+        var options = StreamMessageListenerContainer.StreamMessageListenerContainerOptions
+                .<String, ObjectRecord<String, Object>>builder()
+                .pollTimeout(Duration.ofSeconds(2))
+                .targetType(Object.class)
+                .executor(taskExecutor)
+                .build();
 
         listenerContainer = StreamMessageListenerContainer.create(redisTemplate.getConnectionFactory(), options);
 
-        listenerContainer.receive(Consumer.from(GROUP, CONSUMER_NAME),
+        listenerContainer.receive(
+                Consumer.from(GROUP, CONSUMER_NAME),
                 StreamOffset.create(STREAM_KEY, ReadOffset.lastConsumed()),
-                this);
+                this
+        );
 
         listenerContainer.start();
         log.info("OwnerNotificationListener started");
     }
 
     @Override
-    public void onMessage(ObjectRecord<String, Map> message) {
+    public void onMessage(ObjectRecord<String, Object> message) {
         String recordId = message.getId().getValue();
-        Map<Object, Object> rawData = (Map<Object, Object>) message.getValue();
         try {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> rawData = objectMapper.convertValue(message.getValue(), Map.class);
             NotificationRequestCreateDto dto = objectMapper.convertValue(rawData, NotificationRequestCreateDto.class);
+
             if (!"owner".equals(dto.getFcmData().getTarget())) return;
 
             taskExecutor.execute(() -> {

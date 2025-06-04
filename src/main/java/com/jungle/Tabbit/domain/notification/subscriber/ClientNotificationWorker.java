@@ -3,6 +3,7 @@ package com.jungle.Tabbit.domain.notification.subscriber;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jungle.Tabbit.domain.notification.dto.NotificationRequestCreateDto;
 import com.jungle.Tabbit.domain.notification.service.NotificationService;
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
@@ -20,12 +21,10 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-import jakarta.annotation.PreDestroy;
-
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
-public class ClientNotificationWorker implements StreamListener<String, ObjectRecord<String, Map>>, InitializingBean {
+public class ClientNotificationWorker implements StreamListener<String, ObjectRecord<String, Object>>, InitializingBean {
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final NotificationService notificationService;
@@ -33,7 +32,7 @@ public class ClientNotificationWorker implements StreamListener<String, ObjectRe
     @Qualifier("taskExecutor")
     private final Executor taskExecutor;
 
-    private StreamMessageListenerContainer<String, ObjectRecord<String, Map>> listenerContainer;
+    private StreamMessageListenerContainer<String, ObjectRecord<String, Object>> listenerContainer;
 
     private static final String STREAM_KEY = "stream:notifications";
     private static final String GROUP = "notification-client";
@@ -41,37 +40,39 @@ public class ClientNotificationWorker implements StreamListener<String, ObjectRe
 
     @Override
     public void afterPropertiesSet() {
-        // Consumer Group 생성 (없으면)
         try {
             redisTemplate.opsForStream().createGroup(STREAM_KEY, ReadOffset.from("0"), GROUP);
         } catch (Exception e) {
             log.info("Consumer group already exists: {}", GROUP);
         }
 
-        // Listener Container 설정
-        StreamMessageListenerContainer.StreamMessageListenerContainerOptions<String, ObjectRecord<String, Map>> options =
-                StreamMessageListenerContainer.StreamMessageListenerContainerOptions.builder()
-                        .pollTimeout(Duration.ofSeconds(2))
-                        .targetType(Map.class)
-                        .executor(taskExecutor)
-                        .build();
+        var options = StreamMessageListenerContainer.StreamMessageListenerContainerOptions
+                .<String, ObjectRecord<String, Object>>builder()
+                .pollTimeout(Duration.ofSeconds(2))
+                .targetType(Object.class)
+                .executor(taskExecutor)
+                .build();
 
         listenerContainer = StreamMessageListenerContainer.create(redisTemplate.getConnectionFactory(), options);
 
-        listenerContainer.receive(Consumer.from(GROUP, CONSUMER_NAME),
+        listenerContainer.receive(
+                Consumer.from(GROUP, CONSUMER_NAME),
                 StreamOffset.create(STREAM_KEY, ReadOffset.lastConsumed()),
-                this);
+                this
+        );
 
         listenerContainer.start();
         log.info("ClientNotificationListener started");
     }
 
     @Override
-    public void onMessage(ObjectRecord<String, Map> message) {
+    public void onMessage(ObjectRecord<String, Object> message) {
         String recordId = message.getId().getValue();
-        Map<Object, Object> rawData = (Map<Object, Object>) message.getValue();
         try {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> rawData = objectMapper.convertValue(message.getValue(), Map.class);
             NotificationRequestCreateDto dto = objectMapper.convertValue(rawData, NotificationRequestCreateDto.class);
+
             if (!"client".equals(dto.getFcmData().getTarget())) return;
 
             taskExecutor.execute(() -> {
