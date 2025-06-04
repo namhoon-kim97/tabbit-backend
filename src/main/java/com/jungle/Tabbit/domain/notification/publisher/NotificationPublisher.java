@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jungle.Tabbit.domain.notification.dto.NotificationRequestCreateDto;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.connection.stream.ObjectRecord;
 import org.springframework.data.redis.connection.stream.StreamRecords;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
@@ -27,11 +28,8 @@ public class NotificationPublisher {
     private static final String STREAM_KEY = "stream:notifications";
 
     public void publish(NotificationRequestCreateDto dto) {
-        Map<String, Object> map = objectMapper.convertValue(dto, Map.class);
-
         redisTemplate.opsForStream().add(
-                StreamRecords.mapBacked(map)
-                        .withStreamKey(STREAM_KEY)
+                ObjectRecord.create(STREAM_KEY, dto)
         );
     }
 }
