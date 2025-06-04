@@ -24,7 +24,7 @@ import java.util.concurrent.Executor;
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
-public class OwnerNotificationWorker implements StreamListener<String, ObjectRecord<String, Object>>, InitializingBean {
+public class OwnerNotificationWorker implements StreamListener<String, ObjectRecord<String, Map>>, InitializingBean {
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final NotificationService notificationService;
@@ -32,7 +32,7 @@ public class OwnerNotificationWorker implements StreamListener<String, ObjectRec
     @Qualifier("taskExecutor")
     private final Executor taskExecutor;
 
-    private StreamMessageListenerContainer<String, ObjectRecord<String, Object>> listenerContainer;
+    private StreamMessageListenerContainer<String, ObjectRecord<String, Map>> listenerContainer;
 
     private static final String STREAM_KEY = "stream:notifications";
     private static final String GROUP = "notification-owner";
@@ -46,10 +46,10 @@ public class OwnerNotificationWorker implements StreamListener<String, ObjectRec
             log.info("Consumer group already exists: {}", GROUP);
         }
 
-        StreamMessageListenerContainer.StreamMessageListenerContainerOptions<String, ObjectRecord<String, Object>> options =
+        StreamMessageListenerContainer.StreamMessageListenerContainerOptions<String, ObjectRecord<String, Map>> options =
                 StreamMessageListenerContainer.StreamMessageListenerContainerOptions.builder()
                         .pollTimeout(Duration.ofSeconds(2))
-                        .targetType(Object.class)
+                        .targetType(Map.class)
                         .executor(taskExecutor)
                         .build();
 
@@ -64,7 +64,7 @@ public class OwnerNotificationWorker implements StreamListener<String, ObjectRec
     }
 
     @Override
-    public void onMessage(ObjectRecord<String, Object> message) {
+    public void onMessage(ObjectRecord<String, Map> message) {
         String recordId = message.getId().getValue();
         Map<Object, Object> rawData = (Map<Object, Object>) message.getValue();
         try {

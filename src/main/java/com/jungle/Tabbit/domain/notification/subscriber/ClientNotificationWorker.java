@@ -3,7 +3,6 @@ package com.jungle.Tabbit.domain.notification.subscriber;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jungle.Tabbit.domain.notification.dto.NotificationRequestCreateDto;
 import com.jungle.Tabbit.domain.notification.service.NotificationService;
-import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
@@ -21,10 +20,12 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
+import jakarta.annotation.PreDestroy;
+
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
-public class ClientNotificationWorker implements StreamListener<String, ObjectRecord<String, Object>>, InitializingBean {
+public class ClientNotificationWorker implements StreamListener<String, ObjectRecord<String, Map>>, InitializingBean {
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final NotificationService notificationService;
@@ -32,7 +33,7 @@ public class ClientNotificationWorker implements StreamListener<String, ObjectRe
     @Qualifier("taskExecutor")
     private final Executor taskExecutor;
 
-    private StreamMessageListenerContainer<String, ObjectRecord<String, Object>> listenerContainer;
+    private StreamMessageListenerContainer<String, ObjectRecord<String, Map>> listenerContainer;
 
     private static final String STREAM_KEY = "stream:notifications";
     private static final String GROUP = "notification-client";
@@ -48,10 +49,10 @@ public class ClientNotificationWorker implements StreamListener<String, ObjectRe
         }
 
         // Listener Container 설정
-        StreamMessageListenerContainer.StreamMessageListenerContainerOptions<String, ObjectRecord<String, Object>> options =
+        StreamMessageListenerContainer.StreamMessageListenerContainerOptions<String, ObjectRecord<String, Map>> options =
                 StreamMessageListenerContainer.StreamMessageListenerContainerOptions.builder()
                         .pollTimeout(Duration.ofSeconds(2))
-                        .targetType(Object.class)
+                        .targetType(Map.class)
                         .executor(taskExecutor)
                         .build();
 
@@ -66,7 +67,7 @@ public class ClientNotificationWorker implements StreamListener<String, ObjectRe
     }
 
     @Override
-    public void onMessage(ObjectRecord<String, Object> message) {
+    public void onMessage(ObjectRecord<String, Map> message) {
         String recordId = message.getId().getValue();
         Map<Object, Object> rawData = (Map<Object, Object>) message.getValue();
         try {
