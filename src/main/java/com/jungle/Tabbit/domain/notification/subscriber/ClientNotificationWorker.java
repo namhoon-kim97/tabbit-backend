@@ -9,10 +9,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.data.redis.connection.stream.Consumer;
+import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.ObjectRecord;
 import org.springframework.data.redis.connection.stream.ReadOffset;
 import org.springframework.data.redis.connection.stream.StreamOffset;
+import org.springframework.data.redis.connection.stream.StringRecord;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.stream.StreamListener;
 import org.springframework.data.redis.stream.StreamMessageListenerContainer;
@@ -24,7 +27,8 @@ import java.util.concurrent.Executor;
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
-public class ClientNotificationWorker implements StreamListener<String, ObjectRecord<String, Map<String, String>>>, InitializingBean {
+public class ClientNotificationWorker implements
+        StreamListener<String, MapRecord<String, String, String>>, InitializingBean {
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final NotificationService notificationService;
@@ -32,7 +36,7 @@ public class ClientNotificationWorker implements StreamListener<String, ObjectRe
     @Qualifier("taskExecutor")
     private final Executor taskExecutor;
 
-    private StreamMessageListenerContainer<String, ObjectRecord<String, Map<String, String>>> listenerContainer;
+    private StreamMessageListenerContainer<String, MapRecord<String, String, String>> listenerContainer;
 
     private static final String STREAM_KEY = "stream:notifications";
     private static final String GROUP = "notification-client";
@@ -47,10 +51,10 @@ public class ClientNotificationWorker implements StreamListener<String, ObjectRe
         }
 
         var options = StreamMessageListenerContainer.StreamMessageListenerContainerOptions
-                .<String, ObjectRecord<String, Map<String, String>>>builder()
+                .<String, MapRecord<String, String, String>>builder()
                 .pollTimeout(Duration.ofSeconds(2))
-                .targetType((Class<Map<String, String>>) (Class<?>) Map.class)
                 .executor(taskExecutor)
+                .errorHandler(this::handleStreamError)  // 에러 핸들러 추가
                 .build();
 
         listenerContainer = StreamMessageListenerContainer.create(redisTemplate.getConnectionFactory(), options);
@@ -66,13 +70,31 @@ public class ClientNotificationWorker implements StreamListener<String, ObjectRe
     }
 
     @Override
-    public void onMessage(ObjectRecord<String, Map<String, String>> message) {
+    public void onMessage(MapRecord<String, String, String> message) {
         String recordId = message.getId().getValue();
         try {
             Map<String, String> value = message.getValue();
-            NotificationRequestCreateDto dto = objectMapper.convertValue(value, NotificationRequestCreateDto.class);
 
-            if (!"client".equals(dto.getFcmData().getTarget())) return;
+            // null 체크 추가
+            if (value == null || value.isEmpty()) {
+                log.warn("빈 메시지 수신 - recordId: {}", recordId);
+                return;
+            }
+
+            String jsonPayload = value.get("payload");
+
+            if (jsonPayload == null || jsonPayload.trim().isEmpty()) {
+                log.error("payload가 비어있습니다 - recordId: {}, value: {}", recordId, value);
+                return;
+            }
+
+            NotificationRequestCreateDto dto = objectMapper.readValue(
+                    jsonPayload, NotificationRequestCreateDto.class
+            );
+
+            if (dto.getFcmData() == null || !"client".equals(dto.getFcmData().getTarget())) {
+                return;
+            }
 
             taskExecutor.execute(() -> {
                 try {
@@ -88,6 +110,16 @@ public class ClientNotificationWorker implements StreamListener<String, ObjectRe
         } catch (Exception e) {
             log.error("Client DTO 파싱 실패 - recordId: {}", message.getId(), e);
         }
+    }
+
+    // 에러 핸들러 메서드 추가
+    private void handleStreamError(Throwable throwable) {
+        if (throwable instanceof ConversionFailedException) {
+            log.warn("Stream 메시지 변환 실패 (null 값으로 인한 문제일 가능성): {}", throwable.getMessage());
+            // 메시지를 스킵하고 계속 진행
+            return;
+        }
+        log.error("Stream 처리 중 예상치 못한 에러 발생", throwable);
     }
 
     @PreDestroy

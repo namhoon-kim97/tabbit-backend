@@ -47,13 +47,13 @@ public class RedisPubSubConfig {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
-        // Key는 문자열, Value는 JSON
-        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer();
+        // String 직렬화 사용 (Stream에서 더 안정적)
+        StringRedisSerializer stringSerializer = new StringRedisSerializer();
 
-        template.setKeySerializer(new StringRedisSerializer());
-        template.setHashKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(serializer);
-        template.setHashValueSerializer(serializer);
+        template.setKeySerializer(stringSerializer);
+        template.setHashKeySerializer(stringSerializer);
+        template.setValueSerializer(stringSerializer);  // 이 부분이 중요!
+        template.setHashValueSerializer(stringSerializer);
 
         return template;
     }

@@ -6,9 +6,11 @@ import com.jungle.Tabbit.domain.notification.dto.NotificationRequestCreateDto;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.connection.stream.ObjectRecord;
 import org.springframework.data.redis.connection.stream.StreamRecords;
+import org.springframework.data.redis.connection.stream.StringRecord;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.scheduling.annotation.Async;
@@ -16,32 +18,28 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationPublisher {
-
-//    private final RedisTemplate<String, Object> redisTemplate;
-//    private final ChannelTopic topic;
-//
-//    @Async("taskExecutor")
-//    public void publish(NotificationRequestCreateDto requestDto) {
-//        redisTemplate.convertAndSend(topic.getTopic(), requestDto);
-//    }
     private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
-
     private static final String STREAM_KEY = "stream:notifications";
-
 
     public void publish(NotificationRequestCreateDto dto) {
         try {
-            Map<String, Object> map = objectMapper.convertValue(dto, Map.class);
+            String jsonData = objectMapper.writeValueAsString(dto);
+
+            // Map으로 데이터 구성 (null 값 방지)
+            Map<String, String> streamData = new HashMap<>();
+            streamData.put("payload", jsonData);
 
             redisTemplate.opsForStream().add(
-                    StreamRecords.mapBacked(map).withStreamKey(STREAM_KEY)
+                    StreamRecords.mapBacked(streamData).withStreamKey(STREAM_KEY)
             );
+
+            log.debug("알림 발행 완료: {}", dto);
         } catch (Exception e) {
+            log.error("Redis Stream 발행 실패: {}", dto, e);
             throw new IllegalArgumentException("Redis Stream 직렬화 실패", e);
         }
     }
-
-
 }
