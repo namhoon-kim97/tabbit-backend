@@ -1,9 +1,12 @@
 package com.jungle.Tabbit.domain.notification.publisher;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jungle.Tabbit.domain.notification.dto.NotificationRequestCreateDto;
+import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.connection.stream.ObjectRecord;
 import org.springframework.data.redis.connection.stream.StreamRecords;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -27,11 +30,18 @@ public class NotificationPublisher {
 
     private static final String STREAM_KEY = "stream:notifications";
 
+
     public void publish(NotificationRequestCreateDto dto) {
-        Map<String, Object> map = objectMapper.convertValue(dto, Map.class);
-        redisTemplate.opsForStream().add(StreamRecords
-                        .mapBacked(map)
-                        .withStreamKey(STREAM_KEY));
+        try {
+            Map<String, Object> map = objectMapper.convertValue(dto, Map.class);
+
+            redisTemplate.opsForStream().add(
+                    StreamRecords.mapBacked(map).withStreamKey(STREAM_KEY)
+            );
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Redis Stream 직렬화 실패", e);
+        }
     }
+
 
 }

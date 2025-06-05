@@ -3,6 +3,7 @@ package com.jungle.Tabbit.domain.notification.subscriber;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jungle.Tabbit.domain.notification.dto.NotificationRequestCreateDto;
 import com.jungle.Tabbit.domain.notification.service.NotificationService;
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
@@ -16,7 +17,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.stream.StreamListener;
 import org.springframework.data.redis.stream.StreamMessageListenerContainer;
 
-import jakarta.annotation.PreDestroy;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -24,7 +24,7 @@ import java.util.concurrent.Executor;
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
-public class OwnerNotificationWorker implements StreamListener<String, ObjectRecord<String, Map>>, InitializingBean {
+public class OwnerNotificationWorker implements StreamListener<String, ObjectRecord<String, Map<String, String>>>, InitializingBean {
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final NotificationService notificationService;
@@ -32,7 +32,7 @@ public class OwnerNotificationWorker implements StreamListener<String, ObjectRec
     @Qualifier("taskExecutor")
     private final Executor taskExecutor;
 
-    private StreamMessageListenerContainer<String, ObjectRecord<String, Map>> listenerContainer;
+    private StreamMessageListenerContainer<String, ObjectRecord<String, Map<String, String>>> listenerContainer;
 
     private static final String STREAM_KEY = "stream:notifications";
     private static final String GROUP = "notification-owner";
@@ -47,9 +47,9 @@ public class OwnerNotificationWorker implements StreamListener<String, ObjectRec
         }
 
         var options = StreamMessageListenerContainer.StreamMessageListenerContainerOptions
-                .<String, ObjectRecord<String, Map>>builder()
+                .<String, ObjectRecord<String, Map<String, String>>>builder()
                 .pollTimeout(Duration.ofSeconds(2))
-                .targetType(Map.class)
+                .targetType((Class<Map<String, String>>) (Class<?>) Map.class)
                 .executor(taskExecutor)
                 .build();
 
@@ -66,10 +66,11 @@ public class OwnerNotificationWorker implements StreamListener<String, ObjectRec
     }
 
     @Override
-    public void onMessage(ObjectRecord<String, Map> message) {
+    public void onMessage(ObjectRecord<String, Map<String, String>> message) {
         String recordId = message.getId().getValue();
         try {
-            NotificationRequestCreateDto dto = objectMapper.convertValue(message.getValue(), NotificationRequestCreateDto.class);
+            Map<String, String> value = message.getValue();
+            NotificationRequestCreateDto dto = objectMapper.convertValue(value, NotificationRequestCreateDto.class);
 
             if (!"owner".equals(dto.getFcmData().getTarget())) return;
 
