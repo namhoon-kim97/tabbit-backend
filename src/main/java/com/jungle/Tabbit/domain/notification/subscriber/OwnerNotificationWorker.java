@@ -24,7 +24,7 @@ import java.util.concurrent.Executor;
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
-public class OwnerNotificationWorker implements StreamListener<String, ObjectRecord<String, NotificationRequestCreateDto>>, InitializingBean {
+public class OwnerNotificationWorker implements StreamListener<String, ObjectRecord<String, Map>>, InitializingBean {
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final NotificationService notificationService;
@@ -32,7 +32,7 @@ public class OwnerNotificationWorker implements StreamListener<String, ObjectRec
     @Qualifier("taskExecutor")
     private final Executor taskExecutor;
 
-    private StreamMessageListenerContainer<String, ObjectRecord<String, NotificationRequestCreateDto>> listenerContainer;
+    private StreamMessageListenerContainer<String, ObjectRecord<String, Map>> listenerContainer;
 
     private static final String STREAM_KEY = "stream:notifications";
     private static final String GROUP = "notification-owner";
@@ -47,9 +47,9 @@ public class OwnerNotificationWorker implements StreamListener<String, ObjectRec
         }
 
         var options = StreamMessageListenerContainer.StreamMessageListenerContainerOptions
-                .<String, ObjectRecord<String, NotificationRequestCreateDto>>builder()
+                .<String, ObjectRecord<String, Map>>builder()
                 .pollTimeout(Duration.ofSeconds(2))
-                .targetType(NotificationRequestCreateDto.class)
+                .targetType(Map.class)
                 .executor(taskExecutor)
                 .build();
 
@@ -66,10 +66,10 @@ public class OwnerNotificationWorker implements StreamListener<String, ObjectRec
     }
 
     @Override
-    public void onMessage(ObjectRecord<String, NotificationRequestCreateDto> message) {
+    public void onMessage(ObjectRecord<String, Map> message) {
         String recordId = message.getId().getValue();
         try {
-            NotificationRequestCreateDto dto = message.getValue();
+            NotificationRequestCreateDto dto = objectMapper.convertValue(message.getValue(), NotificationRequestCreateDto.class);
 
             if (!"owner".equals(dto.getFcmData().getTarget())) return;
 
