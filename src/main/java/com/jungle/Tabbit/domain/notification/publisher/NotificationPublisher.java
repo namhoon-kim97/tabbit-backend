@@ -22,7 +22,9 @@ import org.springframework.stereotype.Service;
 public class NotificationPublisher {
     private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
-    private static final String STREAM_KEY = "stream:notifications";
+
+    private static final String STREAM_CLIENT = "stream:notifications:client";
+    private static final String STREAM_OWNER  = "stream:notifications:owner";
 
     public void publish(NotificationRequestCreateDto dto) {
         try {
@@ -32,8 +34,15 @@ public class NotificationPublisher {
             Map<String, String> streamData = new HashMap<>();
             streamData.put("payload", jsonData);
 
+            String target = dto.getFcmData() != null ? dto.getFcmData().getTarget() : null;
+            String streamKey = switch (target) {
+                case "client" -> STREAM_CLIENT;
+                case "owner"  -> STREAM_OWNER;
+                default -> throw new IllegalStateException("Unexpected value: " + target);
+            };
+
             redisTemplate.opsForStream().add(
-                    StreamRecords.mapBacked(streamData).withStreamKey(STREAM_KEY)
+                    StreamRecords.mapBacked(streamData).withStreamKey(streamKey)
             );
 
             log.debug("알림 발행 완료: {}", dto);

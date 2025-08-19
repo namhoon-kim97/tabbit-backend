@@ -38,14 +38,14 @@ public class ClientNotificationWorker implements
 
     private StreamMessageListenerContainer<String, MapRecord<String, String, String>> listenerContainer;
 
-    private static final String STREAM_KEY = "stream:notifications";
+    private static final String STREAM_KEY = "stream:notifications:client";
     private static final String GROUP = "notification-client";
     private static final String CONSUMER_NAME = "client-worker-1";
 
     @Override
     public void afterPropertiesSet() {
         try {
-            redisTemplate.opsForStream().createGroup(STREAM_KEY, ReadOffset.from("0"), GROUP);
+            redisTemplate.opsForStream().createGroup(STREAM_KEY, ReadOffset.latest(), GROUP);
         } catch (Exception e) {
             log.info("Consumer group already exists: {}", GROUP);
         }
@@ -78,23 +78,20 @@ public class ClientNotificationWorker implements
             // null 체크 추가
             if (value == null || value.isEmpty()) {
                 log.warn("빈 메시지 수신 - recordId: {}", recordId);
+                ackSafe(message);
                 return;
             }
 
             String jsonPayload = value.get("payload");
-
             if (jsonPayload == null || jsonPayload.trim().isEmpty()) {
                 log.error("payload가 비어있습니다 - recordId: {}, value: {}", recordId, value);
+                ackSafe(message);
                 return;
             }
 
             NotificationRequestCreateDto dto = objectMapper.readValue(
                     jsonPayload, NotificationRequestCreateDto.class
             );
-
-            if (dto.getFcmData() == null || !"client".equals(dto.getFcmData().getTarget())) {
-                return;
-            }
 
             taskExecutor.execute(() -> {
                 try {
@@ -109,6 +106,14 @@ public class ClientNotificationWorker implements
 
         } catch (Exception e) {
             log.error("Client DTO 파싱 실패 - recordId: {}", message.getId(), e);
+        }
+    }
+
+    private void ackSafe(MapRecord<String, String, String> message) {
+        try {
+            redisTemplate.opsForStream().acknowledge(STREAM_KEY, GROUP, message.getId());
+        } catch (Exception ex) {
+            log.error("ACK 실패 - recordId: {}", message.getId(), ex);
         }
     }
 
